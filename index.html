@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mis tareas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Layout: contador grande + archivos sueltos a la izquierda, lista de tareas a la derecha; una columna en móvil. */
+  :root {
+    --bg:#e4e4e2; --card:#f2f2f0; --ink:#141414; --mute:#3d4046; --line:#141414; --soft:#c4c4c2; --field:#7b7f86;
+    --acc:#ee6a45; --acc-hi:#ff8764; --accd:#a83512; --on-acc:#141414; --mint:#a8d5b0; --on-mint:#141414;
+    --slab:#1e2024; --on-slab:#ffffff; --slab-mute:#c9ccd1; --slab-acc:#ff9577;
+    --tint:rgba(238,106,69,.14); --scrim:rgba(20,20,20,.6);
+    --f-body:"Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;
+    --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg:#18191b; --card:#222427; --ink:#ececea; --mute:#a4a8ae; --line:#ececea; --soft:#383a3f; --field:#5d6168;
+    --acc:#ee6a45; --acc-hi:#ff8764; --accd:#ff8e6e; --on-acc:#141414; --mint:#2e5537; --on-mint:#e6f4e8;
+    --slab:#ececea; --on-slab:#141414; --slab-mute:#3d4046; --slab-acc:#a83512;
+    --tint:rgba(238,106,69,.18); --scrim:rgba(0,0,0,.7); color-scheme:dark; } }
+  :root[data-theme="dark"] {
+    --bg:#18191b; --card:#222427; --ink:#ececea; --mute:#a4a8ae; --line:#ececea; --soft:#383a3f; --field:#5d6168;
+    --acc:#ee6a45; --acc-hi:#ff8764; --accd:#ff8e6e; --on-acc:#141414; --mint:#2e5537; --on-mint:#e6f4e8;
+    --slab:#ececea; --on-slab:#141414; --slab-mute:#3d4046; --slab-acc:#a83512;
+    --tint:rgba(238,106,69,.18); --scrim:rgba(0,0,0,.7); color-scheme:dark; }
+
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 var(--f-body); }
+  .mono { font-family:var(--f-mono); text-transform:uppercase; letter-spacing:.03em; }
+  button, input, select, textarea { font:inherit; color:inherit; }
+  button { cursor:pointer; background:transparent; border:1px solid var(--line); border-radius:99px; padding:7px 14px; font-size:12px; }
+  button:hover { background:var(--ink); color:var(--bg); }
+  button.primary { background:var(--acc); border-color:var(--acc); color:var(--on-acc); font-weight:700; }
+  button.primary:hover { background:var(--acc-hi); color:var(--on-acc); }
+  button.danger { background:var(--accd); border-color:var(--accd); color:var(--bg); font-weight:700; }
+  input, select, textarea { background:var(--card); border:1px solid var(--field); border-radius:10px; padding:8px 12px; }
+  input:focus, select:focus, textarea:focus, button:focus-visible, [tabindex]:focus-visible, a:focus-visible { outline:2px solid var(--acc); outline-offset:1px; }
+
+  .top, .wrap { padding-left:max(48px, env(safe-area-inset-left, 0px)); padding-right:max(48px, env(safe-area-inset-right, 0px)); }
+  .top { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; padding-block:28px 0; }
+  .brand { display:flex; flex-direction:column; gap:4px; }
+  .brand b { font-size:20px; letter-spacing:-.01em; }
+  .sync { font-size:11px; color:var(--mute); display:flex; align-items:center; gap:6px; }
+  .sync::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--field); }
+  .sync.cloud::before { background:#3e9a55; }
+  .sync.local::before { background:var(--acc); }
+  .top .r { display:flex; gap:8px; flex-wrap:wrap; }
+  .wrap { display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:48px; padding-block:40px 64px; }
+  @media (max-width:900px){
+    .top, .wrap { padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+    .wrap { grid-template-columns:1fr; padding-block:24px 48px; gap:32px; } .top { padding-block:20px 0; }
+  }
+
+  .big { position:relative; display:inline-block; isolation:isolate; font-size:clamp(110px,16vw,220px); line-height:.85; font-weight:800; letter-spacing:-.05em; font-variant-numeric:tabular-nums; }
+  .big i { position:absolute; right:-10px; bottom:-6px; width:44%; aspect-ratio:1; max-width:96px; background:var(--acc); z-index:-1; }
+  .lbl { font-size:30px; font-weight:700; line-height:1.1; margin-top:28px; }
+  .tags { margin-top:18px; display:flex; gap:8px; flex-wrap:wrap; }
+  .mint { font-size:12px; background:var(--mint); color:var(--on-mint); padding:2px 6px; display:inline-block; }
+  .mint.warn { background:var(--acc); color:var(--on-acc); }
+
+  .box { margin-top:36px; border:2px solid var(--line); border-radius:16px; padding:18px; background:var(--card); }
+  .box h3 { margin:0 0 4px; font-size:12px; font-weight:500; color:var(--mute); }
+  .box p { margin:0 0 12px; font-size:13px; color:var(--mute); }
+  .drop { border:2px dashed var(--field); border-radius:12px; padding:26px 12px; text-align:center; cursor:pointer; font-size:17px; }
+  .drop.over { background:var(--tint); border-color:var(--acc); }
+  .gf { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:10px 0; border-bottom:1px solid var(--soft); font-size:14px; }
+  .gf:last-child { border-bottom:0; }
+  .gf .n { flex:1; min-width:120px; word-break:break-all; }
+  .linkish { color:inherit; cursor:pointer; text-decoration:underline; background:none; border:0; padding:0; border-radius:0; font-size:inherit; text-align:left; }
+  .linkish:hover { background:none; color:var(--accd); }
+  .gf select { padding:4px 8px; font-size:12px; max-width:170px; }
+
+  .chips { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .chip { font-size:12px; padding:8px 14px; }
+  .chip[aria-pressed="true"] { background:var(--ink); color:var(--bg); }
+  .chip.warn[aria-pressed="false"] { border-color:var(--accd); color:var(--accd); }
+  .chip.warn[aria-pressed="false"]:hover { background:var(--accd); color:var(--bg); }
+  .chip.warn[aria-pressed="true"] { background:var(--acc); border-color:var(--acc); color:var(--on-acc); }
+  .filters input[type=search] { flex:1; min-width:160px; }
+
+  .list { margin-top:18px; border-top:3px solid var(--line); }
+  .grp { margin:22px 0 0; font-size:12px; color:var(--mute); }
+  .grp.warn { color:var(--accd); font-weight:600; }
+  .row { display:grid; grid-template-columns:96px minmax(0,1fr) auto; gap:16px; align-items:start; padding:18px 0; border-bottom:1px solid var(--line); }
+  @media (max-width:560px){ .row { grid-template-columns:1fr; gap:8px; } }
+  .row.over { background:var(--tint); outline:2px dashed var(--acc); outline-offset:-2px; }
+  .row.late .dt { color:var(--accd); font-weight:500; }
+  .row.doing { background:var(--slab); color:var(--on-slab); margin:0 -14px; padding:18px 14px; border-radius:10px; }
+  .row.doing .dt { color:var(--slab-acc); } .row.doing .nt, .row.doing .rel { color:var(--slab-mute); }
+  .row.doing .acts button { border-color:var(--on-slab); } .row.doing .acts button:hover { background:var(--on-slab); color:var(--slab); }
+  .row.done .ti { text-decoration:line-through; color:var(--mute); }
+  .dt { font-size:13px; line-height:1.35; }
+  .rel { display:block; font-size:11px; color:var(--mute); margin-top:2px; }
+  .row.late .rel { color:var(--accd); }
+  .ti { font-size:24px; font-weight:700; line-height:1.12; word-break:break-word; text-wrap:balance; }
+  .nt { font-size:14px; color:var(--mute); margin-top:6px; white-space:pre-wrap; word-break:break-word; max-width:65ch; }
+  .files { display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:8px; font-size:13px; }
+  .files .gone { color:var(--mute); font-style:italic; }
+  .pill { font-size:12px; border:1px solid currentColor; padding:3px 9px; border-radius:99px; white-space:nowrap; display:inline-block; justify-self:start; }
+  .acts { display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+  .acts button { padding:3px 10px; font-size:11px; }
+  .empty { padding:28px 0; color:var(--mute); }
+  .empty b { display:block; color:var(--ink); font-size:20px; margin-bottom:4px; }
+
+  dialog { border:2px solid var(--line); border-radius:18px; background:var(--card); color:var(--ink); width:min(500px,94vw); max-height:92vh; }
+  dialog::backdrop { background:var(--scrim); }
+  dialog h3 { margin:0; font-size:20px; }
+  form label { display:block; margin:12px 0 4px; font-size:11px; color:var(--mute); }
+  form input[type=text], form input[type=date], form select, form textarea { width:100%; }
+  .quick { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+  .quick button { padding:3px 10px; font-size:11px; }
+  .dr { display:flex; gap:10px; justify-content:flex-end; margin-top:18px; flex-wrap:wrap; }
+  .fl { font-size:13px; display:flex; justify-content:space-between; gap:8px; margin-top:6px; }
+  .fl button { color:var(--accd); }
+  #cMsg { margin:6px 0 0; }
+
+  .toast { position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%); background:var(--slab); color:var(--on-slab); padding:10px 16px; border-radius:12px; font-size:14px; max-width:min(520px, calc(100vw - 32px)); z-index:20; box-shadow:0 6px 24px rgba(0,0,0,.25); }
+  .hint { font-size:11px; color:var(--mute); margin-top:14px; }
+  @media (prefers-reduced-motion: no-preference) { .row { transition:background-color .15s; } }
+</style>
+
+</head>
+<body>
+<div class="top">
+  <div class="brand">
+    <b>Mis tareas</b>
+    <span class="sync mono" id="sync">Conectando…</span>
+  </div>
+  <div class="r">
+    <button id="exp" title="Un solo fichero con tareas y archivos">Exportar copia</button>
+    <button id="imp">Importar copia</button>
+    <input id="impf" type="file" accept=".json,application/json" hidden>
+    <button class="primary" id="add">+ Nueva tarea</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <aside>
+    <div class="big"><span id="nOpen">00</span><i></i></div>
+    <div class="lbl">tareas abiertas</div>
+    <div class="tags mono" id="tags"></div>
+
+    <div class="box">
+      <h3 class="mono">Archivos sueltos (sin clasificar)</h3>
+      <p>Se guardan en este navegador. Asígnalos a una tarea cuando sepas dónde van.</p>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Añadir archivos sueltos">Suelta aquí Excel, docs o PDF<br><span class="mono" style="font-size:12px;color:var(--mute)">o haz clic para elegir</span></div>
+      <input id="gfile" type="file" multiple hidden>
+      <div id="gList"></div>
+    </div>
+    <div class="hint mono">Atajos: N nueva tarea · / buscar · arrastra archivos sobre una tarea</div>
+  </aside>
+
+  <section>
+    <div class="chips" id="chips"></div>
+    <div class="chips filters" style="margin-top:10px">
+      <select id="fProj" aria-label="Filtrar por proyecto"><option value="">Todos los proyectos</option></select>
+      <input id="q" type="search" placeholder="Buscar…" aria-label="Buscar">
+    </div>
+    <div class="list" id="list"><div class="empty">Cargando tus tareas…</div></div>
+  </section>
+</div>
+
+<dialog id="dlg">
+  <form id="form">
+    <h3 id="dt">Nueva tarea</h3>
+    <label class="mono" for="fTitle">Título</label><input type="text" id="fTitle" required autocomplete="off">
+    <label class="mono" for="fProjIn">Proyecto / etiqueta</label><select id="fProjIn"></select>
+    <label class="mono" for="fDue">Fecha límite</label><input type="date" id="fDue">
+    <div class="quick mono" id="quick">
+      <button type="button" data-d="0">Hoy</button><button type="button" data-d="1">Mañana</button>
+      <button type="button" data-d="7">En una semana</button><button type="button" data-d="">Sin fecha</button>
+    </div>
+    <label class="mono" for="fState">Estado</label>
+    <select id="fState"><option value="todo">Pendiente</option><option value="doing">En curso</option><option value="done">Hecho</option></select>
+    <label class="mono" for="fNotes">Notas</label><textarea id="fNotes" rows="3"></textarea>
+    <label class="mono" for="fFiles">Archivos de esta tarea</label><input type="file" id="fFiles" multiple>
+    <div id="fList"></div>
+    <div class="dr"><button type="button" id="cancel">Cancelar</button><button class="primary" type="submit">Guardar</button></div>
+  </form>
+</dialog>
+
+<dialog id="cdlg">
+  <h3 id="cTitle">¿Seguro?</h3>
+  <p id="cMsg"></p>
+  <div class="dr"><button type="button" id="cNo">Cancelar</button><button type="button" class="danger" id="cYes">Borrar</button></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+const PROJECTS = [
+  { g:'Talgo', items:['Talgo'] },
+  { g:'Máster', items:['SIF','GMC','Fuentes de energía','Automatización'] },
+  { g:'Fútbol', items:['Fútbol'] },
+];
+const STATES = { todo:'Pendiente', doing:'En curso', done:'Hecho' };
+let tasks = [], general = [], blobIds = new Set();
+let editing = null, pending = [], view = 'open';
+let mode = 'local', cloudCol = null, connecting = !!(window.claude && window.claude.use), loaded = false;
+
+// ---------- Utilidades ----------
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ymd = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today = () => ymd(new Date());
+const plusDays = n => { const d = new Date(); d.setDate(d.getDate()+n); return ymd(d); };
+const size = n => n > 1e6 ? (n/1e6).toFixed(1).replace('.',',')+' MB' : Math.max(1,Math.round((n||0)/1e3))+' KB';
+const fmt = d => d ? new Date(d+'T00:00').toLocaleDateString('es-ES',{day:'numeric',month:'short'}).replace('.','') : '';
+const daysTo = d => Math.round((new Date(d+'T00:00') - new Date(today()+'T00:00')) / 864e5);
+const rel = d => { const n = daysTo(d); return n === 0 ? 'hoy' : n === 1 ? 'mañana' : n === -1 ? 'ayer' : n < 0 ? `hace ${-n} días` : n < 14 ? `en ${n} días` : `en ${Math.round(n/7)} semanas`; };
+const isLate = t => t.state !== 'done' && t.due && t.due < today();
+const newId = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+const groupOf = p => (PROJECTS.find(x => x.items.includes(p)) || {}).g;
+const projLabel = p => { const g = groupOf(p); return !p ? '' : g && g !== p ? `${g} · ${p}` : p; };
+const matchProj = (t, f) => !f || (f.startsWith('g:') ? groupOf(t.proj) === f.slice(2) : t.proj === f.slice(2));
+const clean = o => JSON.parse(JSON.stringify(o));
+
+let toastTimer;
+function toast(msg) { const el = $('toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.hidden = true, 4200); }
+
+function ask(title, msg, ok = 'Borrar') {
+  return new Promise(res => {
+    $('cTitle').textContent = title; $('cMsg').textContent = msg; $('cYes').textContent = ok;
+    const d = $('cdlg');
+    const done = v => { d.close(); $('cYes').onclick = $('cNo').onclick = d.oncancel = null; res(v); };
+    $('cYes').onclick = () => done(true); $('cNo').onclick = () => done(false); d.oncancel = () => done(false);
+    d.showModal(); $('cNo').focus();
+  });
+}
+
+function projOptions(cur, all) {
+  const known = PROJECTS.flatMap(x => x.items);
+  const sel = v => v === cur ? 'selected' : '';
+  const pre = all ? 'p:' : '';
+  let h = all ? `<option value="">Todos los proyectos</option>` : `<option value="">(sin proyecto)</option>`;
+  for (const x of PROJECTS) {
+    h += `<optgroup label="${esc(x.g)}">`;
+    if (all && x.items.length > 1) h += `<option value="g:${esc(x.g)}" ${sel('g:'+x.g)}>Todo ${esc(x.g)}</option>`;
+    h += x.items.map(i => `<option value="${pre}${esc(i)}" ${sel(pre+i)}>${esc(i)}</option>`).join('') + `</optgroup>`;
+  }
+  const legacy = [...new Set(tasks.map(t => t.proj).filter(p => p && !known.includes(p)))];
+  if (cur && !all && !known.includes(cur) && !legacy.includes(cur)) legacy.push(cur);
+  if (legacy.length) h += `<optgroup label="Otros">` + legacy.map(i => `<option value="${pre}${esc(i)}" ${sel(pre+i)}>${esc(i)}</option>`).join('') + `</optgroup>`;
+  return h;
+}
+
+// ---------- Almacenamiento local (IndexedDB, con memoria de reserva) ----------
+const mem = { tasks:new Map(), files:new Map(), blobs:new Map() };
+const IDB = new Promise(res => {
+  try {
+    const r = indexedDB.open('mis-tareas', 3);
+    r.onupgradeneeded = () => { const db = r.result; for (const s of ['tasks','files','blobs']) if (!db.objectStoreNames.contains(s)) db.createObjectStore(s, { keyPath:'id' }); };
+    r.onsuccess = () => res(r.result); r.onerror = () => res(null); r.onblocked = () => res(null);
+  } catch { res(null); }
+});
+async function tx(store, mode_, fn, memFn) {
+  const db = await IDB;
+  if (!db) return memFn(mem[store]);
+  return new Promise((res, rej) => {
+    const t = db.transaction(store, mode_); const req = fn(t.objectStore(store));
+    t.oncomplete = () => res(req && req.result); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+  });
+}
+const getAll = s => tx(s, 'readonly', o => o.getAll(), m => [...m.values()]).catch(() => []);
+const getKeys = s => tx(s, 'readonly', o => o.getAllKeys(), m => [...m.keys()]).catch(() => []);
+const getOne = (s, id) => tx(s, 'readonly', o => o.get(id), m => m.get(id)).catch(() => undefined);
+const put = (s, x) => tx(s, 'readwrite', o => o.put(x), m => m.set(x.id, x));
+const del = (s, id) => tx(s, 'readwrite', o => o.delete(id), m => m.delete(id));
+
+async function storeBlob(file) { const fid = newId(); await put('blobs', { id:fid, blob:file }); blobIds.add(fid); return { fid, name:file.name, size:file.size, type:file.type || '' }; }
+async function dropBlob(fid) { if (!fid) return; blobIds.delete(fid); await del('blobs', fid).catch(() => {}); }
+const getBlob = async fid => (await getOne('blobs', fid))?.blob;
+
+// Pasa los archivos incrustados de versiones anteriores al almacén de archivos
+async function migrateLegacy(list) {
+  for (const t of list) {
+    if (!(t.files || []).some(f => f.blob)) continue;
+    t.files = await Promise.all(t.files.map(async f => f.blob ? { ...(await storeBlob(new File([f.blob], f.name, { type:f.type || '' }))), size:f.size } : f));
+    await put('tasks', t);
+  }
+  return list;
+}
+
+async function loadLocalFiles() { [general, blobIds] = await Promise.all([getAll('files'), getKeys('blobs').then(k => new Set(k))]); }
+async function loadLocalTasks() { tasks = await migrateLegacy(await getAll('tasks')); }
+
+// ---------- Tareas: cuenta (sincronizadas) o navegador ----------
+function setStatus() {
+  const el = $('sync');
+  el.className = 'sync mono ' + (connecting ? '' : mode);
+  el.textContent = connecting ? 'Conectando…' : mode === 'cloud' ? 'Tareas sincronizadas con tu cuenta' : 'Guardado solo en este navegador';
+  el.title = mode === 'cloud' ? 'Las tareas se ven en todos tus dispositivos. Los archivos se quedan en este navegador.' : 'Haz una copia con «Exportar copia» de vez en cuando.';
+}
+
+async function saveTask(t) {
+  t.updated = Date.now();
+  const i = tasks.findIndex(x => x.id === t.id); if (i >= 0) tasks[i] = t; else tasks.push(t);
+  render();
+  try { if (mode === 'cloud') await cloudCol.doc(t.id).set(clean(t)); else await put('tasks', clean(t)); }
+  catch (e) { toast('No se pudo guardar la tarea' + (e?.message ? ': ' + e.message : '.')); }
+}
+async function removeTask(t) {
+  tasks = tasks.filter(x => x.id !== t.id); render();
+  for (const f of t.files || []) await dropBlob(f.fid);
+  try { if (mode === 'cloud') await cloudCol.doc(t.id).delete(); else await del('tasks', t.id); }
+  catch (e) { toast('No se pudo borrar la tarea' + (e?.message ? ': ' + e.message : '.')); }
+}
+
+async function connect() {
+  const wait = p => Promise.race([Promise.resolve(p).catch(() => null), new Promise(r => setTimeout(() => r(null), 10000))]);
+  try {
+    const [db, user] = await Promise.all([wait(claude.use('db')), wait(claude.use('user'))]);
+    const uid = db && user ? await wait(user.id()) : null;
+    if (!uid) throw 0;
+    const col = db.collection('data/users/' + uid);
+    let first = true;
+    const timer = setTimeout(() => { if (first) { first = false; connecting = false; setStatus(); render(); } }, 10000);
+    col.onSnapshot(async snap => {
+      const cloudTasks = snap.docs.map(d => ({ ...d.data(), id:d.id }));
+      if (first) {
+        first = false; clearTimeout(timer);
+        mode = 'cloud'; cloudCol = col; connecting = false;
+        // Sube las tareas que estaban guardadas solo en este navegador
+        const local = await getAll('tasks');
+        const have = new Set(cloudTasks.map(t => t.id));
+        for (const t of local) {
+          if (!have.has(t.id)) { try { await col.doc(t.id).set(clean(t)); cloudTasks.push(t); } catch { continue; } }
+          await del('tasks', t.id).catch(() => {});
+        }
+        if (local.length) toast(`${local.length} tarea${local.length > 1 ? 's' : ''} de este navegador ahora se sincroniza${local.length > 1 ? 'n' : ''} con tu cuenta.`);
+        setStatus();
+      }
+      if (mode === 'cloud') { tasks = cloudTasks; render(); }
+    }, () => {
+      if (first) { first = false; clearTimeout(timer); connecting = false; setStatus(); render(); }
+      else toast('Se perdió la conexión con tu cuenta. Recarga la página para volver a sincronizar.');
+    });
+  } catch { connecting = false; setStatus(); render(); }
+}
+
+// ---------- Descargas ----------
+// Formatos que Claude deja descargar tal cual; el resto se entrega dentro de un .zip
+const ALLOWED = new Set('gif png jpg jpeg webp mp4 webm mov txt json md docx pptx epub csv ttf html svg pdf xlsx zip fig'.split(' '));
+const extOf = n => (String(n).match(/\.([^./\\]+)$/) || [,''])[1].toLowerCase();
+const baseOf = n => String(n).replace(/\.[^./\\]+$/, '') || 'archivo';
+
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = u => { let c = 0xFFFFFFFF; for (let i = 0; i < u.length; i++) c = CRC[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+// ZIP sin compresión (los ficheros de Office y PDF ya van comprimidos)
+async function makeZip(entries) {
+  const enc = new TextEncoder(), parts = [], central = []; let offset = 0;
+  const used = new Set();
+  const now = new Date(), dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1), dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  for (const { name, blob } of entries) {
+    let nm = name || 'archivo', k = 2; while (used.has(nm)) nm = `${baseOf(name)} (${k++})${extOf(name) ? '.' + extOf(name) : ''}`; used.add(nm);
+    const nameB = enc.encode(nm), data = new Uint8Array(await blob.arrayBuffer()), crc = crc32(data);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+    h.setUint16(10, dosTime, true); h.setUint16(12, dosDate, true); h.setUint32(14, crc, true);
+    h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, nameB.length, true); h.setUint16(28, 0, true);
+    parts.push(h.buffer, nameB, data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+    c.setUint16(12, dosTime, true); c.setUint16(14, dosDate, true); c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true);
+    c.setUint16(28, nameB.length, true); c.setUint32(42, offset, true);
+    central.push(c.buffer, nameB);
+    offset += 30 + nameB.length + data.length;
+  }
+  const cdSize = central.reduce((s, p) => s + p.byteLength, 0);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, entries.length, true); e.setUint16(10, entries.length, true); e.setUint32(12, cdSize, true); e.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, e.buffer], { type:'application/zip' });
+}
+
+let dlNs;
+async function saveFile(name, data, zipped = false) {
+  if (!(window.claude && window.claude.use)) {
+    // Fuera de Claude (GitHub Pages): descarga directa de cualquier formato
+    const a = document.createElement('a'); a.href = URL.createObjectURL(data instanceof Blob ? data : new Blob([data])); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 10000); return true;
+  }
+  if (dlNs === undefined) { try { dlNs = window.claude?.use ? await claude.use('downloads') : null; } catch { dlNs = null; } }
+  if (!dlNs) { toast('Las descargas no están disponibles en esta vista.'); return false; }
+  if (!zipped && !ALLOWED.has(extOf(name))) return saveZipped(name, data);
+  try { await dlNs.save({ filename:name, data }); return true; }
+  catch (e) {
+    const c = e?.code;
+    if (c === 'declined') return false;
+    if ((c === 'rejected_extension' || c === 'extension_not_enabled') && !zipped) return saveZipped(name, data);
+    if (c === 'rate_limited') toast('Ya hay una descarga pendiente de confirmar. Inténtalo en un momento.');
+    else toast('No se pudo descargar el archivo.');
+    return false;
+  }
+}
+async function saveZipped(name, data) {
+  const blob = data instanceof Blob ? data : new Blob([data]);
+  const ok = await saveFile(baseOf(name) + '.zip', await makeZip([{ name, blob }]), true);
+  if (ok) toast(`«${name}» se ha descargado dentro de un .zip: ábrelo y tendrás el archivo original.`);
+  return ok;
+}
+async function downloadAll(t) {
+  const entries = [];
+  for (const f of t.files || []) { const b = await getBlob(f.fid); if (b) entries.push({ name:f.name, blob:b }); }
+  if (!entries.length) { toast('Los archivos de esta tarea están en otro dispositivo.'); return; }
+  const safe = String(t.title).replace(/[\\/:*?"<>|]+/g, ' ').trim().slice(0, 60) || 'tarea';
+  const ok = await saveFile(safe + '.zip', await makeZip(entries), true);
+  if (ok) toast(`${entries.length} archivos de «${t.title}» descargados en un .zip.`);
+}
+async function downloadRef(f) {
+  const b = await getBlob(f.fid);
+  if (!b) { toast('Este archivo se añadió en otro dispositivo o navegador y no está aquí.'); return; }
+  saveFile(f.name, b);
+}
+
+// ---------- Archivos sueltos ----------
+async function addGeneral(fileList) {
+  for (const f of fileList) await put('files', { id:newId(), name:f.name, size:f.size, type:f.type, blob:f, added:Date.now() });
+  await loadLocalFiles(); render();
+  toast(`${fileList.length} archivo${fileList.length > 1 ? 's' : ''} añadido${fileList.length > 1 ? 's' : ''}.`);
+}
+async function addFilesToTask(t, fileList) {
+  const refs = []; for (const f of fileList) refs.push(await storeBlob(f));
+  await saveTask({ ...t, files:[...(t.files || []), ...refs] });
+  toast(`Añadido a «${t.title}».`);
+}
+$('drop').onclick = () => $('gfile').click();
+$('drop').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('gfile').click(); } };
+$('gfile').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; if (fs.length) addGeneral(fs); };
+['dragover','dragenter'].forEach(ev => $('drop').addEventListener(ev, e => { e.preventDefault(); $('drop').classList.add('over'); }));
+['dragleave','drop'].forEach(ev => $('drop').addEventListener(ev, () => $('drop').classList.remove('over')));
+$('drop').addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length) addGeneral([...e.dataTransfer.files]); });
+
+$('gList').onclick = async e => {
+  const d = e.target.dataset;
+  if (d.gdl) { const f = general.find(x => x.id === d.gdl); if (f) saveFile(f.name, f.blob); }
+  if (d.grm) {
+    const f = general.find(x => x.id === d.grm);
+    if (f && await ask('¿Borrar este archivo?', `«${f.name}» se borrará de este navegador.`)) { await del('files', f.id); await loadLocalFiles(); render(); }
+  }
+};
+$('gList').onchange = async e => {
+  const id = e.target.dataset.gas; if (!id || !e.target.value) return;
+  const f = general.find(x => x.id === id), t = tasks.find(x => x.id === e.target.value);
+  if (!f || !t) return;
+  const ref = await storeBlob(new File([f.blob], f.name, { type:f.type || '' }));
+  await del('files', id); await loadLocalFiles();
+  await saveTask({ ...t, files:[...(t.files || []), ref] });
+  toast(`«${f.name}» asignado a «${t.title}».`);
+};
+
+// ---------- Render ----------
+function render() {
+  setStatus();
+  const fp = $('fProj').value, q = $('q').value.trim().toLowerCase();
+  const open = tasks.filter(t => t.state !== 'done'), late = tasks.filter(isLate);
+  const dueSoon = open.filter(t => t.due && !isLate(t) && daysTo(t.due) <= 2);
+  $('nOpen').textContent = String(open.length).padStart(2, '0');
+  $('tags').innerHTML = (late.length ? `<span class="mint warn">${late.length} vencida${late.length > 1 ? 's' : ''}</span>` : '')
+    + (dueSoon.length ? `<span class="mint">${dueSoon.length} en 2 días</span>` : '')
+    + `<span class="mint">${open.filter(t => t.files?.length).length} con archivos</span>`
+    + `<span class="mint">${general.length} suelto${general.length === 1 ? '' : 's'}</span>`;
+
+  const chips = [['open',`Abiertas (${open.length})`,''],['late',`Vencidas (${late.length})`,'warn'],['done','Hechas',''],['all','Todas','']];
+  $('chips').innerHTML = chips.map(([k,n,c]) => `<button class="chip mono ${c}" data-v="${k}" aria-pressed="${view===k}">${n}</button>`).join('');
+  $('fProj').innerHTML = projOptions(fp, true);
+
+  let vis = tasks.filter(t => matchProj(t, fp) && (!q || [t.title, t.notes, t.proj, ...(t.files || []).map(f => f.name)].join(' ').toLowerCase().includes(q)));
+  vis = vis.filter(t => view === 'all' ? true : view === 'done' ? t.state === 'done' : view === 'late' ? isLate(t) : t.state !== 'done');
+  const byDue = (a,b) => (a.due||'9999').localeCompare(b.due||'9999') || (a.created||0) - (b.created||0);
+  const byDoneDesc = (a,b) => (b.updated||0) - (a.updated||0);
+  const groups = view === 'done' ? [['', vis.sort(byDoneDesc)]] : [
+    ['Vencidas', vis.filter(isLate).sort(byDue), 'warn'],
+    ['Con fecha', vis.filter(t => t.state !== 'done' && !isLate(t) && t.due).sort(byDue)],
+    ['Sin fecha', vis.filter(t => t.state !== 'done' && !t.due).sort((a,b) => (a.state === 'doing' ? -1 : 0) - (b.state === 'doing' ? -1 : 0) || (a.created||0) - (b.created||0))],
+    ['Hechas', vis.filter(t => t.state === 'done').sort(byDoneDesc)],
+  ];
+  const nonEmpty = groups.filter(g => g[1].length);
+  const showHead = nonEmpty.length > 1 || view === 'late';
+  let emptyMsg;
+  if (connecting && !tasks.length) emptyMsg = 'Cargando tus tareas…';
+  else if (!tasks.length) emptyMsg = '<b>Aún no tienes tareas.</b>Pulsa «+ Nueva tarea» o la tecla N para crear la primera.';
+  else if (q || fp) emptyMsg = 'Ninguna tarea coincide con el filtro.';
+  else emptyMsg = view === 'late' ? 'No tienes tareas vencidas.' : view === 'done' ? 'Todavía no has terminado ninguna tarea.' : 'No tienes tareas abiertas. Buen trabajo.';
+  $('list').innerHTML = vis.length
+    ? nonEmpty.map(([n, items, c]) => (showHead && n ? `<div class="grp mono ${c||''}">${n} · ${items.length}</div>` : '') + items.map(row).join('')).join('')
+    : `<div class="empty">${emptyMsg}</div>`;
+
+  $('gList').innerHTML = general.map(f => `<div class="gf">
+      <button class="n linkish" data-gdl="${f.id}" title="Descargar">📎 ${esc(f.name)}</button><span class="mono" style="font-size:11px">${size(f.size)}</span>
+      <select data-gas="${f.id}" aria-label="Asignar ${esc(f.name)} a una tarea"><option value="">Asignar a tarea…</option>${open.map(t => `<option value="${t.id}">${esc(t.title.slice(0,40))}</option>`).join('')}</select>
+      <button data-grm="${f.id}">Borrar</button></div>`).join('');
+}
+
+function row(t) {
+  const late = isLate(t);
+  let date;
+  if (t.state === 'done') date = 'HECHA';
+  else if (t.due) date = `${fmt(t.due)}<span class="rel">${late ? 'vencida · ' : ''}${rel(t.due)}</span>${t.state === 'doing' ? '<span class="rel">en curso</span>' : ''}`;
+  else date = t.state === 'doing' ? 'EN CURSO' : '—';
+  const next = t.state === 'todo' ? ['doing','Empezar'] : t.state === 'doing' ? ['done','Hecho ✓'] : ['todo','Reabrir'];
+  const files = (t.files || []).map((f, i) => blobIds.has(f.fid)
+    ? `<button class="linkish" data-dl="${t.id}:${i}" title="Descargar">📎 ${esc(f.name)} (${size(f.size)})</button>`
+    : `<span class="gone" title="Se añadió en otro dispositivo o navegador">📎 ${esc(f.name)} · en otro dispositivo</span>`).join('');
+  return `<div class="row ${late ? 'late' : ''} ${t.state}" data-id="${t.id}">
+    <div class="dt mono">${date}</div>
+    <div><div class="ti">${esc(t.title)}</div>
+      ${t.notes ? `<div class="nt">${esc(t.notes)}</div>` : ''}
+      ${files ? `<div class="files">${files}</div>` : ''}
+      <div class="acts mono"><button data-mv="${t.id}:${next[0]}">${next[1]}</button>${t.state === 'todo' ? `<button data-mv="${t.id}:done">Hecho ✓</button>` : ''}${(t.files || []).filter(f => blobIds.has(f.fid)).length > 1 ? `<button data-all="${t.id}">Descargar todo</button>` : ''}<button data-ed="${t.id}">Editar</button><button data-rm="${t.id}">Borrar</button></div>
+    </div>
+    ${t.proj ? `<span class="pill mono">${esc(projLabel(t.proj))}</span>` : '<span></span>'}
+  </div>`;
+}
+
+$('chips').onclick = e => { const v = e.target.closest('[data-v]')?.dataset.v; if (v) { view = v; render(); } };
+$('fProj').onchange = render;
+$('q').oninput = render;
+$('list').onclick = async e => {
+  const b = e.target.closest('button')?.dataset; if (!b) return;
+  if (b.mv) { const [id, s] = b.mv.split(':'); const t = tasks.find(x => x.id === id); if (t) { await saveTask({ ...t, state:s }); if (s === 'done') toast(`«${t.title}» hecha.`); } }
+  if (b.ed) openDlg(tasks.find(x => x.id === b.ed));
+  if (b.rm) { const t = tasks.find(x => x.id === b.rm); if (t && await ask('¿Borrar la tarea?', `«${t.title}» y sus archivos se borrarán. No se puede deshacer.`)) removeTask(t); }
+  if (b.all) { const t = tasks.find(x => x.id === b.all); if (t) downloadAll(t); }
+  if (b.dl) { const [id, i] = b.dl.split(':'); const t = tasks.find(x => x.id === id); if (t) downloadRef(t.files[+i]); }
+};
+$('list').addEventListener('dragover', e => { const r = e.target.closest('.row'); if (!r) return; e.preventDefault(); document.querySelectorAll('.row.over').forEach(x => x !== r && x.classList.remove('over')); r.classList.add('over'); });
+$('list').addEventListener('dragleave', e => { const r = e.target.closest('.row'); if (r && !r.contains(e.relatedTarget)) r.classList.remove('over'); });
+$('list').addEventListener('drop', e => {
+  const r = e.target.closest('.row'); if (!r) return; e.preventDefault(); r.classList.remove('over');
+  const t = tasks.find(x => x.id === r.dataset.id); if (t && e.dataTransfer.files.length) addFilesToTask(t, [...e.dataTransfer.files]);
+});
+
+// ---------- Diálogo de tarea ----------
+function openDlg(t) {
+  editing = t || null; pending = t ? [...(t.files || [])] : [];
+  $('dt').textContent = t ? 'Editar tarea' : 'Nueva tarea';
+  $('fTitle').value = t?.title || '';
+  const fp = $('fProj').value;
+  $('fProjIn').innerHTML = projOptions(t ? (t.proj || '') : fp.startsWith('p:') ? fp.slice(2) : '', false);
+  $('fDue').value = t?.due || '';
+  $('fState').value = t?.state || 'todo'; $('fNotes').value = t?.notes || ''; $('fFiles').value = '';
+  drawFiles(); $('dlg').showModal(); $('fTitle').focus();
+}
+function drawFiles() {
+  $('fList').innerHTML = pending.map((f, i) => `<div class="fl"><span>📎 ${esc(f.name)} (${size(f.size)})${f._file ? ' · nuevo' : ''}</span><button type="button" class="linkish" data-x="${i}">quitar</button></div>`).join('');
+}
+$('fList').onclick = e => { const x = e.target.dataset.x; if (x !== undefined) { pending.splice(+x, 1); drawFiles(); } };
+$('fFiles').onchange = e => { for (const f of e.target.files) pending.push({ name:f.name, size:f.size, type:f.type, _file:f }); e.target.value = ''; drawFiles(); };
+$('quick').onclick = e => { const d = e.target.dataset.d; if (d === undefined) return; $('fDue').value = d === '' ? '' : plusDays(+d); };
+$('add').onclick = () => openDlg(null);
+$('cancel').onclick = () => $('dlg').close();
+$('form').onsubmit = async e => {
+  e.preventDefault();
+  const title = $('fTitle').value.trim(); if (!title) { $('fTitle').focus(); return; }
+  $('dlg').close();
+  const files = [];
+  for (const f of pending) files.push(f._file ? await storeBlob(f._file) : f);
+  const keep = new Set(files.map(f => f.fid));
+  for (const f of editing?.files || []) if (!keep.has(f.fid)) await dropBlob(f.fid);
+  const base = editing ? { ...editing } : { id:newId(), created:Date.now() };
+  await saveTask({ ...base, title, proj:$('fProjIn').value, due:$('fDue').value, state:$('fState').value, notes:$('fNotes').value, files });
+  toast(editing ? 'Tarea guardada.' : 'Tarea creada.');
+};
+
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return;
+  const tag = e.target.tagName; if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (e.key === 'n' || e.key === 'N') { e.preventDefault(); openDlg(null); }
+  if (e.key === '/') { e.preventDefault(); $('q').focus(); }
+});
+
+// ---------- Copia de seguridad ----------
+const toB64 = b => new Promise((r, j) => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.onerror = () => j(fr.error); fr.readAsDataURL(b); });
+function fromB64(dataUrl, type) {
+  const [head, body] = String(dataUrl).split(',');
+  const bin = head.includes(';base64') ? atob(body) : decodeURIComponent(body);
+  const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return new Blob([u], { type:type || head.slice(5).split(';')[0] || '' });
+}
+$('exp').onclick = async () => {
+  if (!tasks.length && !general.length) { toast('No hay nada que exportar todavía.'); return; }
+  toast('Preparando la copia…');
+  const out = { v:3, exported:new Date().toISOString(), tasks:[], general:[] };
+  let missing = 0;
+  for (const t of tasks) {
+    const files = [];
+    for (const f of t.files || []) { const b = await getBlob(f.fid); if (!b) missing++; files.push({ name:f.name, size:f.size, type:f.type, data:b ? await toB64(b) : null }); }
+    out.tasks.push({ ...clean(t), files });
+  }
+  for (const g of general) out.general.push({ id:g.id, added:g.added, name:g.name, size:g.size, type:g.type, data:await toB64(g.blob) });
+  const ok = await saveFile(`tareas-${today()}.json`, new Blob([JSON.stringify(out)], { type:'application/json' }));
+  if (ok) toast(`Copia guardada: ${out.tasks.length} tareas, ${out.general.length} archivos sueltos${missing ? ` (${missing} archivo${missing>1?'s':''} estaba${missing>1?'n':''} en otro dispositivo)` : ''}.`);
+};
+$('imp').onclick = () => $('impf').click();
+$('impf').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  let data;
+  try { data = JSON.parse(await f.text()); if (Array.isArray(data)) data = { tasks:data, general:[] }; if (!Array.isArray(data.tasks)) throw 0; }
+  catch { toast('Ese archivo no es una copia de Mis tareas.'); return; }
+  if (tasks.length && !await ask('¿Importar la copia?', `Se añadirán ${data.tasks.length} tareas. Las que ya tengas con el mismo identificador se sustituirán.`, 'Importar')) return;
+  try {
+    for (const t of data.tasks) {
+      const files = [];
+      for (const x of t.files || []) {
+        if (x.data) files.push({ ...(await storeBlob(new File([fromB64(x.data, x.type)], x.name, { type:x.type || '' }))), size:x.size });
+        else if (x.blob) files.push(await storeBlob(new File([x.blob], x.name)));
+      }
+      const old = tasks.find(y => y.id === t.id);
+      for (const ofl of old?.files || []) await dropBlob(ofl.fid);
+      await saveTask({ id:t.id || newId(), created:t.created || Date.now(), title:String(t.title || 'Sin título'), proj:t.proj || '', due:t.due || '', state:STATES[t.state] ? t.state : 'todo', notes:t.notes || '', files });
+    }
+    for (const g of data.general || []) if (g.data) await put('files', { id:g.id || newId(), added:g.added || Date.now(), name:g.name, size:g.size, type:g.type, blob:fromB64(g.data, g.type) });
+    await loadLocalFiles(); render();
+    toast(`Importadas ${data.tasks.length} tareas y ${(data.general || []).length} archivos sueltos.`);
+  } catch { toast('La copia se importó a medias: algún archivo estaba dañado.'); }
+};
+
+// ---------- Arranque ----------
+(async () => {
+  const idbOk = !!(await IDB);
+  await loadLocalFiles();
+  await loadLocalTasks();
+  loaded = true; render();
+  if (!idbOk) toast('Este navegador no permite guardar datos aquí: los archivos se perderán al cerrar la página.');
+  if (connecting) connect();
+})();
+</script>
+
+</body>
+</html>
