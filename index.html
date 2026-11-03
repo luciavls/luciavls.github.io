@@ -296,6 +296,13 @@
   .fl { font-size:13px; display:flex; justify-content:space-between; gap:8px; margin-top:6px; }
   .fl button { color:var(--late); }
   .toast { position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%); background:var(--ink); color:var(--bg); padding:10px 16px; border-radius:12px; font-size:14px; max-width:min(520px, calc(100vw - 32px)); z-index:50; box-shadow:var(--shadow); }
+  .copyrow { display:flex; gap:8px; margin:8px 0 4px; }
+  .copyrow input { flex:1; min-width:0; font-size:12px; font-family:var(--f-mono); }
+  a.btn { display:block; text-align:center; text-decoration:none; padding:11px; border-radius:12px; font-weight:600; margin:14px 0 8px; }
+  a.btn.primary { background:var(--acc); color:var(--on-acc); }
+  #icalDlg ol { padding-left:20px; margin:8px 0; font-size:14px; color:var(--ink2); }
+  #icalDlg p { color:var(--ink2); font-size:14px; }
+  #icalDlg .sub { font-size:12px; color:var(--mute); }
   @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
 </style>
 </head>
@@ -369,6 +376,7 @@
         <button class="icon" id="gearBtn" aria-label="Ajustes" aria-expanded="false"><svg class="i"><use href="#i-gear"/></svg></button>
         <div class="card pop" id="gearPop" hidden>
           <button class="it" data-act="export"><span>Exportar copia<small>Tareas y archivos en un solo fichero</small></span></button>
+          <button class="it" data-act="ical"><span>Sincronizar con el iPhone<small>Ver tus tareas en la app Calendario</small></span></button>
           <button class="it" data-act="import"><span>Importar copia</span></button>
           <button class="it mob-only" data-act="dark"><span>Cambiar modo oscuro</span></button>
           <button class="it" data-act="logout"><span>Cerrar sesión</span></button>
@@ -404,6 +412,21 @@
   <h3 id="cTitle">¿Seguro?</h3>
   <p id="cMsg"></p>
   <div class="dr"><button type="button" id="cNo">Cancelar</button><button type="button" class="danger" id="cYes">Borrar</button></div>
+</dialog>
+
+<dialog id="icalDlg">
+  <h3>Sincronizar con el iPhone</h3>
+  <p>Tus tareas con fecha aparecerán en la app Calendario del iPhone (y del Mac) como eventos de todo el día, con un aviso a las 9:00. Se actualizan solas: lo que cambies aquí llega al iPhone en unos minutos. Desde el iPhone se ven, pero se editan aquí.</p>
+  <div class="msg" id="icalMsg" hidden></div>
+  <a class="btn primary" id="icalOpen" href="#">Añadir al Calendario del iPhone</a>
+  <p class="sub">Pulsa el botón desde el propio iPhone (en Safari). Si no se abre, copia el enlace y añádelo a mano:</p>
+  <div class="copyrow"><input id="icalUrl" readonly aria-label="Enlace del calendario"><button type="button" id="icalCopy">Copiar</button></div>
+  <ol>
+    <li>En el iPhone: <b>Ajustes → Apps → Calendario → Cuentas de calendario → Añadir cuenta → Otra → Añadir calendario suscrito</b>.</li>
+    <li>Pega el enlace, pulsa <b>Siguiente</b> y luego <b>Guardar</b>.</li>
+  </ol>
+  <p class="sub">El enlace es privado: quien lo tenga puede ver tus tareas. Si lo compartes sin querer, pulsa «Cambiar enlace» y vuelve a añadirlo.</p>
+  <div class="dr"><button type="button" id="icalRegen" class="ghost" style="margin-right:auto">Cambiar enlace</button><button type="button" id="icalClose">Cerrar</button></div>
 </dialog>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -808,6 +831,7 @@ function renderCal() {
       <div class="navbtns"><button data-act="calPrev" aria-label="Anterior">‹</button><button data-act="calToday">Hoy</button><button data-act="calNext" aria-label="Siguiente">›</button></div>
       <h2>${title}</h2>
       ${projSelect()}
+      <button data-act="ical" title="Ver tus tareas en el Calendario del iPhone">📱 iPhone</button>
       <div class="seg">${[['month','Mes'],['week','Semana'],['day','Día']].map(([k,n]) => `<button data-act="calMode" data-v="${k}" aria-pressed="${calMode===k}">${n}</button>`).join('')}</div>
     </div>
     <div class="calwrap" ${calMode === 'day' ? 'style="grid-template-columns:minmax(0,640px)"' : ''}>${calMode !== 'day' ? `<div class="card cal">${body}</div>` : ''}${panel}</div>`;
@@ -1012,6 +1036,7 @@ document.addEventListener('click', async e => {
     case 'seeDone': listFilter = 'done'; go('lista'); break;
     case 'export': closePops(); exportCopy(); break;
     case 'import': closePops(); $('impf').click(); break;
+    case 'ical': closePops(); openIcal(); break;
     case 'dark': toggleDark(); break;
     case 'logout': closePops(); await sb.auth.signOut(); break;
     case 'bellItem': closePops(); if (t) openDlg(t); break;
@@ -1134,6 +1159,33 @@ $('form').onsubmit = async e => {
     await removeObjects(removed);
     toast(isNew ? 'Tarea creada.' : 'Tarea guardada.');
   }
+};
+
+// ======================= Calendario del iPhone =======================
+const icalUrl = tok => `webcal://${window.SUPABASE_URL.replace(/^https?:\/\//, '')}/rest/v1/rpc/calendario?token=${tok}&apikey=${window.SUPABASE_ANON_KEY}`;
+function setIcal(tok, msg) {
+  $('icalMsg').hidden = !msg; $('icalMsg').textContent = msg || '';
+  $('icalUrl').value = tok ? icalUrl(tok) : ''; $('icalOpen').href = tok ? icalUrl(tok) : '#';
+  $('icalOpen').style.pointerEvents = tok ? '' : 'none'; $('icalOpen').style.opacity = tok ? '' : '.5';
+}
+const icalErr = e => /calendar_tokens|does not exist|schema cache/i.test(e?.message || '') ? 'Falta preparar la base de datos: ejecuta el script SQL nuevo en Supabase.' : 'No se pudo crear el enlace: ' + errText(e);
+async function openIcal() {
+  setIcal(null); $('icalUrl').value = 'Creando tu enlace…'; $('icalDlg').showModal();
+  let { data, error } = await sb.from('calendar_tokens').select('token').maybeSingle();
+  if (!error && !data) ({ data, error } = await sb.from('calendar_tokens').insert({}).select('token').single());
+  if (error) return setIcal(null, icalErr(error));
+  setIcal(data.token);
+}
+$('icalClose').onclick = () => $('icalDlg').close();
+$('icalCopy').onclick = async () => {
+  try { await navigator.clipboard.writeText($('icalUrl').value); toast('Enlace copiado.'); }
+  catch { $('icalUrl').select(); toast('Selecciona el enlace y cópialo.'); }
+};
+$('icalRegen').onclick = async () => {
+  if (!await ask('¿Cambiar el enlace?', 'El enlace actual dejará de funcionar. Tendrás que volver a añadir el calendario en el iPhone (y borrar el antiguo).', 'Cambiar enlace')) return;
+  const { data, error } = await sb.from('calendar_tokens').update({ token:newId() }).eq('user_id', user.id).select('token').single();
+  if (error) return setIcal(null, icalErr(error));
+  setIcal(data.token); toast('Enlace nuevo creado.');
 };
 
 // ======================= Copia de seguridad =======================
