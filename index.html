@@ -159,6 +159,7 @@
 
   /* ---------- Lista ---------- */
   .chips { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .chipsel { margin-left:auto; }
   .chip { border-radius:99px; padding:6px 14px; }
   .chip[aria-pressed="true"] { background:var(--ink); color:var(--bg); border-color:var(--ink); }
   .chip.warn[aria-pressed="false"] { color:var(--late); border-color:color-mix(in srgb, var(--late) 50%, transparent); }
@@ -186,7 +187,6 @@
   .check.half { border-color:var(--week); }
   .empty { padding:36px 20px; color:var(--ink2); text-align:center; }
   .empty b { display:block; color:var(--ink); font-size:18px; margin-bottom:4px; }
-  @media (max-width:640px) { .row { grid-template-columns:24px minmax(0,1fr); } .row .dt { grid-column:2; order:-1; padding:0; } .row .pillcell { grid-column:2; } }
 
   /* ---------- Calendario ---------- */
   .calwrap { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:18px; align-items:start; }
@@ -372,10 +372,45 @@
     #add { display:none; }
     .fab { display:grid; place-items:center; position:fixed; right:calc(16px + env(safe-area-inset-right, 0px)); bottom:calc(78px + env(safe-area-inset-bottom, 0px)); z-index:21; width:56px; height:56px; border-radius:50%; font-size:28px; font-weight:400; padding:0; box-shadow:0 6px 20px rgba(238,106,69,.45); }
     .brand { padding:0; }
-    .bignum { font-size:48px; }
-    .count b { font-size:13px; }
-    .kpis { gap:4px; } .kpi { font-size:13px; }
-    .side { gap:12px; }
+    /* Móvil: primero las tareas. Cabecera en una sola línea */
+    .side { flex-direction:row; align-items:center; flex-wrap:nowrap; gap:10px; padding-block:10px; }
+    .brand { gap:10px; } .brand .logo { --s:30px; } .brand small { display:none; } .brand b { font-size:16px; }
+    .sumrow { display:flex; margin-left:auto; }
+    .count, .prog { display:none; }
+    .kpis { display:flex; gap:12px; padding:0; }
+    .kpi { font-size:14px; gap:5px; } .kpi .kl { display:none; } .kpi strong { min-width:0; }
+    .topbar { padding-block:6px 8px; gap:8px; }
+    .search input { padding:7px 0; }
+    button.icon { width:36px; height:36px; }
+    .content { padding-top:12px; }
+    .head { margin-bottom:10px; gap:8px; }
+    .head h2.sec { display:none; }
+    .head h2 { font-size:20px; }
+    .head select { font-size:13px; padding:6px 10px; margin-left:auto; }
+    .list .chips, .content > .chips { flex-wrap:nowrap; overflow-x:auto; margin:0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding:0 max(16px, env(safe-area-inset-left, 0px)) 4px; scrollbar-width:none; }
+    .content > .chips::-webkit-scrollbar { display:none; }
+    .chip { flex:none; padding:5px 12px; }
+    .list { margin-top:8px; }
+    .grp { margin:14px 0 6px; }
+    .row { grid-template-columns:24px minmax(0,1fr); gap:2px 12px; padding:12px 14px; margin-bottom:6px; }
+    .row > .check { grid-row:1 / span 3; }
+    .row > div:nth-of-type(2) { grid-column:2; grid-row:1; }
+    .row .dt { grid-column:2; grid-row:2; order:0; padding:0; font-size:12px; }
+    .row .dt .rel { display:inline; margin-left:6px; }
+    .row .pillcell { grid-column:2; grid-row:3; margin-top:4px; }
+    .row .pillcell:empty { display:none; }
+    .row .ti { font-size:16px; }
+    .row .nt { display:none; }
+    .head.sec { display:none; }
+    .calhead select { display:none; }
+    .calhead h2 { font-size:18px; margin-right:0; flex:1; min-width:0; }
+    .calhead .seg button { padding:5px 10px; }
+    .grid .ev.ext b { display:none; }
+    .grid .ev.ext::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--pc); }
+    .chipsel { margin-left:0 !important; flex:none; }
+    .chipsel select { font-size:13px; padding:5px 10px; border-radius:99px; }
+    .row .acts { display:none; }
+    .row:hover { transform:none; }
     .toast { bottom:calc(150px + env(safe-area-inset-bottom, 0px)); }
   }
   @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
@@ -870,9 +905,9 @@ function renderSide() {
   const p2 = n => String(n).padStart(2, '0');
   $('nOpen').textContent = p2(open.length);
   $('kpis').innerHTML = `
-    <button class="kpi" data-act="goLate"><span class="dot" style="--pc:var(--late)"></span><strong>${p2(late)}</strong>Vencidas</button>
-    <button class="kpi" data-act="goToday"><span class="dot" style="--pc:var(--today)"></span><strong>${p2(hoy)}</strong>Para hoy</button>
-    <button class="kpi" data-act="goWeek"><span class="dot" style="--pc:var(--week)"></span><strong>${p2(semana)}</strong>Esta semana</button>`;
+    <button class="kpi" data-act="goLate" title="Vencidas"><span class="dot" style="--pc:var(--late)"></span><strong>${p2(late)}</strong><span class="kl">Vencidas</span></button>
+    <button class="kpi" data-act="goToday" title="Para hoy"><span class="dot" style="--pc:var(--today)"></span><strong>${p2(hoy)}</strong><span class="kl">Para hoy</span></button>
+    <button class="kpi" data-act="goWeek" title="Esta semana"><span class="dot" style="--pc:var(--week)"></span><strong>${p2(semana)}</strong><span class="kl">Esta semana</span></button>`;
   const range = w.mon.getMonth() === w.sun.getMonth() ? `${w.mon.getDate()} – ${w.sun.getDate()} ${MSHORT[w.sun.getMonth()]}.` : `${w.mon.getDate()} ${MSHORT[w.mon.getMonth()]}. – ${w.sun.getDate()} ${MSHORT[w.sun.getMonth()]}.`;
   $('prog').innerHTML = `<div class="bar"><div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${w.pct ?? 0}" aria-label="Tareas de esta semana completadas"><div class="fill" style="width:${w.pct ?? 0}%"></div></div>${w.pct === null ? '—' : w.pct + '%'}</div>
     <small>Semana del ${range} · ${w.done} de ${w.inWeek.length} hechas</small>`;
@@ -914,8 +949,8 @@ function renderList() {
   else if ($('q').value || projFilter) emptyMsg = 'Ninguna tarea coincide con la búsqueda o el filtro.';
   else emptyMsg = { late:'No tienes tareas vencidas.', done:'Todavía no has completado ninguna tarea.', today:'Nada para hoy.', week:'Nada más para esta semana.' }[listFilter] || 'No tienes tareas abiertas. Buen trabajo.';
   $('content').innerHTML = `
-    <div class="head"><h2>Lista</h2>${projSelect()}</div>
-    <div class="chips">${chips.map(([k,n,c]) => `<button class="chip ${c}" data-act="lf" data-v="${k}" aria-pressed="${listFilter===k}">${n}</button>`).join('')}</div>
+    <div class="head sec"><h2 class="sec">Lista</h2></div>
+    <div class="chips">${chips.map(([k,n,c]) => `<button class="chip ${c}" data-act="lf" data-v="${k}" aria-pressed="${listFilter===k}">${n}</button>`).join('')}<span class="chipsel">${projSelect()}</span></div>
     <div class="list">${vis.length ? nonEmpty.map(([n, items, c]) => (nonEmpty.length > 1 && n ? `<div class="grp ${c||''}">${n} · ${items.length}</div>` : '') + items.map(row).join('')).join('') : `<div class="card empty">${emptyMsg}</div>`}</div>`;
 }
 function row(t) {
@@ -929,7 +964,7 @@ function row(t) {
   return `<div class="row ${late ? 'late' : ''} ${t.state}" data-drop="${t.id}" style="--pc:${t.proj ? colorOf(t.proj) : 'transparent'}">
     <button class="check ${checkCls(t)}" data-act="toggle" data-id="${t.id}" aria-label="${t.state === 'done' ? 'Marcar como pendiente' : 'Marcar como completada'}"></button>
     <div class="dt">${date}</div>
-    <div><div class="ti">${esc(t.title)}</div>
+    <div><div class="ti" data-act="edit" data-id="${t.id}" style="cursor:pointer">${esc(t.title)}</div>
       ${t.notes ? `<div class="nt">${esc(t.notes)}</div>` : ''}
       ${files ? `<div class="files">${files}</div>` : ''}
       <div class="acts"><button data-act="state" data-id="${t.id}" data-s="${next[0]}">${next[1]}</button>${(t.files || []).length > 1 ? `<button data-act="dlall" data-id="${t.id}">Descargar todo</button>` : ''}<button data-act="edit" data-id="${t.id}">Editar</button><button data-act="del" data-id="${t.id}">Borrar</button></div>
@@ -986,7 +1021,7 @@ function renderCal() {
     ${nodate.length ? `<div class="grp">Sin fecha · ${nodate.length}</div>${nodate.map(item).join('')}` : ''}
     <button class="addday" data-act="newOn" data-day="${sk}">+ Añadir tarea este día</button></aside>`;
   $('content').innerHTML = `
-    <div class="head">
+    <div class="head calhead">
       <div class="navbtns"><button data-act="calPrev" aria-label="Anterior">‹</button><button data-act="calToday">Hoy</button><button data-act="calNext" aria-label="Siguiente">›</button></div>
       <h2>${title}</h2>
       ${projSelect()}
@@ -1015,7 +1050,7 @@ function renderBoard() {
       <div><div class="ti">${esc(t.title)}</div>
       <div class="meta">${pill(t.proj)}${t.due ? `<span class="${isLate(t) ? 'late' : ''}">${isLate(t) ? 'Vencida · ' : ''}${fmt(t.due)}</span>` : ''}${t.files?.length ? `<span>📎 ${t.files.length}</span>` : ''}</div></div></div>`;
   $('content').innerHTML = `
-    <div class="head"><h2>Proyectos</h2>${projSelect()}</div>
+    <div class="head"><h2 class="sec">Proyectos</h2>${projSelect()}</div>
     <div class="board">${cols.map(([k, n, c, list]) => {
       const shown = k === 'done' ? list.slice(0, 8) : list;
       return `<section class="kcol" data-dropstate="${k}" aria-label="${n}">
@@ -1036,7 +1071,7 @@ function renderFiles() {
   const count = general.length + tasks.reduce((s,t) => s + (t.files||[]).length, 0);
   const total = general.reduce((s, f) => s + (f.size||0), 0) + tasks.reduce((s, t) => s + (t.files||[]).reduce((a, f) => a + (f.size||0), 0), 0);
   $('content').innerHTML = `
-    <div class="head"><h2>Archivos</h2><span style="color:var(--mute);font-size:13px">${count} archivo${count === 1 ? '' : 's'} · ${size(total)}</span>${projSelect()}</div>
+    <div class="head"><h2 class="sec">Archivos</h2><span style="color:var(--mute);font-size:13px">${count} archivo${count === 1 ? '' : 's'} · ${size(total)}</span>${projSelect()}</div>
     <section class="card box" id="pasteBox" style="margin-bottom:18px">
       <h3>Pegar texto o imágenes</h3>
       <p class="sub">Pega aquí (Cmd+V, o mantén pulsado → Pegar en el iPhone) un texto, una captura de pantalla o una imagen copiada. También puedes arrastrar archivos. Se guardan como archivos: el texto como .txt.</p>
@@ -1112,7 +1147,7 @@ function renderStats() {
   const mon = monday(now), load = DOW.map((x, i) => { const k = ymd(addDays(mon, i)); const l = all.filter(t => t.due === k); return { x, k, n:l.length, done:l.filter(t => t.state === 'done').length }; });
 
   $('content').innerHTML = `
-    <div class="head"><h2>Estadísticas</h2>${projSelect()}
+    <div class="head"><h2 class="sec">Estadísticas</h2>${projSelect()}
       <select id="sRange" aria-label="Periodo">${[[7,'Última semana'],[30,'Último mes'],[90,'Últimos 3 meses']].map(([v,n]) => `<option value="${v}" ${v===R?'selected':''}>${n}</option>`).join('')}</select></div>
     <div class="minis" style="margin-bottom:16px">
       <div class="card mini"><small>Completadas en el periodo</small><b>${doneIn.length}</b></div>
