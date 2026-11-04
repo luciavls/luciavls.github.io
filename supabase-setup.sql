@@ -66,57 +66,44 @@ drop policy if exists "borrar mis archivos" on storage.objects;
 create policy "borrar mis archivos" on storage.objects for delete to authenticated
   using (bucket_id = 'archivos' and (storage.foldername(name))[1] = auth.uid()::text);
 
--- 5) Sincronización con el Calendario del iPhone (suscripción .ics)
-create table if not exists public.calendar_tokens (
-  user_id    uuid primary key default auth.uid() references auth.users(id) on delete cascade,
-  token      uuid not null unique default gen_random_uuid(),
+-- 5) Calendarios del iPhone (iCloud) que se ven dentro de la app
+create extension if not exists http with schema extensions;
+
+create table if not exists public.external_calendars (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  name       text not null default 'iPhone',
+  url        text not null,
+  color      text not null default '#8e8e93',
   created_at timestamptz not null default now()
 );
-alter table public.calendar_tokens enable row level security;
-drop policy if exists "enlace propio" on public.calendar_tokens;
-create policy "enlace propio" on public.calendar_tokens
+alter table public.external_calendars enable row level security;
+drop policy if exists "calendarios propios" on public.external_calendars;
+create policy "calendarios propios" on public.external_calendars
   for all to authenticated
   using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
--- Tipo de respuesta text/calendar para que el iPhone lo reconozca
-do $$ begin
-  if not exists (select 1 from pg_type where typname = 'text/calendar') then
-    create domain "text/calendar" as text;
-  end if;
+-- Descarga el calendario (el navegador no puede pedírselo a iCloud directamente)
+create or replace function public.leer_calendario(cal uuid) returns text
+language plpgsql security definer set search_path = public, extensions as $$
+declare
+  u text; r extensions.http_response; loc text; i int := 0;
+begin
+  select url into u from public.external_calendars where id = cal and user_id = auth.uid();
+  if u is null then raise exception 'Calendario no encontrado'; end if;
+  u := regexp_replace(trim(u), '^webcals?://', 'https://', 'i');
+  begin perform extensions.http_set_curlopt('CURLOPT_TIMEOUT_MS', '15000'); exception when others then null; end;
+  loop
+    if u !~* '^https://[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}(:[0-9]+)?(/|\?|$)' then raise exception 'El enlace no es válido'; end if;
+    r := extensions.http_get(u);
+    exit when r.status not in (301, 302, 303, 307, 308) or i >= 5;
+    select h.value into loc from unnest(r.headers) h where lower(h.field) = 'location' limit 1;
+    exit when loc is null;
+    u := loc; i := i + 1;
+  end loop;
+  if r.status <> 200 then raise exception 'El calendario respondió con el código %', r.status; end if;
+  if position('BEGIN:VCALENDAR' in r.content) = 0 then raise exception 'Ese enlace no es un calendario'; end if;
+  return r.content;
 end $$;
-
-create or replace function public.ics_escape(s text) returns text
-language sql immutable as $$
-  select replace(replace(replace(replace(replace(coalesce(s, ''), E'\\', E'\\\\'), ';', E'\;'), ',', E'\\,'), E'\r', ''), E'\n', E'\\n')
-$$;
-
--- Devuelve las tareas con fecha de quien tenga ese enlace secreto
-create or replace function public.calendario(token uuid) returns "text/calendar"
-language sql stable security definer set search_path = public as $$
-  select concat_ws(E'\r\n',
-    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Mis tareas//ES', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
-    'X-WR-CALNAME:Mis tareas', 'X-WR-TIMEZONE:Europe/Madrid',
-    'REFRESH-INTERVAL;VALUE=DURATION:PT15M', 'X-PUBLISHED-TTL:PT15M',
-    (select string_agg(concat_ws(E'\r\n',
-        'BEGIN:VEVENT',
-        'UID:' || t.id || '@luciavls.github.io',
-        'DTSTAMP:' || to_char(t.updated_at at time zone 'UTC', 'YYYYMMDD"T"HH24MISS"Z"'),
-        'LAST-MODIFIED:' || to_char(t.updated_at at time zone 'UTC', 'YYYYMMDD"T"HH24MISS"Z"'),
-        'DTSTART;VALUE=DATE:' || to_char(t.due, 'YYYYMMDD'),
-        'DTEND;VALUE=DATE:' || to_char(t.due + 1, 'YYYYMMDD'),
-        'SUMMARY:' || public.ics_escape(case when t.state = 'done' then '✓ ' else '' end || t.title),
-        'DESCRIPTION:' || public.ics_escape(concat_ws(E'\n',
-            nullif(t.proj, ''),
-            case t.state when 'todo' then 'Pendiente' when 'doing' then 'En proceso' else 'Completada' end,
-            nullif(t.notes, ''))),
-        case when t.proj <> '' then 'CATEGORIES:' || public.ics_escape(t.proj) end,
-        'TRANSP:TRANSPARENT',
-        case when t.state <> 'done' then E'BEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:' || public.ics_escape(t.title) || E'\r\nTRIGGER:PT9H\r\nEND:VALARM' end,
-        'END:VEVENT'), E'\r\n' order by t.due)
-     from public.tasks t
-     join public.calendar_tokens c on c.user_id = t.user_id
-     where c.token = calendario.token and t.due is not null and t.due > current_date - 365),
-    'END:VCALENDAR') || E'\r\n'
-$$;
-revoke all on function public.calendario(uuid) from public;
-grant execute on function public.calendario(uuid) to anon, authenticated;
+revoke all on function public.leer_calendario(uuid) from public, anon;
+grant execute on function public.leer_calendario(uuid) to authenticated;

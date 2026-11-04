@@ -300,9 +300,27 @@
   .copyrow input { flex:1; min-width:0; font-size:12px; font-family:var(--f-mono); }
   a.btn { display:block; text-align:center; text-decoration:none; padding:11px; border-radius:12px; font-weight:600; margin:14px 0 8px; }
   a.btn.primary { background:var(--acc); color:var(--on-acc); }
-  #icalDlg ol { padding-left:20px; margin:8px 0; font-size:14px; color:var(--ink2); }
-  #icalDlg p { color:var(--ink2); font-size:14px; }
-  #icalDlg .sub { font-size:12px; color:var(--mute); }
+  #extDlg ol { padding-left:20px; margin:6px 0 10px; font-size:14px; color:var(--ink2); }
+  #extDlg p { color:var(--ink2); font-size:14px; }
+  #extDlg .sub { font-size:12px; color:var(--mute); }
+  .extrow { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); font-size:14px; }
+  .extrow .n { flex:1; min-width:0; }
+  .extrow small { display:block; color:var(--mute); font-size:12px; word-break:break-all; }
+  .extrow small.err { color:var(--late); }
+  .extform { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; margin-top:12px; }
+  .extform input[type=url] { grid-column:1 / -1; }
+  .swatches { display:flex; gap:6px; align-items:center; }
+  .swatches label { margin:0; }
+  .swatches input { position:absolute; opacity:0; pointer-events:none; }
+  .swatches span { display:block; width:22px; height:22px; border-radius:50%; background:var(--sw); cursor:pointer; box-shadow:inset 0 0 0 2px rgba(0,0,0,.08); }
+  .swatches input:checked + span { box-shadow:0 0 0 2px var(--card), 0 0 0 4px var(--sw); }
+  .swatches input:focus-visible + span { outline:2px solid var(--acc); outline-offset:3px; }
+  .ev.ext { background:transparent; box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--pc) 55%, transparent); cursor:pointer; }
+  .ev.ext b { font-weight:600; font-variant-numeric:tabular-nums; flex:none; }
+  .extitem { display:grid; grid-template-columns:22px minmax(0,1fr); gap:10px; padding:10px 0; border-top:1px solid var(--line); }
+  .extitem .bar { width:4px; border-radius:4px; background:var(--pc); justify-self:center; height:100%; min-height:20px; }
+  .extitem .ti { font-size:15px; }
+  .extitem .meta { font-size:12px; color:var(--mute); margin-top:3px; }
   @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
 </style>
 </head>
@@ -328,7 +346,7 @@
     <p class="sub" id="aSub">Tu lista, tus archivos y tus fechas, en cualquier dispositivo.</p>
     <form id="aForm" novalidate>
       <div class="msg" id="aMsg" hidden></div>
-      <div id="aEmailWrap"><label for="aEmail">Correo</label><input type="email" id="aEmail" autocomplete="email" required></div>
+      <div id="aEmailWrap"><label for="aEmail" id="aUserLbl">Usuario</label><input type="text" id="aEmail" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required></div>
       <div id="aPassWrap"><label for="aPass">Contraseña</label><input type="password" id="aPass" autocomplete="current-password" minlength="6" required></div>
       <button class="primary" type="submit" id="aBtn">Entrar</button>
       <div class="links">
@@ -376,7 +394,8 @@
         <button class="icon" id="gearBtn" aria-label="Ajustes" aria-expanded="false"><svg class="i"><use href="#i-gear"/></svg></button>
         <div class="card pop" id="gearPop" hidden>
           <button class="it" data-act="export"><span>Exportar copia<small>Tareas y archivos en un solo fichero</small></span></button>
-          <button class="it" data-act="ical"><span>Sincronizar con el iPhone<small>Ver tus tareas en la app Calendario</small></span></button>
+          <button class="it" data-act="ext"><span>Calendarios del iPhone<small>Ver tus eventos de iCloud en el calendario</small></span></button>
+          <button class="it" data-act="pw"><span>Cambiar contraseña</span></button>
           <button class="it" data-act="import"><span>Importar copia</span></button>
           <button class="it mob-only" data-act="dark"><span>Cambiar modo oscuro</span></button>
           <button class="it" data-act="logout"><span>Cerrar sesión</span></button>
@@ -414,19 +433,42 @@
   <div class="dr"><button type="button" id="cNo">Cancelar</button><button type="button" class="danger" id="cYes">Borrar</button></div>
 </dialog>
 
-<dialog id="icalDlg">
-  <h3>Sincronizar con el iPhone</h3>
-  <p>Tus tareas con fecha aparecerán en la app Calendario del iPhone (y del Mac) como eventos de todo el día, con un aviso a las 9:00. Se actualizan solas: lo que cambies aquí llega al iPhone en unos minutos. Desde el iPhone se ven, pero se editan aquí.</p>
-  <div class="msg" id="icalMsg" hidden></div>
-  <a class="btn primary" id="icalOpen" href="#">Añadir al Calendario del iPhone</a>
-  <p class="sub">Pulsa el botón desde el propio iPhone (en Safari). Si no se abre, copia el enlace y añádelo a mano:</p>
-  <div class="copyrow"><input id="icalUrl" readonly aria-label="Enlace del calendario"><button type="button" id="icalCopy">Copiar</button></div>
-  <ol>
-    <li>En el iPhone: <b>Ajustes → Apps → Calendario → Cuentas de calendario → Añadir cuenta → Otra → Añadir calendario suscrito</b>.</li>
-    <li>Pega el enlace, pulsa <b>Siguiente</b> y luego <b>Guardar</b>.</li>
-  </ol>
-  <p class="sub">El enlace es privado: quien lo tenga puede ver tus tareas. Si lo compartes sin querer, pulsa «Cambiar enlace» y vuelve a añadirlo.</p>
-  <div class="dr"><button type="button" id="icalRegen" class="ghost" style="margin-right:auto">Cambiar enlace</button><button type="button" id="icalClose">Cerrar</button></div>
+<dialog id="extDlg">
+  <h3>Calendarios del iPhone</h3>
+  <p>Los eventos de tus calendarios de iCloud aparecerán en la vista Calendario, junto a tus tareas. Se actualizan cada vez que abres el calendario.</p>
+  <div id="extList"></div>
+  <form id="extForm" class="extform">
+    <input type="text" id="extName" placeholder="Nombre (p. ej. Personal)" aria-label="Nombre del calendario" autocomplete="off">
+    <div class="swatches" role="radiogroup" aria-label="Color">
+      <label><input type="radio" name="extColor" value="#8e8e93" checked><span style="--sw:#8e8e93"></span></label>
+      <label><input type="radio" name="extColor" value="#af52de"><span style="--sw:#af52de"></span></label>
+      <label><input type="radio" name="extColor" value="#e8a400"><span style="--sw:#e8a400"></span></label>
+      <label><input type="radio" name="extColor" value="#e34948"><span style="--sw:#e34948"></span></label>
+    </div>
+    <input type="url" id="extUrl" placeholder="Pega aquí el enlace (webcal://… o https://…)" aria-label="Enlace del calendario" autocomplete="off" required>
+    <button class="primary" type="submit" id="extAdd" style="grid-column:1 / -1">Añadir calendario</button>
+  </form>
+  <details style="margin-top:14px" open>
+    <summary style="cursor:pointer;font-weight:600;font-size:14px">Cómo sacar el enlace en el iPhone</summary>
+    <ol>
+      <li>Abre la app <b>Calendario</b> y pulsa <b>Calendarios</b> (abajo).</li>
+      <li>Pulsa la <b>ⓘ</b> junto al calendario que quieras ver aquí.</li>
+      <li>Activa <b>Calendario público</b> y pulsa <b>Compartir enlace… → Copiar</b>.</li>
+      <li>Pega el enlace aquí arriba y pulsa «Añadir calendario».</li>
+    </ol>
+    <p class="sub">Solo funciona con calendarios de iCloud. Los que pone «En mi iPhone» no se pueden compartir. También vale la «dirección secreta en formato iCal» de Google Calendar. El enlace público lo puede ver quien lo tenga, así que no lo compartas.</p>
+  </details>
+  <div class="dr"><button type="button" id="extRefresh" class="ghost" style="margin-right:auto">Actualizar ahora</button><button type="button" id="extClose">Cerrar</button></div>
+</dialog>
+
+<dialog id="pwDlg">
+  <form id="pwForm">
+    <h3>Cambiar contraseña</h3>
+    <label for="pw1">Contraseña nueva</label><input type="password" id="pw1" autocomplete="new-password" minlength="6" required style="width:100%">
+    <label for="pw2">Repítela</label><input type="password" id="pw2" autocomplete="new-password" minlength="6" required style="width:100%">
+    <div class="msg" id="pwMsg" hidden style="margin-top:12px"></div>
+    <div class="dr"><button type="button" id="pwCancel">Cancelar</button><button class="primary" type="submit" id="pwSave">Guardar</button></div>
+  </form>
 </dialog>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -509,7 +551,9 @@ function projOptions(cur, all) {
 }
 const errText = e => {
   const m = String(e?.message || e || '');
-  if (/Invalid login credentials/i.test(m)) return 'Correo o contraseña incorrectos.';
+  if (/Invalid login credentials/i.test(m)) return 'Usuario o contraseña incorrectos.';
+  if (/already registered|already been registered|already exists/i.test(m)) return 'Ese nombre de usuario ya está cogido. Prueba otro, o entra si es tuyo.';
+  if (/Email not confirmed/i.test(m)) return 'Esta cuenta está pendiente de confirmar. Hay que desactivar «Confirm email» en Supabase (Authentication → Sign In / Providers → Email).';
   if (/Email not confirmed/i.test(m)) return 'Aún no has confirmado tu correo. Abre el enlace que te enviamos al registrarte.';
   if (/already registered|already been registered/i.test(m)) return 'Ya existe una cuenta con ese correo. Entra con tu contraseña.';
   if (/Password should be at least/i.test(m)) return 'La contraseña tiene que tener al menos 6 caracteres.';
@@ -522,14 +566,20 @@ const errText = e => {
 };
 
 // ======================= Inicio de sesión =======================
+// Las cuentas con nombre de usuario se guardan con un correo interno que nunca recibe mensajes
+const USER_DOMAIN = 'usuarios.luciavls.github.io';
+const USER_RE = /^[a-z0-9][a-z0-9._-]{2,29}$/;
+const userToEmail = u => `${u}@${USER_DOMAIN}`;
+const displayName = u => (u?.email || '').endsWith('@' + USER_DOMAIN) ? u.email.split('@')[0] : (u?.email || '');
+const isUsernameAccount = u => (u?.email || '').endsWith('@' + USER_DOMAIN);
 let aMode = 'login';
 function showAuth(mode, msg, ok) {
   aMode = mode;
   $('appView').hidden = true; $('authView').hidden = false;
   const T = {
     login:   ['Entra en tus tareas', 'Tu lista, tus archivos y tus fechas, en cualquier dispositivo.', 'Entrar', '¿No tienes cuenta? Crear una'],
-    signup:  ['Crea tu cuenta', 'Cada cuenta tiene su propia lista. Nadie más puede ver tus tareas.', 'Crear cuenta', '¿Ya tienes cuenta? Entrar'],
-    reset:   ['Recupera tu contraseña', 'Te enviaremos un enlace a tu correo para poner una nueva.', 'Enviar enlace', 'Volver a entrar'],
+    signup:  ['Crea tu cuenta', 'Elige un nombre de usuario y una contraseña. Nadie más puede ver tus tareas.', 'Crear cuenta', '¿Ya tienes cuenta? Entrar'],
+    reset:   ['Recupera tu contraseña', 'Si tu cuenta usa un correo, te enviaremos un enlace para poner una nueva.', 'Enviar enlace', 'Volver a entrar'],
     newpass: ['Pon una contraseña nueva', 'Elige una contraseña de al menos 6 caracteres.', 'Guardar contraseña', 'Volver a entrar'],
   }[mode];
   $('aTitle').textContent = T[0]; $('aSub').textContent = T[1]; $('aBtn').textContent = T[2]; $('aSwitch').textContent = T[3];
@@ -538,6 +588,8 @@ function showAuth(mode, msg, ok) {
   $('aForgot').hidden = mode !== 'login';
   $('aPass').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
   $('aPass').value = '';
+  $('aUserLbl').textContent = mode === 'reset' ? 'Correo de tu cuenta' : mode === 'login' ? 'Usuario (o correo)' : 'Usuario';
+  $('aEmail').placeholder = mode === 'signup' ? 'p. ej. lucia' : '';
   setAuthMsg(msg, ok);
   (mode === 'newpass' ? $('aPass') : $('aEmail')).focus();
 }
@@ -547,8 +599,13 @@ $('aForgot').onclick = () => showAuth('reset');
 $('aForm').onsubmit = async e => {
   e.preventDefault();
   if (!sb) return;
-  const email = $('aEmail').value.trim(), pass = $('aPass').value;
-  if (aMode !== 'newpass' && !/^\S+@\S+\.\S+$/.test(email)) { setAuthMsg('Escribe tu correo.'); $('aEmail').focus(); return; }
+  const login = $('aEmail').value.trim().toLowerCase(), pass = $('aPass').value;
+  const isMail = login.includes('@');
+  if (aMode === 'reset' && !isMail) { setAuthMsg('Las cuentas con nombre de usuario no tienen correo, así que no se puede enviar un enlace. Si recuerdas la contraseña, entra y cámbiala desde Ajustes → Cambiar contraseña. Si no, pide a quien administra la web que te la restablezca.'); return; }
+  if (aMode === 'reset' && !/^\S+@\S+\.\S+$/.test(login)) { setAuthMsg('Escribe el correo de tu cuenta.'); $('aEmail').focus(); return; }
+  if ((aMode === 'login' || aMode === 'signup') && !isMail && !USER_RE.test(login)) { setAuthMsg(login ? 'El usuario solo puede tener letras sin tilde, números, puntos, guiones y guiones bajos (3 a 30 caracteres).' : 'Escribe tu usuario.'); $('aEmail').focus(); return; }
+  if (aMode === 'signup' && isMail) { setAuthMsg('Escribe un nombre de usuario, sin @.'); $('aEmail').focus(); return; }
+  const email = isMail ? login : userToEmail(login);
   if (aMode !== 'reset' && pass.length < 6) { setAuthMsg('La contraseña tiene que tener al menos 6 caracteres.'); $('aPass').focus(); return; }
   $('aBtn').disabled = true; setAuthMsg('');
   const redirect = location.origin + location.pathname;
@@ -557,7 +614,7 @@ $('aForm').onsubmit = async e => {
       const { error } = await sb.auth.signInWithPassword({ email, password:pass }); if (error) throw error;
     } else if (aMode === 'signup') {
       const { data, error } = await sb.auth.signUp({ email, password:pass, options:{ emailRedirectTo:redirect } }); if (error) throw error;
-      if (!data.session) showAuth('login', `Te hemos enviado un correo a ${email}. Abre el enlace para confirmar tu cuenta y después entra aquí.`, true);
+      if (!data.session) showAuth('login', 'La cuenta se ha creado, pero el servidor pide confirmar el correo. Hay que desactivar «Confirm email» en Supabase (Authentication → Sign In / Providers → Email) para usar nombres de usuario.');
     } else if (aMode === 'reset') {
       const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo:redirect }); if (error) throw error;
       showAuth('login', `Si hay una cuenta con ${email}, te llegará un correo con el enlace para cambiar la contraseña.`, true);
@@ -723,7 +780,7 @@ function renderSide() {
   const range = w.mon.getMonth() === w.sun.getMonth() ? `${w.mon.getDate()} – ${w.sun.getDate()} ${MSHORT[w.sun.getMonth()]}.` : `${w.mon.getDate()} ${MSHORT[w.mon.getMonth()]}. – ${w.sun.getDate()} ${MSHORT[w.sun.getMonth()]}.`;
   $('prog').innerHTML = `<div class="bar"><div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${w.pct ?? 0}" aria-label="Tareas de esta semana completadas"><div class="fill" style="width:${w.pct ?? 0}%"></div></div>${w.pct === null ? '—' : w.pct + '%'}</div>
     <small>Semana del ${range} · ${w.done} de ${w.inWeek.length} hechas</small>`;
-  $('who').textContent = user ? user.email : '';
+  $('who').textContent = user ? displayName(user) : '';
   const bell = open.filter(t => isLate(t) || t.due === t0).length;
   $('bellN').hidden = !bell; $('bellN').textContent = bell;
   document.querySelectorAll('[data-view]').forEach(a => a.setAttribute('aria-current', a.dataset.view === view ? 'page' : 'false'));
@@ -793,11 +850,14 @@ function renderCal() {
   for (const k in byDay) byDay[k].sort((a,b) => (a.state === 'done') - (b.state === 'done') || a.created - b.created);
   const t0 = today(), sk = ymd(sel);
   let title, body = '';
+  const gridStart = calMode === 'month' ? monday(new Date(sel.getFullYear(), sel.getMonth(), 1)) : calMode === 'week' ? monday(sel) : parse(sk);
+  const extDay = extByDay(gridStart, addDays(gridStart, calMode === 'month' ? 42 : calMode === 'week' ? 7 : 1));
+  ensureExt();
   const cell = (d, out, max) => {
-    const k = ymd(d), list = byDay[k] || [];
-    const shown = list.slice(0, max), more = list.length - shown.length;
-    return `<div class="cell ${out ? 'out' : ''} ${k === t0 ? 'today' : ''} ${k === sk ? 'sel' : ''}" data-act="pick" data-day="${k}" data-dropday="${k}" role="button" tabindex="0" aria-label="${d.getDate()} de ${MONTHS[d.getMonth()]}, ${list.length} tareas">
-      <span class="n">${d.getDate()}</span><div class="evs">${shown.map(evChip).join('')}</div>${more > 0 ? `<span class="more">+${more} más</span>` : ''}</div>`;
+    const k = ymd(d), list = byDay[k] || [], ex = extDay[k] || [];
+    const shown = list.slice(0, max), exShown = ex.slice(0, Math.max(0, max - shown.length)), more = list.length + ex.length - shown.length - exShown.length;
+    return `<div class="cell ${out ? 'out' : ''} ${k === t0 ? 'today' : ''} ${k === sk ? 'sel' : ''}" data-act="pick" data-day="${k}" data-dropday="${k}" role="button" tabindex="0" aria-label="${d.getDate()} de ${MONTHS[d.getMonth()]}, ${list.length} tareas${ex.length ? `, ${ex.length} eventos` : ''}">
+      <span class="n">${d.getDate()}</span><div class="evs">${shown.map(evChip).join('')}${exShown.map(extChip).join('')}</div>${more > 0 ? `<span class="more">+${more} más</span>` : ''}</div>`;
   };
   if (calMode === 'month') {
     title = `${cap(MONTHS[sel.getMonth()])} ${sel.getFullYear()}`;
@@ -823,6 +883,7 @@ function renderCal() {
   const panel = `<aside class="card side-panel">
     <h3>${fmtLong(sel)}</h3><div class="sub">${dayList.length} tarea${dayList.length === 1 ? '' : 's'}</div>
     ${dayList.map(item).join('') || '<div class="sub" style="border-top:1px solid var(--line);padding-top:12px">Nada este día.</div>'}
+    ${(extDay[sk] || []).length ? `<div class="grp">Del iPhone · ${extDay[sk].length}</div>${extDay[sk].map(extItem).join('')}` : ''}
     ${lateList.length ? `<div class="grp warn">Vencidas · ${lateList.length}</div>${lateList.map(item).join('')}` : ''}
     ${nodate.length ? `<div class="grp">Sin fecha · ${nodate.length}</div>${nodate.map(item).join('')}` : ''}
     <button class="addday" data-act="newOn" data-day="${sk}">+ Añadir tarea este día</button></aside>`;
@@ -831,7 +892,7 @@ function renderCal() {
       <div class="navbtns"><button data-act="calPrev" aria-label="Anterior">‹</button><button data-act="calToday">Hoy</button><button data-act="calNext" aria-label="Siguiente">›</button></div>
       <h2>${title}</h2>
       ${projSelect()}
-      <button data-act="ical" title="Ver tus tareas en el Calendario del iPhone">📱 iPhone</button>
+      <button data-act="ext" title="Ver aquí los eventos de tu iPhone">📱 iPhone</button>
       <div class="seg">${[['month','Mes'],['week','Semana'],['day','Día']].map(([k,n]) => `<button data-act="calMode" data-v="${k}" aria-pressed="${calMode===k}">${n}</button>`).join('')}</div>
     </div>
     <div class="calwrap" ${calMode === 'day' ? 'style="grid-template-columns:minmax(0,640px)"' : ''}>${calMode !== 'day' ? `<div class="card cal">${body}</div>` : ''}${panel}</div>`;
@@ -1036,7 +1097,9 @@ document.addEventListener('click', async e => {
     case 'seeDone': listFilter = 'done'; go('lista'); break;
     case 'export': closePops(); exportCopy(); break;
     case 'import': closePops(); $('impf').click(); break;
-    case 'ical': closePops(); openIcal(); break;
+    case 'ext': closePops(); openExt(); break;
+    case 'pw': closePops(); openPw(); break;
+    case 'extdel': deleteExt(id); break;
     case 'dark': toggleDark(); break;
     case 'logout': closePops(); await sb.auth.signOut(); break;
     case 'bellItem': closePops(); if (t) openDlg(t); break;
@@ -1161,31 +1224,203 @@ $('form').onsubmit = async e => {
   }
 };
 
-// ======================= Calendario del iPhone =======================
-const icalUrl = tok => `webcal://${window.SUPABASE_URL.replace(/^https?:\/\//, '')}/rest/v1/rpc/calendario?token=${tok}&apikey=${window.SUPABASE_ANON_KEY}`;
-function setIcal(tok, msg) {
-  $('icalMsg').hidden = !msg; $('icalMsg').textContent = msg || '';
-  $('icalUrl').value = tok ? icalUrl(tok) : ''; $('icalOpen').href = tok ? icalUrl(tok) : '#';
-  $('icalOpen').style.pointerEvents = tok ? '' : 'none'; $('icalOpen').style.opacity = tok ? '' : '.5';
+// ======================= Calendarios del iPhone (iCloud) =======================
+let extCals = [], extData = {}, extLoading = false;
+const hhmm = d => String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+const extErr = e => /external_calendars|leer_calendario|does not exist|schema cache|http_get|http_response/i.test(e?.message || '') ? 'Falta preparar la base de datos: ejecuta el script SQL nuevo en Supabase.' : errText(e);
+
+// --- Lectura del formato iCalendar (.ics) ---
+function icsDate(v, params) {
+  const m = String(v).match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?(Z)?)?/);
+  if (!m) return null;
+  const allDay = !m[4] || /VALUE=DATE(?!-)/i.test(params || '');
+  if (allDay) return { d:new Date(+m[1], m[2]-1, +m[3]), allDay:true };
+  const a = [+m[1], m[2]-1, +m[3], +m[4], +m[5], +(m[6] || 0)];
+  return { d:m[7] ? new Date(Date.UTC(...a)) : new Date(...a), allDay:false };
 }
-const icalErr = e => /calendar_tokens|does not exist|schema cache/i.test(e?.message || '') ? 'Falta preparar la base de datos: ejecuta el script SQL nuevo en Supabase.' : 'No se pudo crear el enlace: ' + errText(e);
-async function openIcal() {
-  setIcal(null); $('icalUrl').value = 'Creando tu enlace…'; $('icalDlg').showModal();
-  let { data, error } = await sb.from('calendar_tokens').select('token').maybeSingle();
-  if (!error && !data) ({ data, error } = await sb.from('calendar_tokens').insert({}).select('token').single());
-  if (error) return setIcal(null, icalErr(error));
-  setIcal(data.token);
+const icsText = v => String(v || '').replace(/\\n/gi, '\n').replace(/\\([,;\\])/g, '$1');
+function parseICS(text) {
+  const lines = String(text).replace(/\r?\n[ \t]/g, '').split(/\r?\n/);
+  const evs = [], overrides = [];
+  let cur = null, depth = 0;
+  for (const line of lines) {
+    if (line === 'BEGIN:VEVENT') { cur = { exdates:[] }; depth = 0; continue; }
+    if (!cur) continue;
+    if (/^BEGIN:/.test(line)) { depth++; continue; }
+    if (/^END:/.test(line) && line !== 'END:VEVENT') { depth--; continue; }
+    if (line === 'END:VEVENT') {
+      if (cur.start && cur.status !== 'CANCELLED') (cur.recId ? overrides : evs).push(cur);
+      cur = null; continue;
+    }
+    if (depth > 0) continue;
+    const c = line.indexOf(':'); if (c < 0) continue;
+    const head = line.slice(0, c), val = line.slice(c + 1), [name, ...ps] = head.split(';'), params = ps.join(';');
+    switch (name.toUpperCase()) {
+      case 'UID': cur.uid = val; break;
+      case 'SUMMARY': cur.title = icsText(val); break;
+      case 'LOCATION': cur.loc = icsText(val); break;
+      case 'STATUS': cur.status = val.toUpperCase(); break;
+      case 'DTSTART': { const x = icsDate(val, params); if (x) { cur.start = x.d; cur.allDay = x.allDay; } break; }
+      case 'DTEND': { const x = icsDate(val, params); if (x) cur.end = x.d; break; }
+      case 'DURATION': cur.dur = val; break;
+      case 'RRULE': cur.rrule = Object.fromEntries(val.split(';').map(kv => kv.split('='))); break;
+      case 'EXDATE': for (const v of val.split(',')) { const x = icsDate(v, params); if (x) cur.exdates.push(x.d.getTime()); } break;
+      case 'RECURRENCE-ID': { const x = icsDate(val, params); if (x) cur.recId = x.d.getTime(); break; }
+    }
+  }
+  for (const e of [...evs, ...overrides]) {
+    if (!e.end && e.dur) {
+      const m = e.dur.match(/P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?/) || [];
+      e.end = new Date(e.start.getTime() + (((+m[1]||0)*7 + (+m[2]||0)) * 864e5) + (+m[3]||0) * 36e5 + (+m[4]||0) * 6e4);
+    }
+    if (!e.end) e.end = e.allDay ? addDays(e.start, 1) : new Date(e.start.getTime() + 36e5);
+    e.len = e.end - e.start;
+  }
+  // Las ocurrencias modificadas sustituyen a la original
+  for (const o of overrides) { const base = evs.find(e => e.uid === o.uid); if (base) base.exdates.push(o.recId); }
+  return [...evs, ...overrides.map(o => ({ ...o, rrule:null }))];
 }
-$('icalClose').onclick = () => $('icalDlg').close();
-$('icalCopy').onclick = async () => {
-  try { await navigator.clipboard.writeText($('icalUrl').value); toast('Enlace copiado.'); }
-  catch { $('icalUrl').select(); toast('Selecciona el enlace y cópialo.'); }
+const WD = { MO:1, TU:2, WE:3, TH:4, FR:5, SA:6, SU:0 };
+function occurrences(e, from, to) {
+  if (!e.rrule) return e.end > from && e.start < to ? [e.start] : [];
+  const r = e.rrule, freq = r.FREQ, iv = Math.max(1, +r.INTERVAL || 1), count = +r.COUNT || Infinity;
+  const until = r.UNTIL ? icsDate(r.UNTIL).d : null;
+  const byday = r.BYDAY ? r.BYDAY.split(',').map(x => x.match(/^([+-]?\d+)?([A-Z]{2})$/)).filter(Boolean).map(m => ({ n:m[1] ? +m[1] : 0, wd:WD[m[2]] })) : null;
+  const bymd = r.BYMONTHDAY ? r.BYMONTHDAY.split(',').map(Number) : null;
+  const out = [], ex = new Set(e.exdates), s = e.start;
+  const at = (y, mo, d) => new Date(y, mo, d, s.getHours(), s.getMinutes(), s.getSeconds());
+  let n = 0, guard = 0;
+  const push = d => {
+    if (d < s) return true;
+    if ((until && d > until) || n >= count) return false;
+    n++;
+    if (!ex.has(d.getTime()) && d.getTime() + e.len > from.getTime() && d < to) out.push(d);
+    return d < to;
+  };
+  if (freq === 'DAILY') {
+    for (let d = new Date(s); guard++ < 5000; d = addDays(d, iv)) if (!push(at(d.getFullYear(), d.getMonth(), d.getDate()))) break;
+  } else if (freq === 'WEEKLY') {
+    const days = byday ? byday.map(b => b.wd) : [s.getDay()];
+    const wk0 = addDays(new Date(s.getFullYear(), s.getMonth(), s.getDate()), -((s.getDay() + 6) % 7));
+    outer: for (let w = 0; guard++ < 3000; w += iv) {
+      const ws = addDays(wk0, w * 7);
+      for (const wd of [...days].sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7))) {
+        const d = addDays(ws, (wd + 6) % 7);
+        if (!push(at(d.getFullYear(), d.getMonth(), d.getDate()))) break outer;
+      }
+    }
+  } else if (freq === 'MONTHLY' || freq === 'YEARLY') {
+    const step = freq === 'YEARLY' ? 12 * iv : iv;
+    outer2: for (let k = 0; guard++ < 1200; k += step) {
+      const y = s.getFullYear() + Math.floor((s.getMonth() + k) / 12), mo = (s.getMonth() + k) % 12;
+      const dim = new Date(y, mo + 1, 0).getDate();
+      let ds = [];
+      if (byday && freq === 'MONTHLY') {
+        for (const b of byday) {
+          const all = []; for (let d = 1; d <= dim; d++) if (new Date(y, mo, d).getDay() === b.wd) all.push(d);
+          if (!b.n) ds.push(...all); else { const v = b.n > 0 ? all[b.n - 1] : all[all.length + b.n]; if (v) ds.push(v); }
+        }
+      } else if (bymd) ds = bymd.map(d => d < 0 ? dim + d + 1 : d).filter(d => d >= 1 && d <= dim);
+      else if (s.getDate() <= dim) ds = [s.getDate()];
+      for (const d of ds.sort((a, b) => a - b)) if (!push(at(y, mo, d))) break outer2;
+    }
+  }
+  return out;
+}
+function extByDay(from, to) {
+  const res = {};
+  for (const c of extCals) for (const e of extData[c.id]?.events || []) {
+    for (const st of occurrences(e, from, to)) {
+      const en = new Date(st.getTime() + e.len);
+      const o = { title:e.title || '(Sin título)', loc:e.loc, allDay:e.allDay, start:st, end:en, color:c.color, cal:c.name };
+      let d = new Date(st.getFullYear(), st.getMonth(), st.getDate());
+      const last = e.allDay ? addDays(en, -1) : en;
+      for (let g = 0; d <= last && g < 60; d = addDays(d, 1), g++) { if (d >= from && d < to) (res[ymd(d)] ||= []).push(o); if (!e.allDay && g === 0 && en - st <= 864e5) break; }
+    }
+  }
+  for (const k in res) res[k].sort((a, b) => (b.allDay - a.allDay) || a.start - b.start);
+  return res;
+}
+const extChip = o => `<div class="ev ext" style="--pc:${esc(o.color)}" title="${esc(o.title)}${o.loc ? ' · ' + esc(o.loc) : ''} · ${esc(o.cal)}">${o.allDay ? '<i class="dot"></i>' : `<b>${hhmm(o.start)}</b>`}<span>${esc(o.title)}</span></div>`;
+const extItem = o => `<div class="extitem" style="--pc:${esc(o.color)}"><span class="bar"></span><div><div class="ti">${esc(o.title)}</div>
+  <div class="meta">${o.allDay ? 'Todo el día' : `${hhmm(o.start)} – ${hhmm(o.end)}`}${o.loc ? ' · ' + esc(o.loc) : ''} · ${esc(o.cal)}</div></div></div>`;
+
+async function loadExtCals() {
+  const { data, error } = await sb.from('external_calendars').select('*').order('created_at');
+  if (error) { extCals = []; return error; }
+  extCals = data; return null;
+}
+async function fetchExt(c, force) {
+  const cache = extData[c.id];
+  if (!force && cache && Date.now() - cache.at < 10 * 6e4) return;
+  const { data, error } = await sb.rpc('leer_calendario', { cal:c.id });
+  if (error) extData[c.id] = { at:Date.now(), events:cache?.events || [], error:extErr(error) };
+  else { try { extData[c.id] = { at:Date.now(), events:parseICS(data) }; } catch { extData[c.id] = { at:Date.now(), events:[], error:'No se pudo leer el calendario.' }; } }
+}
+let extLoaded = false;
+async function ensureExt(force) {
+  if (extLoading || !user) return;
+  if (!force && extLoaded && extCals.every(c => extData[c.id] && Date.now() - extData[c.id].at < 10 * 6e4)) return;
+  extLoading = true;
+  try {
+    if (!extLoaded || force) { await loadExtCals(); extLoaded = true; }
+    await Promise.all(extCals.map(c => fetchExt(c, force)));
+  } finally { extLoading = false; }
+  if (view === 'calendario') render();
+  if (!$('extDlg').hidden && $('extDlg').open) drawExt();
+}
+function drawExt(msg) {
+  $('extList').innerHTML = (msg ? `<div class="msg">${esc(msg)}</div>` : '') + (extCals.map(c => {
+    const d = extData[c.id];
+    const st = !d ? 'Cargando…' : d.error ? `<small class="err">${esc(d.error)}</small>` : `<small>${d.events.length} evento${d.events.length === 1 ? '' : 's'} · actualizado a las ${hhmm(new Date(d.at))}</small>`;
+    return `<div class="extrow"><span class="dot" style="--pc:${esc(c.color)};width:12px;height:12px"></span><div class="n">${esc(c.name)}${st.startsWith('<') ? st : `<small>${st}</small>`}</div><button data-act="extdel" data-id="${c.id}">Quitar</button></div>`;
+  }).join('') || '<p class="sub" style="margin:6px 0">Aún no has añadido ningún calendario.</p>');
+}
+async function openExt() {
+  $('extDlg').showModal(); drawExt();
+  const err = await loadExtCals(); extLoaded = true;
+  if (err) return drawExt(extErr(err));
+  drawExt(); await Promise.all(extCals.map(c => fetchExt(c))); drawExt();
+}
+$('extForm').onsubmit = async e => {
+  e.preventDefault();
+  let url = $('extUrl').value.trim();
+  if (!/^(webcals?|https?):\/\//i.test(url)) { drawExt('Pega el enlace completo: empieza por webcal:// o https://'); return; }
+  url = url.replace(/^webcals?:\/\//i, 'https://').replace(/^http:\/\//i, 'https://');
+  const name = $('extName').value.trim() || 'iPhone', color = (document.querySelector('input[name=extColor]:checked') || {}).value || '#8e8e93';
+  $('extAdd').disabled = true;
+  const { data, error } = await sb.from('external_calendars').insert({ name, url, color }).select().single();
+  $('extAdd').disabled = false;
+  if (error) return drawExt(extErr(error));
+  extCals.push(data); $('extUrl').value = ''; $('extName').value = ''; drawExt();
+  await fetchExt(data, true); drawExt();
+  if (extData[data.id]?.error) return;
+  toast(`«${name}» añadido: ${extData[data.id].events.length} eventos.`); render();
 };
-$('icalRegen').onclick = async () => {
-  if (!await ask('¿Cambiar el enlace?', 'El enlace actual dejará de funcionar. Tendrás que volver a añadir el calendario en el iPhone (y borrar el antiguo).', 'Cambiar enlace')) return;
-  const { data, error } = await sb.from('calendar_tokens').update({ token:newId() }).eq('user_id', user.id).select('token').single();
-  if (error) return setIcal(null, icalErr(error));
-  setIcal(data.token); toast('Enlace nuevo creado.');
+async function deleteExt(id) {
+  const c = extCals.find(x => x.id === id); if (!c) return;
+  if (!await ask('¿Quitar este calendario?', `Los eventos de «${c.name}» dejarán de verse aquí. En el iPhone no se borra nada.`, 'Quitar')) return;
+  const { error } = await sb.from('external_calendars').delete().eq('id', id);
+  if (error) return drawExt(extErr(error));
+  extCals = extCals.filter(x => x.id !== id); delete extData[id]; drawExt(); render();
+}
+$('extRefresh').onclick = async () => { $('extRefresh').disabled = true; await ensureExt(true); drawExt(); $('extRefresh').disabled = false; };
+$('extClose').onclick = () => $('extDlg').close();
+
+// ======================= Cambiar contraseña =======================
+function openPw() { $('pw1').value = $('pw2').value = ''; $('pwMsg').hidden = true; $('pwSave').disabled = false; $('pwDlg').showModal(); $('pw1').focus(); }
+$('pwCancel').onclick = () => $('pwDlg').close();
+$('pwForm').onsubmit = async e => {
+  e.preventDefault();
+  const a = $('pw1').value, b = $('pw2').value, m = $('pwMsg');
+  const say = t => { m.hidden = false; m.textContent = t; };
+  if (a.length < 6) return say('La contraseña tiene que tener al menos 6 caracteres.');
+  if (a !== b) return say('Las dos contraseñas no coinciden.');
+  $('pwSave').disabled = true;
+  const { error } = await sb.auth.updateUser({ password:a });
+  $('pwSave').disabled = false;
+  if (error) return say(/different from the old/i.test(error.message) ? 'La contraseña nueva tiene que ser distinta de la actual.' : errText(error));
+  $('pwDlg').close(); toast('Contraseña cambiada.');
 };
 
 // ======================= Copia de seguridad =======================
@@ -1239,7 +1474,7 @@ $('impf').onchange = async e => {
 // ======================= Arranque =======================
 function enterApp(u) {
   if (user && u && user.id === u.id && !$('appView').hidden) return;
-  user = u; loaded = false; tasks = []; general = [];
+  user = u; loaded = false; tasks = []; general = []; extCals = []; extData = {}; extLoaded = false;
   $('authView').hidden = true; $('appView').hidden = false;
   const h = location.hash.slice(1); view = VIEWS.includes(h) ? h : 'lista';
   render(); loadAll();
