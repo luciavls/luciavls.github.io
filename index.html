@@ -1329,9 +1329,12 @@ function occurrences(e, from, to) {
   return out;
 }
 function extByDay(from, to) {
-  const res = {};
+  const res = {}, seen = new Set();
   for (const c of extCals) for (const e of extData[c.id]?.events || []) {
     for (const st of occurrences(e, from, to)) {
+      // El mismo evento en dos calendarios (o el mismo calendario añadido dos veces) se muestra una sola vez
+      const key = (e.uid || e.title) + '|' + st.getTime();
+      if (seen.has(key)) continue; seen.add(key);
       const en = new Date(st.getTime() + e.len);
       const o = { title:e.title || '(Sin título)', loc:e.loc, allDay:e.allDay, start:st, end:en, color:c.color, cal:c.name };
       let d = new Date(st.getFullYear(), st.getMonth(), st.getDate());
@@ -1388,6 +1391,9 @@ $('extForm').onsubmit = async e => {
   let url = $('extUrl').value.trim();
   if (!/^(webcals?|https?):\/\//i.test(url)) { drawExt('Pega el enlace completo: empieza por webcal:// o https://'); return; }
   url = url.replace(/^webcals?:\/\//i, 'https://').replace(/^http:\/\//i, 'https://');
+  const norm = u => String(u).trim().replace(/^[a-z]+:\/\//i, '').replace(/\/+$/, '').toLowerCase();
+  const dup = extCals.find(c => norm(c.url) === norm(url));
+  if (dup) { drawExt(`Ese calendario ya está añadido como «${dup.name}».`); return; }
   const name = $('extName').value.trim() || 'iPhone', color = (document.querySelector('input[name=extColor]:checked') || {}).value || '#1d8fe0';
   $('extAdd').disabled = true;
   const { data, error } = await sb.from('external_calendars').insert({ name, url, color }).select().single();
