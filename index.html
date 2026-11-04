@@ -1025,7 +1025,6 @@ function renderCal() {
       <div class="navbtns"><button data-act="calPrev" aria-label="Anterior">‹</button><button data-act="calToday">Hoy</button><button data-act="calNext" aria-label="Siguiente">›</button></div>
       <h2>${title}</h2>
       ${projSelect()}
-      <button data-act="ext" title="Ver aquí los eventos de tu iPhone">📱 iPhone</button>
       <div class="seg">${[['month','Mes'],['week','Semana'],['day','Día']].map(([k,n]) => `<button data-act="calMode" data-v="${k}" aria-pressed="${calMode===k}">${n}</button>`).join('')}</div>
     </div>
     <div class="calwrap" ${calMode === 'day' ? 'style="grid-template-columns:minmax(0,640px)"' : ''}>${calMode !== 'day' ? `<div class="card cal">${body}</div>` : ''}${panel}</div>`;
