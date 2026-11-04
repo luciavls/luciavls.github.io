@@ -307,6 +307,10 @@
   .extrow .n { flex:1; min-width:0; }
   .extrow small { display:block; color:var(--mute); font-size:12px; word-break:break-all; }
   .extrow small.err { color:var(--late); }
+  .extrow { flex-wrap:wrap; }
+  .rowsw { display:flex; gap:6px; align-items:center; }
+  .rowsw button { width:22px; height:22px; padding:0; border-radius:50%; border:0; background:var(--sw); box-shadow:inset 0 0 0 2px rgba(0,0,0,.08); }
+  .rowsw button[aria-pressed="true"] { box-shadow:0 0 0 2px var(--card), 0 0 0 4px var(--sw); }
   .extform { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; margin-top:12px; }
   .extform input[type=url] { grid-column:1 / -1; }
   .swatches { display:flex; gap:6px; align-items:center; }
@@ -1101,6 +1105,7 @@ document.addEventListener('click', async e => {
     case 'ext': closePops(); openExt(); break;
     case 'pw': closePops(); openPw(); break;
     case 'extdel': deleteExt(id); break;
+    case 'extcolor': setExtColor(id, el.dataset.color); break;
     case 'dark': toggleDark(); break;
     case 'logout': closePops(); await sb.auth.signOut(); break;
     case 'bellItem': closePops(); if (t) openDlg(t); break;
@@ -1373,11 +1378,19 @@ async function ensureExt(force) {
   if (view === 'calendario') render();
   if (!$('extDlg').hidden && $('extDlg').open) drawExt();
 }
+const EXT_COLORS = [['#1d8fe0','azul'],['#9c4fd0','morado'],['#2e9e4f','verde'],['#e34948','rojo'],['#8e8e93','gris']];
+async function setExtColor(id, color) {
+  const c = extCals.find(x => x.id === id); if (!c || c.color === color) return;
+  const old = c.color; c.color = color; drawExt(); render();
+  const { error } = await sb.from('external_calendars').update({ color }).eq('id', id);
+  if (error) { c.color = old; drawExt(extErr(error)); render(); }
+}
 function drawExt(msg) {
   $('extList').innerHTML = (msg ? `<div class="msg">${esc(msg)}</div>` : '') + (extCals.map(c => {
     const d = extData[c.id];
     const st = !d ? 'Cargando…' : d.error ? `<small class="err">${esc(d.error)}</small>` : `<small>${d.events.length} evento${d.events.length === 1 ? '' : 's'} · actualizado a las ${hhmm(new Date(d.at))}</small>`;
-    return `<div class="extrow"><span class="dot" style="--pc:${esc(c.color)};width:12px;height:12px"></span><div class="n">${esc(c.name)}${st.startsWith('<') ? st : `<small>${st}</small>`}</div><button data-act="extdel" data-id="${c.id}">Quitar</button></div>`;
+    const sw = EXT_COLORS.map(([hex, n]) => `<button type="button" data-act="extcolor" data-id="${c.id}" data-color="${hex}" style="--sw:${hex}" title="${n}" aria-label="Color ${n}" aria-pressed="${c.color.toLowerCase() === hex}"></button>`).join('');
+    return `<div class="extrow"><span class="dot" style="--pc:${esc(c.color)};width:12px;height:12px"></span><div class="n">${esc(c.name)}${st.startsWith('<') ? st : `<small>${st}</small>`}</div><div class="rowsw" role="group" aria-label="Color de ${esc(c.name)}">${sw}</div><button data-act="extdel" data-id="${c.id}">Quitar</button></div>`;
   }).join('') || '<p class="sub" style="margin:6px 0">Aún no has añadido ningún calendario.</p>');
 }
 async function openExt() {
