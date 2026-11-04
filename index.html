@@ -21,7 +21,7 @@
     --bg:#efefed; --panel:#f7f7f5; --card:#ffffff; --ink:#141414; --ink2:#4a4c52; --mute:#7c7f86; --line:#e3e2df; --line2:#d2d1cd;
     --acc:#ee6a45; --acc-ink:#b8401b; --acc-soft:#fde4da; --on-acc:#141414;
     --late:#d93b3b; --today:#9a9ca1; --week:#f08a3c; --good:#2f9655;
-    --c1:#2a78d6; --c2:#eb6834; --c3:#1baf7a; --c0:#9a9ca1;
+    --c1:#eb6834; --c2:#2e9e4f; --c3:#d49a00; --c0:#9a9ca1; --sv:#2a78d6;
     --shadow:0 1px 2px rgba(20,20,20,.04), 0 8px 24px rgba(20,20,20,.06);
     --scrim:rgba(20,20,20,.45);
     --f-body:"Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -31,12 +31,12 @@
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
     --bg:#111213; --panel:#17181a; --card:#1e1f22; --ink:#f0efec; --ink2:#c3c2bd; --mute:#8d9096; --line:#2b2c30; --line2:#3a3c41;
     --acc-ink:#ff9a78; --acc-soft:#4a2518; --late:#ef6161; --today:#8d9096; --week:#f39a55; --good:#4cbb74;
-    --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c0:#7d8087;
+    --c1:#e0703f; --c2:#3fb563; --c3:#e2ad2a; --c0:#7d8087; --sv:#3987e5;
     --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); --scrim:rgba(0,0,0,.65); color-scheme:dark; } }
   :root[data-theme="dark"] {
     --bg:#111213; --panel:#17181a; --card:#1e1f22; --ink:#f0efec; --ink2:#c3c2bd; --mute:#8d9096; --line:#2b2c30; --line2:#3a3c41;
     --acc-ink:#ff9a78; --acc-soft:#4a2518; --late:#ef6161; --today:#8d9096; --week:#f39a55; --good:#4cbb74;
-    --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c0:#7d8087;
+    --c1:#e0703f; --c2:#3fb563; --c3:#e2ad2a; --c0:#7d8087; --sv:#3987e5;
     --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); --scrim:rgba(0,0,0,.65); color-scheme:dark; }
 
   * { box-sizing:border-box; }
@@ -104,7 +104,7 @@
   .toggle { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 6px; font-size:14px; background:none; border:0; width:100%; }
   .toggle .sw { width:40px; height:22px; border-radius:99px; background:var(--line2); position:relative; transition:background .2s; flex:none; }
   .toggle .sw::after { content:""; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition:transform .2s; }
-  .toggle[aria-checked="true"] .sw { background:var(--c1); }
+  .toggle[aria-checked="true"] .sw { background:var(--sv); }
   .toggle[aria-checked="true"] .sw::after { transform:translateX(18px); }
   .who { font-size:12px; color:var(--mute); padding:0 6px; word-break:break-all; }
 
@@ -124,7 +124,7 @@
   .seg button { border:0; background:transparent; border-radius:9px; padding:6px 14px; }
   .seg button[aria-pressed="true"] { background:var(--card); box-shadow:var(--shadow); font-weight:600; }
   .navbtns { display:inline-flex; border:1px solid var(--line2); border-radius:99px; overflow:hidden; }
-  .navbtns button { border:0; border-radius:0; padding:7px 12px; background:var(--card); color:var(--c1); }
+  .navbtns button { border:0; border-radius:0; padding:7px 12px; background:var(--card); color:var(--acc-ink); }
   .card { background:var(--card); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); }
   .pop { position:absolute; right:0; top:46px; width:320px; max-width:calc(100vw - 32px); padding:8px; z-index:30; text-align:left; }
   .pop h4 { margin:6px 8px 8px; font-size:12px; color:var(--mute); font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
@@ -315,7 +315,7 @@
   .swatches span { display:block; width:22px; height:22px; border-radius:50%; background:var(--sw); cursor:pointer; box-shadow:inset 0 0 0 2px rgba(0,0,0,.08); }
   .swatches input:checked + span { box-shadow:0 0 0 2px var(--card), 0 0 0 4px var(--sw); }
   .swatches input:focus-visible + span { outline:2px solid var(--acc); outline-offset:3px; }
-  .ev.ext { background:transparent; box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--pc) 55%, transparent); cursor:pointer; }
+  .ev.ext { cursor:pointer; }
   .ev.ext b { font-weight:600; font-variant-numeric:tabular-nums; flex:none; }
   .extitem { display:grid; grid-template-columns:22px minmax(0,1fr); gap:10px; padding:10px 0; border-top:1px solid var(--line); }
   .extitem .bar { width:4px; border-radius:4px; background:var(--pc); justify-self:center; height:100%; min-height:20px; }
@@ -440,10 +440,11 @@
   <form id="extForm" class="extform">
     <input type="text" id="extName" placeholder="Nombre (p. ej. Personal)" aria-label="Nombre del calendario" autocomplete="off">
     <div class="swatches" role="radiogroup" aria-label="Color">
-      <label><input type="radio" name="extColor" value="#8e8e93" checked><span style="--sw:#8e8e93"></span></label>
-      <label><input type="radio" name="extColor" value="#af52de"><span style="--sw:#af52de"></span></label>
-      <label><input type="radio" name="extColor" value="#e8a400"><span style="--sw:#e8a400"></span></label>
-      <label><input type="radio" name="extColor" value="#e34948"><span style="--sw:#e34948"></span></label>
+      <label title="Azul"><input type="radio" name="extColor" value="#1d8fe0" checked><span style="--sw:#1d8fe0"></span></label>
+      <label title="Morado"><input type="radio" name="extColor" value="#9c4fd0"><span style="--sw:#9c4fd0"></span></label>
+      <label title="Verde"><input type="radio" name="extColor" value="#2e9e4f"><span style="--sw:#2e9e4f"></span></label>
+      <label title="Rojo"><input type="radio" name="extColor" value="#e34948"><span style="--sw:#e34948"></span></label>
+      <label title="Gris"><input type="radio" name="extColor" value="#8e8e93"><span style="--sw:#8e8e93"></span></label>
     </div>
     <input type="url" id="extUrl" placeholder="Pega aquí el enlace (webcal://… o https://…)" aria-label="Enlace del calendario" autocomplete="off" required>
     <button class="primary" type="submit" id="extAdd" style="grid-column:1 / -1">Añadir calendario</button>
@@ -1027,11 +1028,11 @@ function lineChart(b, step) {
   const labIdx = [0, Math.floor((b.length - 1) / 2), b.length - 1].filter((v, i, a) => a.indexOf(v) === i);
   const last = pts[pts.length - 1], hitW = b.length > 1 ? w / (b.length - 1) : w;
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tareas completadas ${step === 7 ? 'por semana' : 'por día'}">
-    <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--c1)" stop-opacity=".22"/><stop offset="1" stop-color="var(--c1)" stop-opacity="0"/></linearGradient></defs>
+    <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--sv)" stop-opacity=".22"/><stop offset="1" stop-color="var(--sv)" stop-opacity="0"/></linearGradient></defs>
     ${[0, max / 2, max].map(v => `<line class="grid-l" x1="${L}" x2="${W-Rt}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`).join('')}
     <path d="${area}" fill="url(#ga)"/>
-    <path d="${line}" fill="none" stroke="var(--c1)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-    <circle cx="${last[0]}" cy="${last[1]}" r="4.5" fill="var(--c1)" stroke="var(--card)" stroke-width="2"/>
+    <path d="${line}" fill="none" stroke="var(--sv)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="4.5" fill="var(--sv)" stroke="var(--card)" stroke-width="2"/>
     ${labIdx.map(i => `<text x="${X(i)}" y="${H-5}" text-anchor="${i === 0 ? 'start' : i === b.length - 1 ? 'end' : 'middle'}">${fmt(ymd(b[i].d))}</text>`).join('')}
     ${b.map((x, i) => `<rect x="${X(i) - hitW/2}" y="${T}" width="${hitW}" height="${h}" fill="transparent" data-tip="${step === 7 ? 'Semana del ' : ''}${fmt(ymd(x.d))}: ${x.n} completada${x.n === 1 ? '' : 's'}"/>`).join('')}
   </svg>`;
@@ -1057,7 +1058,7 @@ function barChart(load) {
     ${load.map((l, i) => {
       const cx = L + w / 7 * (i + .5), x = cx - bw / 2, y = Y(l.n), bh = T + h - y, isT = l.k === t0, r = Math.min(4, bh / 2);
       const path = bh > 0 ? `M${x} ${T+h} V${y + r} Q${x} ${y} ${x + r} ${y} H${x + bw - r} Q${x + bw} ${y} ${x + bw} ${y + r} V${T+h} Z` : '';
-      return `${path ? `<path d="${path}" fill="var(--c1)" opacity="${isT ? 1 : .75}"/>` : ''}
+      return `${path ? `<path d="${path}" fill="var(--sv)" opacity="${isT ? 1 : .75}"/>` : ''}
         ${l.n && l.n === top ? `<text x="${cx}" y="${y - 5}" text-anchor="middle" style="fill:var(--ink);font-weight:600">${l.n}</text>` : ''}
         <text x="${cx}" y="${H-6}" text-anchor="middle" style="${isT ? 'fill:var(--ink);font-weight:700' : ''}">${l.x}</text>
         <rect x="${cx - w/14}" y="${T}" width="${w/7}" height="${h}" fill="transparent" data-tip="${cap(DOWL[i])} ${parse(l.k).getDate()}: ${l.n} tarea${l.n === 1 ? '' : 's'}${l.n ? ` · ${l.done} hecha${l.done === 1 ? '' : 's'}` : ''}"/>`;
@@ -1387,7 +1388,7 @@ $('extForm').onsubmit = async e => {
   let url = $('extUrl').value.trim();
   if (!/^(webcals?|https?):\/\//i.test(url)) { drawExt('Pega el enlace completo: empieza por webcal:// o https://'); return; }
   url = url.replace(/^webcals?:\/\//i, 'https://').replace(/^http:\/\//i, 'https://');
-  const name = $('extName').value.trim() || 'iPhone', color = (document.querySelector('input[name=extColor]:checked') || {}).value || '#8e8e93';
+  const name = $('extName').value.trim() || 'iPhone', color = (document.querySelector('input[name=extColor]:checked') || {}).value || '#1d8fe0';
   $('extAdd').disabled = true;
   const { data, error } = await sb.from('external_calendars').insert({ name, url, color }).select().single();
   $('extAdd').disabled = false;
