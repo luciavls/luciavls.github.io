@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Mis tareas</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#141414">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LV Tareas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -332,6 +341,43 @@
   .extitem .bar { width:4px; border-radius:4px; background:var(--pc); justify-self:center; height:100%; min-height:20px; }
   .extitem .ti { font-size:15px; }
   .extitem .meta { font-size:12px; color:var(--mute); margin-top:3px; }
+  /* ---------- Marca LV y pulido ---------- */
+  .logo { --s:34px; position:relative; flex:none; width:var(--s); height:var(--s); border-radius:calc(var(--s)*.22); background:#141414; overflow:hidden; display:grid; place-items:center;
+          font:800 calc(var(--s)*.46)/1 var(--f-body); letter-spacing:-.06em; color:#fff; }
+  :root[data-theme="dark"] .logo { box-shadow:inset 0 0 0 1px rgba(255,255,255,.14); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .logo { box-shadow:inset 0 0 0 1px rgba(255,255,255,.14); } }
+  .logo span { position:relative; z-index:1; transform:translate(-2%,-4%); }
+  .logo i { position:absolute; right:12%; bottom:12%; width:26%; height:26%; background:var(--acc); }
+  .brand { display:flex; align-items:center; gap:12px; padding:0 6px; }
+  .brand b { display:block; font-size:15px; font-weight:700; letter-spacing:-.01em; }
+  .brand small { display:block; font-size:12px; color:var(--mute); }
+  .auth .logo { --s:76px; margin-bottom:4px; }
+  .row { box-shadow:inset 4px 0 0 var(--pc, transparent); transition:transform .15s, box-shadow .15s; }
+  .row:hover { transform:translateY(-1px); box-shadow:inset 4px 0 0 var(--pc, transparent), var(--shadow); }
+  .row.doing { border-left:1px solid var(--line); }
+  .kcard { transition:transform .15s, box-shadow .15s; }
+  .kcard:hover { transform:translateY(-1px); box-shadow:var(--shadow); }
+  .grid .cell:nth-child(7n), .grid .cell:nth-child(7n-1), .week .cell:nth-child(7n), .week .cell:nth-child(7n-1) { background:var(--panel); }
+  .cell.today { background:color-mix(in srgb, var(--acc) 6%, var(--card)) !important; }
+  .cell:hover { background:color-mix(in srgb, var(--ink) 4%, var(--card)) !important; }
+  @media (prefers-reduced-motion: no-preference) { #content > * { animation:rise .22s ease-out both; } @keyframes rise { from { opacity:.0; transform:translateY(4px); } } }
+  .fab { display:none; }
+  @media (max-width:900px) {
+    .nav { position:fixed; left:0; right:0; bottom:0; z-index:20; display:grid !important; grid-template-columns:repeat(5,1fr); gap:0; border-top:1px solid var(--line); background:color-mix(in srgb, var(--card) 92%, transparent);
+           backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); padding:6px max(4px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px)); overflow:visible; }
+    .nav a { flex-direction:column; gap:3px; padding:6px 2px; font-size:11px; border-radius:10px; justify-content:center; text-align:center; }
+    .nav a svg.i { width:22px; height:22px; }
+    .nav a[aria-current="page"] { background:transparent; }
+    .content { padding-bottom:calc(110px + env(safe-area-inset-bottom, 0px)); }
+    #add { display:none; }
+    .fab { display:grid; place-items:center; position:fixed; right:calc(16px + env(safe-area-inset-right, 0px)); bottom:calc(78px + env(safe-area-inset-bottom, 0px)); z-index:21; width:56px; height:56px; border-radius:50%; font-size:28px; font-weight:400; padding:0; box-shadow:0 6px 20px rgba(238,106,69,.45); }
+    .brand { padding:0; }
+    .bignum { font-size:48px; }
+    .count b { font-size:13px; }
+    .kpis { gap:4px; } .kpi { font-size:13px; }
+    .side { gap:12px; }
+    .toast { bottom:calc(150px + env(safe-area-inset-bottom, 0px)); }
+  }
   @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
 </style>
 </head>
@@ -352,7 +398,7 @@
 <!-- ================= INICIO DE SESIÓN ================= -->
 <main class="auth" id="authView" hidden>
   <div class="auth-card">
-    <div class="bignum">✓<i></i></div>
+    <span class="logo" aria-hidden="true"><i></i><span>LV</span></span>
     <h1 id="aTitle">Entra en tus tareas</h1>
     <p class="sub" id="aSub">Tu lista, tus archivos y tus fechas, en cualquier dispositivo.</p>
     <form id="aForm" novalidate>
@@ -371,6 +417,7 @@
 <!-- ================= APLICACIÓN ================= -->
 <div class="app" id="appView" hidden>
   <aside class="side">
+    <div class="brand"><span class="logo" aria-hidden="true"><i></i><span>LV</span></span><div><b>Mis tareas</b><small id="hello"></small></div></div>
     <div class="sumrow">
       <div class="count"><span class="bignum"><span id="nOpen">00</span><i></i></span><b>Tareas<br>abiertas</b></div>
       <div class="kpis" id="kpis"></div>
@@ -413,6 +460,7 @@
         </div>
       </div>
       <button class="primary" id="add">+ Nueva tarea</button>
+      <button class="primary fab" id="fab" aria-label="Nueva tarea">+</button>
       <input id="impf" type="file" accept=".json,application/json" hidden>
     </header>
     <main class="content" id="content"><div class="empty">Cargando tus tareas…</div></main>
@@ -829,6 +877,8 @@ function renderSide() {
   $('prog').innerHTML = `<div class="bar"><div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${w.pct ?? 0}" aria-label="Tareas de esta semana completadas"><div class="fill" style="width:${w.pct ?? 0}%"></div></div>${w.pct === null ? '—' : w.pct + '%'}</div>
     <small>Semana del ${range} · ${w.done} de ${w.inWeek.length} hechas</small>`;
   $('who').textContent = user ? displayName(user) : '';
+  const hr = new Date().getHours(), nd = new Date();
+  $('hello').textContent = `${hr < 14 ? 'Buenos días' : hr < 21 ? 'Buenas tardes' : 'Buenas noches'}${user ? ', ' + displayName(user) : ''} · ${DOWL[(nd.getDay()+6)%7]} ${nd.getDate()} ${MSHORT[nd.getMonth()]}`;
   const bell = open.filter(t => isLate(t) || t.due === t0).length;
   $('bellN').hidden = !bell; $('bellN').textContent = bell;
   document.querySelectorAll('[data-view]').forEach(a => a.setAttribute('aria-current', a.dataset.view === view ? 'page' : 'false'));
@@ -876,7 +926,7 @@ function row(t) {
   else date = '<span class="rel">sin fecha</span>';
   const next = t.state === 'todo' ? ['doing','Empezar'] : t.state === 'doing' ? ['todo','Pausar'] : ['todo','Reabrir'];
   const files = (t.files || []).map((f, i) => `<button class="linkish" data-act="dl" data-id="${t.id}" data-i="${i}">📎 ${esc(f.name)} (${size(f.size)})</button>`).join('');
-  return `<div class="row ${late ? 'late' : ''} ${t.state}" data-drop="${t.id}">
+  return `<div class="row ${late ? 'late' : ''} ${t.state}" data-drop="${t.id}" style="--pc:${t.proj ? colorOf(t.proj) : 'transparent'}">
     <button class="check ${checkCls(t)}" data-act="toggle" data-id="${t.id}" aria-label="${t.state === 'done' ? 'Marcar como pendiente' : 'Marcar como completada'}"></button>
     <div class="dt">${date}</div>
     <div><div class="ti">${esc(t.title)}</div>
@@ -1281,6 +1331,7 @@ $('fList').onclick = e => { const x = e.target.dataset.x; if (x !== undefined) {
 $('fFiles').onchange = e => { for (const f of e.target.files) pending.push({ name:f.name, size:f.size, type:f.type, _file:f }); e.target.value = ''; drawFiles(); };
 $('quick').onclick = e => { const d = e.target.dataset.d; if (d === undefined) return; $('fDue').value = d === '' ? '' : plusDays(+d); };
 $('add').onclick = () => openDlg(null, view === 'calendario' && calSel ? ymd(calSel) : '');
+$('fab').onclick = () => $('add').click();
 $('cancel').onclick = () => $('dlg').close();
 $('fDel').onclick = async () => { const t = editing; $('dlg').close(); if (t && await ask('¿Borrar la tarea?', `«${t.title}» y sus archivos se borrarán. No se puede deshacer.`)) removeTask(t); };
 $('form').onsubmit = async e => {
