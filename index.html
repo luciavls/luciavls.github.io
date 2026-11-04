@@ -254,6 +254,13 @@
   .frow .n { flex:1; min-width:140px; word-break:break-all; }
   .frow small { color:var(--mute); font-variant-numeric:tabular-nums; }
   .frow select { padding:5px 8px; font-size:13px; max-width:180px; }
+  #pasteBox.over { outline:2px dashed var(--acc); outline-offset:-2px; background:var(--acc-soft); }
+  .pthumbs { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+  .pthumb { position:relative; width:120px; border:1px solid var(--line); border-radius:12px; padding:6px; background:var(--panel); }
+  .pthumb img { width:100%; height:80px; object-fit:cover; border-radius:8px; display:block; }
+  .pthumb .pico { display:grid; place-items:center; height:80px; font-size:28px; }
+  .pthumb small { display:block; font-size:11px; color:var(--mute); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pthumb button { position:absolute; top:-8px; right:-8px; width:24px; height:24px; padding:0; border-radius:50%; font-size:14px; line-height:1; }
 
   /* ---------- Estadísticas ---------- */
   .stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
@@ -740,12 +747,48 @@ async function addGeneral(fileList) {
     const { error } = await sb.from('loose_files').insert(refs.map(r => ({ name:r.name, size:r.size, type:r.type, path:r.path })));
     if (error) throw error;
     toast(`${refs.length} archivo${refs.length > 1 ? 's' : ''} guardado${refs.length > 1 ? 's' : ''}.`);
-  } catch (e) { toast('No se pudo subir: ' + errText(e)); }
-  loadAll();
+    loadAll(); return true;
+  } catch (e) { toast('No se pudo subir: ' + errText(e)); loadAll(); return false; }
 }
 async function addFilesToTask(t, fileList) {
-  try { const refs = await uploadMany(fileList); if (await saveTask({ ...t, files:[...(t.files || []), ...refs] })) toast(`Añadido a «${t.title}».`); }
+  try { const refs = await uploadMany(fileList); if (await saveTask({ ...t, files:[...(t.files || []), ...refs] })) { toast(`Añadido a «${t.title}».`); return true; } }
   catch (e) { toast('No se pudo subir: ' + errText(e)); }
+  return false;
+}
+
+// ---------- Cuadro para pegar texto e imágenes ----------
+let pasteText = '', pasteName = '', pasteTask = '', pasteFiles = [], pasteBusy = false;
+const stamp = () => { const d = new Date(); return `${ymd(d)} ${String(d.getHours()).padStart(2,'0')}.${String(d.getMinutes()).padStart(2,'0')}.${String(d.getSeconds()).padStart(2,'0')}`; };
+const cleanName = n => String(n).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80);
+function addPasteFiles(list) {
+  for (const f of list) {
+    let file = f;
+    if (!f.name || /^image\.\w+$/i.test(f.name) || f.name === 'blob') {
+      const ext = (f.type.split('/')[1] || 'bin').replace('jpeg', 'jpg').replace(/\+.*/, '');
+      file = new File([f], `${f.type.startsWith('image/') ? 'Imagen' : 'Archivo'} ${stamp()}${pasteFiles.length ? ' (' + (pasteFiles.length + 1) + ')' : ''}.${ext}`, { type:f.type });
+    }
+    file._url = file.type.startsWith('image/') ? URL.createObjectURL(file) : '';
+    pasteFiles.push(file);
+  }
+  render();
+}
+function clearPaste() { for (const f of pasteFiles) if (f._url) URL.revokeObjectURL(f._url); pasteFiles = []; pasteText = ''; pasteName = ''; }
+async function savePaste() {
+  if (pasteBusy) return;
+  const text = pasteText.trim(), name = cleanName(pasteName);
+  if (!text && !pasteFiles.length) { toast('Pega o escribe algo primero.'); $('pText')?.focus(); return; }
+  const files = [];
+  if (text) files.push(new File([pasteText], `${name || 'Nota ' + stamp()}.txt`, { type:'text/plain' }));
+  pasteFiles.forEach((f, i) => {
+    const ext = extOf(f.name);
+    files.push(name && !text ? new File([f], `${name}${pasteFiles.length > 1 ? ' (' + (i + 1) + ')' : ''}${ext ? '.' + ext : ''}`, { type:f.type }) : f);
+  });
+  pasteBusy = true; render();
+  const t = pasteTask && tasks.find(x => x.id === pasteTask);
+  const ok = t ? await addFilesToTask(t, files) : await addGeneral(files);
+  pasteBusy = false;
+  if (ok) clearPaste();
+  render();
 }
 async function assignLoose(id, taskId) {
   const f = general.find(x => x.id === id), t = tasks.find(x => x.id === taskId);
@@ -944,6 +987,20 @@ function renderFiles() {
   const total = general.reduce((s, f) => s + (f.size||0), 0) + tasks.reduce((s, t) => s + (t.files||[]).reduce((a, f) => a + (f.size||0), 0), 0);
   $('content').innerHTML = `
     <div class="head"><h2>Archivos</h2><span style="color:var(--mute);font-size:13px">${count} archivo${count === 1 ? '' : 's'} · ${size(total)}</span>${projSelect()}</div>
+    <section class="card box" id="pasteBox" style="margin-bottom:18px">
+      <h3>Pegar texto o imágenes</h3>
+      <p class="sub">Pega aquí (Cmd+V, o mantén pulsado → Pegar en el iPhone) un texto, una captura de pantalla o una imagen copiada. También puedes arrastrar archivos. Se guardan como archivos: el texto como .txt.</p>
+      <div style="display:grid;gap:8px">
+        <input type="text" id="pName" placeholder="Nombre (opcional)" value="${esc(pasteName)}" aria-label="Nombre del archivo" autocomplete="off">
+        <textarea id="pText" rows="5" placeholder="Pega o escribe aquí…" aria-label="Texto para guardar" style="width:100%;resize:vertical">${esc(pasteText)}</textarea>
+      </div>
+      ${pasteFiles.length ? `<div class="pthumbs">${pasteFiles.map((f, i) => `<div class="pthumb">${f._url ? `<img src="${f._url}" alt="">` : '<span class="pico">📎</span>'}<small>${esc(f.name)}</small><button type="button" data-act="pdel" data-i="${i}" aria-label="Quitar ${esc(f.name)}">×</button></div>`).join('')}</div>` : ''}
+      <div class="dr" style="margin-top:12px;align-items:center">
+        <select id="pTask" aria-label="Dónde guardarlo" style="margin-right:auto;max-width:100%"><option value="">Guardar en archivos sueltos</option>${open.map(t => `<option value="${t.id}" ${t.id === pasteTask ? 'selected' : ''}>Adjuntar a: ${esc(t.title.slice(0,40))}</option>`).join('')}</select>
+        <button type="button" data-act="pclear" ${pasteBusy ? 'disabled' : ''}>Vaciar</button>
+        <button type="button" class="primary" data-act="psave" ${pasteBusy ? 'disabled' : ''}>${pasteBusy ? 'Guardando…' : 'Guardar'}</button>
+      </div>
+    </section>
     <div class="filesgrid">
       <section class="card box">
         <h3>Archivos sueltos</h3><p class="sub">Súbelos aquí y asígnalos a una tarea cuando sepas dónde van.</p>
@@ -960,6 +1017,19 @@ function renderFiles() {
           <button class="linkish" style="color:var(--ink2);font-size:13px;text-decoration:none" data-act="edit" data-id="${t.id}">${esc(t.title.slice(0,40))}</button>${pill(t.proj)}<small>${size(f.size)}</small></div>`).join('') || '<p class="sub" style="margin:0">Ninguna tarea tiene archivos todavía.</p>'}
       </section>
     </div>`;
+  const pb = $('pasteBox');
+  $('pText').oninput = e => { pasteText = e.target.value; };
+  $('pName').oninput = e => { pasteName = e.target.value; };
+  $('pTask').onchange = e => { pasteTask = e.target.value; };
+  pb.addEventListener('paste', e => {
+    const cd = e.clipboardData; if (!cd) return;
+    const files = [...cd.files], hasText = !!cd.getData('text/plain');
+    // Desde Excel o Word llega el texto y además una imagen: nos quedamos con el texto
+    if (files.length && !hasText) { e.preventDefault(); addPasteFiles(files); }
+  });
+  pb.addEventListener('dragover', e => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); pb.classList.add('over'); } });
+  pb.addEventListener('dragleave', e => { if (!pb.contains(e.relatedTarget)) pb.classList.remove('over'); });
+  pb.addEventListener('drop', e => { pb.classList.remove('over'); if (e.dataTransfer.files.length) { e.preventDefault(); e.stopPropagation(); addPasteFiles([...e.dataTransfer.files]); } });
   const drop = $('drop');
   ['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
   ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove('over')));
@@ -1105,6 +1175,9 @@ document.addEventListener('click', async e => {
     case 'ext': closePops(); openExt(); break;
     case 'pw': closePops(); openPw(); break;
     case 'extdel': deleteExt(id); break;
+    case 'pdel': { const f = pasteFiles.splice(+el.dataset.i, 1)[0]; if (f?._url) URL.revokeObjectURL(f._url); render(); break; }
+    case 'pclear': clearPaste(); render(); break;
+    case 'psave': savePaste(); break;
     case 'extcolor': setExtColor(id, el.dataset.color); break;
     case 'dark': toggleDark(); break;
     case 'logout': closePops(); await sb.auth.signOut(); break;
