@@ -263,6 +263,14 @@
   .frow .n { flex:1; min-width:140px; word-break:break-all; }
   .frow small { color:var(--mute); font-variant-numeric:tabular-nums; }
   .frow select { padding:5px 8px; font-size:13px; max-width:180px; }
+  .clip { border-top:1px solid var(--line); padding:12px 0 10px; }
+  .clip:first-child { margin-top:14px; }
+  .ctext { white-space:pre-wrap; word-break:break-word; font-size:14px; max-height:4.4em; overflow:hidden; cursor:pointer; position:relative;
+           -webkit-mask-image:linear-gradient(#000 60%, transparent); mask-image:linear-gradient(#000 60%, transparent); user-select:text; -webkit-user-select:text; }
+  .clip.open .ctext { max-height:none; -webkit-mask-image:none; mask-image:none; }
+  .cmeta { display:flex; align-items:center; gap:8px; margin-top:8px; }
+  .cmeta small { margin-right:auto; color:var(--mute); font-size:12px; }
+  .cmeta button { padding:5px 12px; font-size:13px; }
   #pasteBox.over { outline:2px dashed var(--acc); outline-offset:-2px; background:var(--acc-soft); }
   .pthumbs { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
   .pthumb { position:relative; width:120px; border:1px solid var(--line); border-radius:12px; padding:6px; background:var(--panel); }
@@ -730,6 +738,7 @@ const toRow = t => ({ title:t.title, proj:t.proj || '', due:t.due || null, state
   done_at:t.done_at ? new Date(t.done_at).toISOString() : null, updated_at:new Date().toISOString() });
 
 async function loadAll() {
+  loadClips().then(drawClips);
   const [a, b] = await Promise.all([
     sb.from('tasks').select('*').order('created_at'),
     sb.from('loose_files').select('*').order('added_at'),
@@ -860,18 +869,102 @@ async function savePaste() {
   if (pasteBusy) return;
   const text = pasteText.trim(), name = cleanName(pasteName);
   if (!text && !pasteFiles.length) { toast('Pega o escribe algo primero.'); $('pText')?.focus(); return; }
+  pasteBusy = true; render();
+  let okText = true;
+  if (text) okText = await saveClip(pasteText);
+  if (!pasteFiles.length) { pasteBusy = false; if (okText) { pasteText = ''; pasteName = ''; } render(); return; }
   const files = [];
-  if (text) files.push(new File([pasteText], `${name || 'Nota ' + stamp()}.txt`, { type:'text/plain' }));
   pasteFiles.forEach((f, i) => {
     const ext = extOf(f.name);
-    files.push(name && !text ? new File([f], `${name}${pasteFiles.length > 1 ? ' (' + (i + 1) + ')' : ''}${ext ? '.' + ext : ''}`, { type:f.type }) : f);
+    files.push(name ? new File([f], `${name}${pasteFiles.length > 1 ? ' (' + (i + 1) + ')' : ''}${ext ? '.' + ext : ''}`, { type:f.type }) : f);
   });
-  pasteBusy = true; render();
   const t = pasteTask && tasks.find(x => x.id === pasteTask);
   const ok = t ? await addFilesToTask(t, files) : await addGeneral(files);
   pasteBusy = false;
-  if (ok) clearPaste();
+  if (ok && okText) clearPaste();
+  else if (ok) { for (const f of pasteFiles) if (f._url) URL.revokeObjectURL(f._url); pasteFiles = []; pasteName = ''; }
+  else if (okText) pasteText = '';
   render();
+}
+
+// ---------- Portapapeles entre dispositivos ----------
+let clips = [], clipsErr = '', clipChan = null;
+const clipOpen = new Set();
+const DEVICE = /iPhone/.test(navigator.userAgent) ? 'iPhone' : /iPad/.test(navigator.userAgent) ? 'iPad' : /Android/.test(navigator.userAgent) ? 'Android'
+  : /Mac/.test(navigator.userAgent) ? 'Mac' : /Windows/.test(navigator.userAgent) ? 'Windows' : 'Navegador';
+const ago = ts => { const m = Math.round((Date.now() - Date.parse(ts)) / 6e4); const d = new Date(ts);
+  return m < 1 ? 'ahora' : m < 60 ? `hace ${m} min` : m < 24 * 60 && d.getDate() === new Date().getDate() ? `hoy, ${hhmm(d)}` : `${fmt(ymd(d))}, ${hhmm(d)}`; };
+async function loadClips() {
+  const { data, error } = await sb.from('clips').select('*').order('created_at', { ascending:false }).limit(50);
+  if (error) { clipsErr = /clips|does not exist|schema cache/i.test(error.message) ? 'Falta preparar la base de datos: ejecuta el script SQL nuevo en Supabase.' : errText(error); clips = []; }
+  else { clipsErr = ''; clips = data; }
+}
+function subClips() {
+  if (clipChan) { sb.removeChannel(clipChan); clipChan = null; }
+  if (!user) return;
+  clipChan = sb.channel('clips-' + user.id)
+    .on('postgres_changes', { event:'*', schema:'public', table:'clips' }, p => {
+      if (p.eventType === 'INSERT' && p.new && !clips.some(c => c.id === p.new.id)) {
+        clips.unshift(p.new);
+        if (p.new.device && p.new.device !== DEVICE) toast(`Nuevo en el portapapeles (desde ${p.new.device}).`);
+      } else if (p.eventType === 'DELETE' && p.old) clips = clips.filter(c => c.id !== p.old.id);
+      drawClips();
+    }).subscribe();
+}
+async function saveClip(text) {
+  const { data, error } = await sb.from('clips').insert({ content:text, device:DEVICE }).select().single();
+  if (error) { clipsErr = /clips|does not exist|schema cache/i.test(error.message) ? 'Falta preparar la base de datos: ejecuta el script SQL nuevo en Supabase.' : 'No se pudo guardar: ' + errText(error); drawClips(); return false; }
+  if (!clips.some(c => c.id === data.id)) clips.unshift(data);
+  clipsErr = ''; toast('Guardado en el portapapeles. Ya está en tus otros dispositivos.');
+  return true;
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch {
+    const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:-100px;opacity:0';
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, text.length);
+    let ok = false; try { ok = document.execCommand('copy'); } catch {}
+    ta.remove(); return ok;
+  }
+}
+async function copyClip(id) {
+  const c = clips.find(x => x.id === id); if (!c) return;
+  if (await copyText(c.content)) {
+    toast('Copiado. Ya puedes pegarlo donde quieras.');
+    const b = document.querySelector(`[data-act="ccopy"][data-id="${id}"]`); if (b) { b.textContent = 'Copiado ✓'; setTimeout(() => { if (b.isConnected) b.textContent = 'Copiar'; }, 1600); }
+  } else { clipOpen.add(id); drawClips(); toast('No se pudo copiar solo: mantén pulsado el texto y elige «Copiar».'); }
+}
+async function deleteClip(id) {
+  clips = clips.filter(c => c.id !== id); drawClips();
+  const { error } = await sb.from('clips').delete().eq('id', id);
+  if (error) { toast('No se pudo borrar: ' + errText(error)); await loadClips(); drawClips(); }
+}
+async function clearClips() {
+  if (!clips.length || !await ask('¿Vaciar el portapapeles?', `Se borrarán los ${clips.length} textos guardados, en todos tus dispositivos.`, 'Vaciar')) return;
+  const ids = clips.map(c => c.id); clips = []; drawClips();
+  const { error } = await sb.from('clips').delete().in('id', ids);
+  if (error) { toast('No se pudo vaciar: ' + errText(error)); await loadClips(); drawClips(); }
+}
+async function pasteFromClipboard() {
+  try {
+    const t = await navigator.clipboard.readText();
+    if (!t) { toast('No tienes texto copiado.'); return; }
+    pasteText = pasteText ? pasteText.replace(/\s*$/, '\n') + t : t;
+    const ta = $('pText'); if (ta) { ta.value = pasteText; ta.focus(); }
+  } catch { toast('Este navegador no deja leer el portapapeles: mantén pulsado el cuadro y elige «Pegar».'); $('pText')?.focus(); }
+}
+function drawClips() {
+  const el = $('clipList'); if (!el) return;
+  const q = $('q').value.trim().toLowerCase();
+  const list = clips.filter(c => !q || c.content.toLowerCase().includes(q));
+  el.innerHTML = (clipsErr ? `<div class="msg">${esc(clipsErr)}</div>` : '')
+    + (list.map(c => `<div class="clip ${clipOpen.has(c.id) ? 'open' : ''}">
+        <div class="ctext" data-act="cexpand" data-id="${c.id}" title="Tocar para ver entero">${esc(c.content)}</div>
+        <div class="cmeta"><small>${esc(ago(c.created_at))}${c.device ? ' · ' + esc(c.device) : ''}</small>
+          <button type="button" data-act="cdel" data-id="${c.id}" class="ghost" aria-label="Borrar este texto">Borrar</button>
+          <button type="button" class="primary" data-act="ccopy" data-id="${c.id}">Copiar</button></div>
+      </div>`).join('') || (clipsErr ? '' : `<p class="sub" style="margin:10px 0 0">${q ? 'Ningún texto coincide con la búsqueda.' : 'Aún no hay nada. Pega un texto arriba y pulsa «Guardar»: aparecerá aquí y en tus otros dispositivos.'}</p>`))
+    + (clips.length > 1 ? `<div style="text-align:right;margin-top:8px"><button type="button" class="ghost" data-act="cclear" style="font-size:12px;color:var(--mute)">Vaciar portapapeles</button></div>` : '');
 }
 async function assignLoose(id, taskId) {
   const f = general.find(x => x.id === id), t = tasks.find(x => x.id === taskId);
@@ -1070,20 +1163,22 @@ function renderFiles() {
   const count = general.length + tasks.reduce((s,t) => s + (t.files||[]).length, 0);
   const total = general.reduce((s, f) => s + (f.size||0), 0) + tasks.reduce((s, t) => s + (t.files||[]).reduce((a, f) => a + (f.size||0), 0), 0);
   $('content').innerHTML = `
-    <div class="head"><h2 class="sec">Archivos</h2><span style="color:var(--mute);font-size:13px">${count} archivo${count === 1 ? '' : 's'} · ${size(total)}</span>${projSelect()}</div>
+    <div class="head"><h2 class="sec">Archivos</h2><span style="color:var(--mute);font-size:13px">${count} archivo${count === 1 ? '' : 's'}${count ? ' · ' + size(total) : ''}</span>${projSelect()}</div>
     <section class="card box" id="pasteBox" style="margin-bottom:18px">
-      <h3>Pegar texto o imágenes</h3>
-      <p class="sub">Pega aquí (Cmd+V, o mantén pulsado → Pegar en el iPhone) un texto, una captura de pantalla o una imagen copiada. También puedes arrastrar archivos. Se guardan como archivos: el texto como .txt.</p>
+      <h3>Portapapeles</h3>
+      <p class="sub">Pega aquí un texto y pulsa «Guardar»: aparece al momento en tus otros dispositivos, listo para copiarlo con un toque. Las imágenes y capturas que pegues se guardan como archivos.</p>
       <div style="display:grid;gap:8px">
-        <input type="text" id="pName" placeholder="Nombre (opcional)" value="${esc(pasteName)}" aria-label="Nombre del archivo" autocomplete="off">
-        <textarea id="pText" rows="5" placeholder="Pega o escribe aquí…" aria-label="Texto para guardar" style="width:100%;resize:vertical">${esc(pasteText)}</textarea>
+        <textarea id="pText" rows="4" placeholder="Pega o escribe aquí…" aria-label="Texto para el portapapeles" style="width:100%;resize:vertical">${esc(pasteText)}</textarea>
       </div>
+      ${pasteFiles.length ? `<input type="text" id="pName" placeholder="Nombre de la imagen (opcional)" value="${esc(pasteName)}" aria-label="Nombre del archivo" autocomplete="off" style="width:100%;margin-top:8px">` : ''}
       ${pasteFiles.length ? `<div class="pthumbs">${pasteFiles.map((f, i) => `<div class="pthumb">${f._url ? `<img src="${f._url}" alt="">` : '<span class="pico">📎</span>'}<small>${esc(f.name)}</small><button type="button" data-act="pdel" data-i="${i}" aria-label="Quitar ${esc(f.name)}">×</button></div>`).join('')}</div>` : ''}
       <div class="dr" style="margin-top:12px;align-items:center">
-        <select id="pTask" aria-label="Dónde guardarlo" style="margin-right:auto;max-width:100%"><option value="">Guardar en archivos sueltos</option>${open.map(t => `<option value="${t.id}" ${t.id === pasteTask ? 'selected' : ''}>Adjuntar a: ${esc(t.title.slice(0,40))}</option>`).join('')}</select>
+        ${pasteFiles.length ? `<select id="pTask" aria-label="Dónde guardar las imágenes" style="margin-right:auto;max-width:100%"><option value="">Imágenes a archivos sueltos</option>${open.map(t => `<option value="${t.id}" ${t.id === pasteTask ? 'selected' : ''}>Adjuntar a: ${esc(t.title.slice(0,40))}</option>`).join('')}</select>`
+          : `<button type="button" class="ghost" data-act="preadclip" style="margin-right:auto">📋 Pegar lo copiado</button>`}
         <button type="button" data-act="pclear" ${pasteBusy ? 'disabled' : ''}>Vaciar</button>
         <button type="button" class="primary" data-act="psave" ${pasteBusy ? 'disabled' : ''}>${pasteBusy ? 'Guardando…' : 'Guardar'}</button>
       </div>
+      <div id="clipList"></div>
     </section>
     <div class="filesgrid">
       <section class="card box">
@@ -1103,8 +1198,10 @@ function renderFiles() {
     </div>`;
   const pb = $('pasteBox');
   $('pText').oninput = e => { pasteText = e.target.value; };
-  $('pName').oninput = e => { pasteName = e.target.value; };
-  $('pTask').onchange = e => { pasteTask = e.target.value; };
+  if ($('pName')) $('pName').oninput = e => { pasteName = e.target.value; };
+  if ($('pTask')) $('pTask').onchange = e => { pasteTask = e.target.value; };
+  $('pText').onkeydown = e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); savePaste(); } };
+  drawClips();
   pb.addEventListener('paste', e => {
     const cd = e.clipboardData; if (!cd) return;
     const files = [...cd.files], hasText = !!cd.getData('text/plain');
@@ -1262,6 +1359,11 @@ document.addEventListener('click', async e => {
     case 'pdel': { const f = pasteFiles.splice(+el.dataset.i, 1)[0]; if (f?._url) URL.revokeObjectURL(f._url); render(); break; }
     case 'pclear': clearPaste(); render(); break;
     case 'psave': savePaste(); break;
+    case 'preadclip': pasteFromClipboard(); break;
+    case 'ccopy': copyClip(id); break;
+    case 'cdel': deleteClip(id); break;
+    case 'cclear': clearClips(); break;
+    case 'cexpand': if (clipOpen.has(id)) clipOpen.delete(id); else clipOpen.add(id); drawClips(); break;
     case 'extcolor': setExtColor(id, el.dataset.color); break;
     case 'dark': toggleDark(); break;
     case 'logout': closePops(); await sb.auth.signOut(); break;
@@ -1652,7 +1754,8 @@ $('impf').onchange = async e => {
 // ======================= Arranque =======================
 function enterApp(u) {
   if (user && u && user.id === u.id && !$('appView').hidden) return;
-  user = u; loaded = false; tasks = []; general = []; extCals = []; extData = {}; extLoaded = false;
+  user = u; loaded = false; tasks = []; general = []; extCals = []; extData = {}; extLoaded = false; clips = []; clipsErr = '';
+  subClips();
   $('authView').hidden = true; $('appView').hidden = false;
   const h = location.hash.slice(1); view = VIEWS.includes(h) ? h : 'lista';
   render(); loadAll();
@@ -1667,7 +1770,7 @@ function enterApp(u) {
   let recovering = /type=recovery/.test(location.hash);
   sb.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY' || recovering) { recovering = false; if (session) { showAuth('newpass'); return; } }
-    if (event === 'SIGNED_OUT' || !session) { user = null; showAuth('login'); return; }
+    if (event === 'SIGNED_OUT' || !session) { user = null; subClips(); showAuth('login'); return; }
     if (location.hash.includes('access_token')) history.replaceState(null, '', location.pathname);
     enterApp(session.user);
   });

@@ -107,3 +107,22 @@ begin
 end $$;
 revoke all on function public.leer_calendario(uuid) from public, anon;
 grant execute on function public.leer_calendario(uuid) to authenticated;
+
+-- 6) Portapapeles entre dispositivos (texto que copias aquí y pegas en otro sitio)
+create table if not exists public.clips (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  content    text not null,
+  device     text not null default '',
+  created_at timestamptz not null default now()
+);
+alter table public.clips enable row level security;
+drop policy if exists "portapapeles propio" on public.clips;
+create policy "portapapeles propio" on public.clips
+  for all to authenticated
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+-- Para que lo que copias en un dispositivo aparezca al momento en los demás
+do $$ begin
+  alter publication supabase_realtime add table public.clips;
+exception when duplicate_object then null; when undefined_object then null;
+end $$;
