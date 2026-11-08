@@ -349,6 +349,30 @@
   .extitem .bar { width:4px; border-radius:4px; background:var(--pc); justify-self:center; height:100%; min-height:20px; }
   .extitem .ti { font-size:15px; }
   .extitem .meta { font-size:12px; color:var(--mute); margin-top:3px; }
+  /* ---------- Logros ---------- */
+  .achgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+  .ach { background:#1b1c1f; color:#f0efec; border:1px solid #2c2d31; border-radius:18px; overflow:hidden; display:flex; flex-direction:column; cursor:pointer; transition:transform .2s; }
+  .ach:hover { transform:translateY(-2px); }
+  .ach.hidden { opacity:.55; }
+  .cov, .achpv { position:relative; height:140px; overflow:hidden; display:flex; align-items:flex-end; padding:12px 16px;
+         background:radial-gradient(circle at 28% 30%, var(--cc) 0, color-mix(in srgb, var(--cc) 0%, transparent) 62%), #1b1c1f; }
+  .cov .ab, .achpv .ab { font:800 58px/.85 var(--f-body); letter-spacing:-.06em; color:#111213; white-space:nowrap; }
+  .cov .k, .achpv .k { position:absolute; right:12px; top:12px; font:500 11px var(--f-mono); text-transform:uppercase; letter-spacing:.08em; color:#f0efec; background:rgba(17,18,19,.55); padding:4px 8px; border-radius:99px; }
+  .achpv { border-radius:12px; margin:12px 0 4px; height:120px; }
+  .achpv .k:empty { display:none; }
+  .ach .bd { padding:14px 16px 16px; display:flex; flex-direction:column; gap:6px; flex:1; }
+  .ach .mt { font:500 11px var(--f-mono); color:#ee6a45; text-transform:uppercase; letter-spacing:.08em; }
+  .ach h4 { margin:0; font-size:18px; letter-spacing:-.01em; }
+  .ach p { margin:0; color:#c3c2bd; font-size:13px; }
+  .ach .ty { display:flex; gap:5px; flex-wrap:wrap; margin-top:auto; padding-top:8px; }
+  .ftag { font:600 10px/1 var(--f-mono); color:#fff; background:var(--c, #8e9097); border-radius:5px; padding:4px 6px; letter-spacing:.04em; }
+  .achsw { display:flex; gap:9px; flex-wrap:wrap; }
+  .achsw button { width:28px; height:28px; border-radius:50%; border:0; padding:0; background:var(--sw); }
+  .achsw button[aria-checked="true"] { box-shadow:0 0 0 2px var(--card), 0 0 0 4px var(--sw); }
+  .pubbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 16px; margin-bottom:16px; }
+  .pubbar a { color:inherit; text-decoration:none; }
+  .pubbar code { font-family:var(--f-mono); font-size:13px; background:var(--panel); padding:4px 8px; border-radius:8px; word-break:break-all; }
+
   /* ---------- Marca LV y pulido ---------- */
   .logo { --s:34px; position:relative; flex:none; width:var(--s); height:var(--s); border-radius:calc(var(--s)*.22); background:#141414; overflow:hidden; display:grid; place-items:center;
           font:800 calc(var(--s)*.46)/1 var(--f-body); letter-spacing:-.06em; color:#fff; }
@@ -371,7 +395,7 @@
   @media (prefers-reduced-motion: no-preference) { #content > * { animation:rise .22s ease-out both; } @keyframes rise { from { opacity:.0; transform:translateY(4px); } } }
   .fab { display:none; }
   @media (max-width:900px) {
-    .nav { position:fixed; left:0; right:0; bottom:0; z-index:20; display:grid !important; grid-template-columns:repeat(5,1fr); gap:0; border-top:1px solid var(--line); background:color-mix(in srgb, var(--card) 92%, transparent);
+    .nav { position:fixed; left:0; right:0; bottom:0; z-index:20; display:grid !important; grid-template-columns:repeat(6,1fr); gap:0; border-top:1px solid var(--line); background:color-mix(in srgb, var(--card) 92%, transparent);
            backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); padding:6px max(4px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px)); overflow:visible; }
     .nav a { flex-direction:column; gap:3px; padding:6px 2px; font-size:11px; border-radius:10px; justify-content:center; text-align:center; }
     .nav a svg.i { width:22px; height:22px; }
@@ -431,6 +455,7 @@
   <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
   <symbol id="i-board" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></symbol>
   <symbol id="i-clip" viewBox="0 0 24 24"><path d="M20 11.5l-7.8 7.8a5 5 0 01-7.1-7.1l8.5-8.5a3.3 3.3 0 014.7 4.7l-8.5 8.5a1.7 1.7 0 01-2.4-2.4l7.8-7.8"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 01-8 0zM8 6H5a3 3 0 003 4M16 6h3a3 3 0 01-3 4M12 13v4M8 20h8M9.5 17h5"/></symbol>
   <symbol id="i-stats" viewBox="0 0 24 24"><path d="M5 20V10M10 20V4M15 20v-8M20 20v-5"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 119.5 4a6.5 6.5 0 0010.5 10.5z"/></symbol>
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1112 0v5l1.5 2h-15zM10 20.5a2 2 0 004 0"/></symbol>
@@ -472,6 +497,7 @@
       <a href="#proyectos" data-view="proyectos"><svg class="i"><use href="#i-board"/></svg>Proyectos</a>
       <a href="#archivos" data-view="archivos"><svg class="i"><use href="#i-clip"/></svg>Archivos</a>
       <a href="#estadisticas" data-view="estadisticas"><svg class="i"><use href="#i-stats"/></svg>Estadísticas</a>
+      <a href="#logros" data-view="logros"><svg class="i"><use href="#i-trophy"/></svg>Logros</a>
     </nav>
     <div class="side-foot">
       <button class="toggle" id="darkT" role="switch" aria-checked="false"><span style="display:flex;gap:10px;align-items:center"><svg class="i"><use href="#i-moon"/></svg>Modo oscuro</span><span class="sw"></span></button>
@@ -564,6 +590,26 @@
   <div class="dr"><button type="button" id="extRefresh" class="ghost" style="margin-right:auto">Actualizar ahora</button><button type="button" id="extClose">Cerrar</button></div>
 </dialog>
 
+<dialog id="achDlg">
+  <form id="achForm">
+    <h3 id="achT">Nuevo logro</h3>
+    <div class="achpv" id="achPv"><span class="k" id="achPvK"></span><span class="ab" id="achPvAb">TFM</span></div>
+    <label for="achTitle">Título</label><input type="text" id="achTitle" required autocomplete="off" placeholder="p. ej. Trabajo Fin de Máster">
+    <label for="achCover">Texto de la portada</label><input type="text" id="achCover" maxlength="10" autocomplete="off" placeholder="Vacío = iniciales del título">
+    <label>Color de la portada</label><div class="achsw" id="achSw" role="radiogroup" aria-label="Color de la portada"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label for="achCat">Categoría</label><input type="text" id="achCat" list="achCats" autocomplete="off" placeholder="Máster, Talgo…"><datalist id="achCats"></datalist></div>
+      <div><label for="achDate">Fecha</label><input type="date" id="achDate"></div>
+    </div>
+    <label for="achDesc">Descripción</label><textarea id="achDesc" rows="2"></textarea>
+    <label for="achFiles">Archivos definitivos</label><input type="file" id="achFiles" multiple>
+    <div id="achFl"></div>
+    <label style="display:flex;gap:8px;align-items:center;margin-top:14px;font-size:14px;color:var(--ink)"><input type="checkbox" id="achPub" checked style="width:auto"> Visible en la página pública</label>
+    <div class="msg" id="achMsg" hidden style="margin-top:12px"></div>
+    <div class="dr"><button type="button" id="achDel" class="ghost" style="margin-right:auto;color:var(--late)" hidden>Borrar logro</button><button type="button" id="achCancel">Cancelar</button><button class="primary" type="submit" id="achSave">Guardar</button></div>
+  </form>
+</dialog>
+
 <dialog id="pwDlg">
   <form id="pwForm">
     <h3>Cambiar contraseña</h3>
@@ -586,7 +632,7 @@ const PROJECTS = [
 ];
 const STATES = { todo:'Pendiente', doing:'En proceso', done:'Completada' };
 const BUCKET = 'archivos';
-const VIEWS = ['lista','calendario','proyectos','archivos','estadisticas'];
+const VIEWS = ['lista','calendario','proyectos','archivos','estadisticas','logros'];
 let sb = null, user = null, tasks = [], general = [], loaded = false;
 let editing = null, pending = [];
 let view = 'lista', listFilter = 'open', projFilter = '';
@@ -1019,7 +1065,7 @@ function render() {
   if (!user) return;
   renderSide();
   if (!loaded) { $('content').innerHTML = '<div class="empty">Cargando tus tareas…</div>'; return; }
-  ({ lista:renderList, calendario:renderCal, proyectos:renderBoard, archivos:renderFiles, estadisticas:renderStats })[view]();
+  ({ lista:renderList, calendario:renderCal, proyectos:renderBoard, archivos:renderFiles, estadisticas:renderStats, logros:renderLogros })[view]();
 }
 const projSelect = () => `<select id="fProj" aria-label="Filtrar por proyecto">${projOptions(projFilter, true)}</select>`;
 
@@ -1359,6 +1405,11 @@ document.addEventListener('click', async e => {
     case 'pdel': { const f = pasteFiles.splice(+el.dataset.i, 1)[0]; if (f?._url) URL.revokeObjectURL(f._url); render(); break; }
     case 'pclear': clearPaste(); render(); break;
     case 'psave': savePaste(); break;
+    case 'achnew': openAch(null); break;
+    case 'achedit': openAch(achs.find(x => x.id === id)); break;
+    case 'achclaim': claimLogros(); break;
+    case 'achcopy': if (await copyText(LOGROS_URL)) toast('Enlace copiado.'); break;
+    case 'achname': renameLogros(); break;
     case 'preadclip': pasteFromClipboard(); break;
     case 'ccopy': copyClip(id); break;
     case 'cdel': deleteClip(id); break;
@@ -1687,6 +1738,128 @@ async function deleteExt(id) {
 $('extRefresh').onclick = async () => { $('extRefresh').disabled = true; await ensureExt(true); drawExt(); $('extRefresh').disabled = false; };
 $('extClose').onclick = () => $('extDlg').close();
 
+// ======================= Logros =======================
+const ACH_COLORS = [['Naranja','#ee6a45'],['Rojo','#e5534b'],['Rosa','#e86aa6'],['Fucsia','#d14bd0'],['Morado','#a46be6'],['Índigo','#6f6af0'],
+  ['Azul','#3d8be8'],['Celeste','#36b3e0'],['Turquesa','#2fc1a9'],['Verde','#3fb563'],['Lima','#a4c93a'],['Amarillo','#e2ad2a'],['Dorado','#c8963e'],['Gris','#8e9097']];
+const LOGROS_URL = location.origin + location.pathname.replace(/[^/]*$/, '') + 'logros/';
+const FT = { pdf:'#e5534b', doc:'#3d8be8', docx:'#3d8be8', xls:'#3fb563', xlsx:'#3fb563', csv:'#3fb563', ppt:'#ee6a45', pptx:'#ee6a45', zip:'#a46be6', rar:'#a46be6', jpg:'#e2ad2a', jpeg:'#e2ad2a', png:'#e2ad2a' };
+const ftag = n => { const e = extOf(n) || 'file'; return `<span class="ftag" style="--c:${FT[e] || '#8e9097'}">${esc(e.toUpperCase().slice(0, 4))}</span>`; };
+const initials = t => (String(t).match(/[A-Za-zÁÉÍÓÚÑáéíóúñ0-9]+/g) || []).filter(w => w.length > 2 || /^[A-Z0-9]+$/.test(w)).map(w => /^[A-Z0-9]{2,}$/.test(w) ? w : w[0].toUpperCase()).join('').slice(0, 5) || '★';
+const coverText = a => (a.cover_text || '').trim() || initials(a.title);
+let achs = [], achOwner, achErr = '', achEditing = null, achPending = [], achColor = ACH_COLORS[0][1];
+async function loadLogros() {
+  const [o, a] = await Promise.all([
+    sb.from('logros_owner').select('*').maybeSingle(),
+    sb.from('achievements').select('*').order('date', { ascending:false, nullsFirst:false }).order('created_at', { ascending:false }),
+  ]);
+  const e = o.error || a.error;
+  if (e) { achErr = /logros_owner|achievements|does not exist|schema cache/i.test(e.message) ? 'Falta preparar la base de datos: ejecuta el script SQL nuevo en Supabase.' : errText(e); achOwner = undefined; achs = []; }
+  else { achErr = ''; achOwner = o.data; achs = a.data.filter(x => x.user_id === user.id); }
+  if (view === 'logros') render();
+}
+function achCard(a) {
+  return `<article class="ach ${a.published ? '' : 'hidden'}" data-act="achedit" data-id="${a.id}" title="Editar">
+    <div class="cov" style="--cc:${esc(a.color)}">${a.category ? `<span class="k">${esc(a.category)}</span>` : ''}<span class="ab">${esc(coverText(a))}</span></div>
+    <div class="bd"><span class="mt">${a.date ? fmt(a.date) + ' ' + a.date.slice(0, 4) : 'Sin fecha'}${a.published ? '' : ' · oculto'}</span><h4>${esc(a.title)}</h4>${a.description ? `<p>${esc(a.description)}</p>` : ''}
+    <div class="ty">${(a.files || []).map(f => ftag(f.name)).join('') || '<span style="font-size:12px;color:#8d9096">Sin archivos</span>'}</div></div></article>`;
+}
+function renderLogros() {
+  if (achOwner === undefined && !achErr) { $('content').innerHTML = '<div class="empty">Cargando tus logros…</div>'; loadLogros(); return; }
+  let body;
+  if (achErr) body = `<div class="card box"><div class="msg">${esc(achErr)}</div></div>`;
+  else if (!achOwner) body = `<div class="card box" style="max-width:560px"><h3>Activa tu página de logros</h3>
+      <p class="sub">Tendrás una página pública en <b>${esc(LOGROS_URL)}</b> con tus trabajos definitivos, que cualquiera podrá ver y descargar sin iniciar sesión. Solo tú podrás subir y editar logros.</p>
+      <label for="achOwnerName" style="font-size:12px;color:var(--ink2)">Nombre que se verá arriba</label>
+      <input type="text" id="achOwnerName" placeholder="p. ej. Lucía Velasco" style="width:100%;margin:4px 0 12px">
+      <button class="primary" data-act="achclaim">Activar mi página de logros</button></div>`;
+  else if (achOwner.user_id !== user.id) body = `<div class="card box"><p style="margin:0">La página de logros pertenece a otra cuenta. Puedes verla en <a href="${esc(LOGROS_URL)}" target="_blank" rel="noopener">${esc(LOGROS_URL)}</a>.</p></div>`;
+  else body = `<div class="card pubbar"><span style="font-weight:600">Tu página pública:</span><code>${esc(LOGROS_URL)}</code>
+      <a href="${esc(LOGROS_URL)}" target="_blank" rel="noopener"><button>Abrir</button></a><button data-act="achcopy">Copiar enlace</button>
+      <button class="ghost" data-act="achname" style="margin-left:auto">Nombre: ${esc(achOwner.display_name)}</button></div>
+      ${achs.length ? `<div class="achgrid">${achs.map(achCard).join('')}</div>` : `<div class="card empty"><b>Aún no tienes logros.</b>Pulsa «+ Nuevo logro» y sube tus archivos definitivos.</div>`}`;
+  $('content').innerHTML = `<div class="head"><h2 class="sec">Logros</h2>${achOwner && achOwner.user_id === user.id ? '<button class="primary" data-act="achnew">+ Nuevo logro</button>' : ''}</div>${body}`;
+}
+async function claimLogros() {
+  const name = ($('achOwnerName')?.value || '').trim() || displayName(user) || 'LV';
+  const { error } = await sb.from('logros_owner').insert({ display_name:name });
+  if (error) { toast(/duplicate|unique/i.test(error.message) ? 'La página de logros ya pertenece a otra cuenta.' : 'No se pudo activar: ' + errText(error)); }
+  else toast('Página de logros activada.');
+  loadLogros();
+}
+async function renameLogros() {
+  const cur = achOwner.display_name;
+  $('content').querySelector('.pubbar [data-act="achname"]').outerHTML = `<form id="achNameForm" style="margin-left:auto;display:flex;gap:6px"><input id="achNameIn" value="${esc(cur)}" aria-label="Nombre de la página" style="padding:6px 10px"><button class="primary">Guardar</button></form>`;
+  $('achNameIn').focus(); $('achNameIn').select();
+  $('achNameForm').onsubmit = async e => {
+    e.preventDefault(); const v = $('achNameIn').value.trim(); if (!v) return;
+    const { error } = await sb.from('logros_owner').update({ display_name:v }).eq('id', 1);
+    if (error) toast('No se pudo cambiar: ' + errText(error)); else { achOwner.display_name = v; toast('Nombre cambiado.'); }
+    render();
+  };
+}
+function drawAchPreview() {
+  const pv = $('achPv'); pv.style.setProperty('--cc', achColor);
+  $('achPvAb').textContent = ($('achCover').value.trim() || initials($('achTitle').value || '')) || '★';
+  $('achPvK').textContent = $('achCat').value.trim();
+  $('achSw').innerHTML = ACH_COLORS.map(([n, c]) => `<button type="button" role="radio" aria-checked="${c === achColor}" aria-label="${n}" title="${n}" data-c="${c}" style="--sw:${c}"></button>`).join('');
+}
+function drawAchFiles() {
+  $('achFl').innerHTML = achPending.map((f, i) => `<div class="fl"><span>${ftag(f.name)} ${esc(f.name)} (${size(f.size)})${f._file ? ' · nuevo' : ''}</span><button type="button" class="linkish" data-ax="${i}">quitar</button></div>`).join('');
+}
+function openAch(a) {
+  achEditing = a || null; achPending = a ? [...(a.files || [])] : []; achColor = a?.color || ACH_COLORS[(achs.length) % ACH_COLORS.length][1];
+  $('achT').textContent = a ? 'Editar logro' : 'Nuevo logro';
+  $('achTitle').value = a?.title || ''; $('achCover').value = a?.cover_text || ''; $('achCat').value = a?.category || '';
+  $('achDate').value = a?.date || today(); $('achDesc').value = a?.description || ''; $('achPub').checked = a ? a.published : true;
+  $('achCats').innerHTML = [...new Set(achs.map(x => x.category).filter(Boolean))].map(c => `<option value="${esc(c)}">`).join('');
+  $('achDel').hidden = !a; $('achMsg').hidden = true; $('achSave').disabled = false; $('achFiles').value = '';
+  drawAchPreview(); drawAchFiles(); $('achDlg').showModal(); $('achTitle').focus();
+}
+['achTitle','achCover','achCat'].forEach(i => $(i).addEventListener('input', drawAchPreview));
+$('achSw').onclick = e => { const c = e.target.dataset?.c; if (c) { achColor = c; drawAchPreview(); } };
+$('achFiles').onchange = e => { for (const f of e.target.files) achPending.push({ name:f.name, size:f.size, type:f.type, _file:f }); e.target.value = ''; drawAchFiles(); };
+$('achFl').onclick = e => { const x = e.target.dataset.ax; if (x !== undefined) { achPending.splice(+x, 1); drawAchFiles(); } };
+$('achCancel').onclick = () => $('achDlg').close();
+$('achDel').onclick = async () => {
+  const a = achEditing; $('achDlg').close();
+  if (!a || !await ask('¿Borrar este logro?', `«${a.title}» y sus archivos desaparecerán de tu página pública.`)) return;
+  achs = achs.filter(x => x.id !== a.id); render();
+  const { error } = await sb.from('achievements').delete().eq('id', a.id);
+  if (error) { toast('No se pudo borrar: ' + errText(error)); loadLogros(); return; }
+  const paths = (a.files || []).map(f => f.path).filter(Boolean); if (paths.length) await sb.storage.from('logros').remove(paths);
+};
+$('achForm').onsubmit = async e => {
+  e.preventDefault();
+  const title = $('achTitle').value.trim(); if (!title) { $('achTitle').focus(); return; }
+  const say = t => { $('achMsg').hidden = false; $('achMsg').textContent = t; };
+  $('achSave').disabled = true;
+  const id = achEditing?.id || newId();
+  const files = [];
+  try {
+    const news = achPending.filter(f => f._file);
+    for (let i = 0; i < achPending.length; i++) {
+      const f = achPending[i];
+      if (!f._file) { files.push(f); continue; }
+      if (news.length > 1 || f.size > 2e6) say(`Subiendo ${news.indexOf(f) + 1} de ${news.length}: ${f.name}…`);
+      const path = `${user.id}/${id}/${newId().slice(0, 8)}-${safeKey(f.name)}`;
+      const { error } = await sb.storage.from('logros').upload(path, f._file, { contentType:f.type || 'application/octet-stream', upsert:false });
+      if (error) throw error;
+      files.push({ path, name:f.name, size:f.size, type:f.type || '' });
+    }
+  } catch (err) { say('No se pudo subir: ' + errText(err)); $('achSave').disabled = false; return; }
+  const row = { title, cover_text:$('achCover').value.trim(), color:achColor, category:$('achCat').value.trim(), date:$('achDate').value || null,
+    description:$('achDesc').value.trim(), files, published:$('achPub').checked };
+  const { data, error } = achEditing ? await sb.from('achievements').update(row).eq('id', id).select().single() : await sb.from('achievements').insert({ id, ...row }).select().single();
+  if (error) { say('No se pudo guardar: ' + errText(error)); $('achSave').disabled = false; return; }
+  const keep = new Set(files.map(f => f.path));
+  const removed = (achEditing?.files || []).map(f => f.path).filter(p => p && !keep.has(p));
+  if (removed.length) await sb.storage.from('logros').remove(removed);
+  $('achDlg').close();
+  const i = achs.findIndex(x => x.id === id); if (i >= 0) achs[i] = data; else achs.unshift(data);
+  achs.sort((x, y) => (y.date || '').localeCompare(x.date || ''));
+  toast(achEditing ? 'Logro guardado.' : 'Logro publicado.'); render();
+};
+
 // ======================= Cambiar contraseña =======================
 function openPw() { $('pw1').value = $('pw2').value = ''; $('pwMsg').hidden = true; $('pwSave').disabled = false; $('pwDlg').showModal(); $('pw1').focus(); }
 $('pwCancel').onclick = () => $('pwDlg').close();
@@ -1754,7 +1927,7 @@ $('impf').onchange = async e => {
 // ======================= Arranque =======================
 function enterApp(u) {
   if (user && u && user.id === u.id && !$('appView').hidden) return;
-  user = u; loaded = false; tasks = []; general = []; extCals = []; extData = {}; extLoaded = false; clips = []; clipsErr = '';
+  user = u; loaded = false; tasks = []; general = []; extCals = []; extData = {}; extLoaded = false; clips = []; clipsErr = ''; achs = []; achOwner = undefined; achErr = '';
   subClips();
   $('authView').hidden = true; $('appView').hidden = false;
   const h = location.hash.slice(1); view = VIEWS.includes(h) ? h : 'lista';
