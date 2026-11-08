@@ -127,21 +127,7 @@ do $$ begin
 exception when duplicate_object then null; when undefined_object then null;
 end $$;
 
--- 7) Logros: página pública con tus trabajos definitivos
--- Dueña de la página de logros (solo puede haber una: la primera cuenta que la active)
-create table if not exists public.logros_owner (
-  id           int primary key default 1 check (id = 1),
-  user_id      uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  display_name text not null default 'LV'
-);
-alter table public.logros_owner enable row level security;
-drop policy if exists "ver dueña" on public.logros_owner;
-create policy "ver dueña" on public.logros_owner for select to anon, authenticated using (true);
-drop policy if exists "activar logros" on public.logros_owner;
-create policy "activar logros" on public.logros_owner for insert to authenticated with check (user_id = auth.uid());
-drop policy if exists "editar nombre" on public.logros_owner;
-create policy "editar nombre" on public.logros_owner for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-
+-- 7) Logros: tus trabajos definitivos, privados (solo los ves tú, dentro de la app)
 create table if not exists public.achievements (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null default auth.uid() references auth.users(id) on delete cascade,
@@ -157,17 +143,19 @@ create table if not exists public.achievements (
 );
 alter table public.achievements enable row level security;
 drop policy if exists "logros publicos" on public.achievements;
-create policy "logros publicos" on public.achievements for select to anon, authenticated
-  using (published or user_id = auth.uid());
 drop policy if exists "logros de la duena" on public.achievements;
-create policy "logros de la duena" on public.achievements for all to authenticated
-  using (user_id = auth.uid() and user_id = (select user_id from public.logros_owner where id = 1))
-  with check (user_id = auth.uid() and user_id = (select user_id from public.logros_owner where id = 1));
+drop policy if exists "logros propios" on public.achievements;
+create policy "logros propios" on public.achievements for all to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop table if exists public.logros_owner;
 
--- Almacén público de los archivos de logros (cualquiera puede descargarlos)
+-- Almacén PRIVADO de los archivos de logros
 insert into storage.buckets (id, name, public, file_size_limit)
-values ('logros', 'logros', true, 52428800)
-on conflict (id) do update set public = true;
+values ('logros', 'logros', false, 52428800)
+on conflict (id) do update set public = false;
+drop policy if exists "leer logros" on storage.objects;
+create policy "leer logros" on storage.objects for select to authenticated
+  using (bucket_id = 'logros' and (storage.foldername(name))[1] = auth.uid()::text);
 drop policy if exists "subir logros" on storage.objects;
 create policy "subir logros" on storage.objects for insert to authenticated
   with check (bucket_id = 'logros' and (storage.foldername(name))[1] = auth.uid()::text);
