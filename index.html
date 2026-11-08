@@ -349,6 +349,25 @@
   .extitem .bar { width:4px; border-radius:4px; background:var(--pc); justify-self:center; height:100%; min-height:20px; }
   .extitem .ti { font-size:15px; }
   .extitem .meta { font-size:12px; color:var(--mute); margin-top:3px; }
+  /* ---------- Selector de proyecto ---------- */
+  .ppick { display:grid; gap:10px; }
+  .ppg { display:grid; gap:6px; }
+  .ppl { font-size:11px; color:var(--mute); text-transform:uppercase; letter-spacing:.06em; font-weight:600; }
+  .pprow { display:flex; flex-wrap:wrap; gap:6px; }
+  .pp { display:inline-flex; align-items:center; gap:7px; border-radius:99px; padding:6px 12px; font-size:13px; border:1px solid var(--line2); background:var(--card); }
+  .pp i { width:9px; height:9px; border-radius:50%; background:var(--pc, var(--c0)); }
+  .pp:hover { border-color:var(--pc, var(--ink2)); }
+  .pp[aria-checked="true"] { background:color-mix(in srgb, var(--pc, var(--ink)) 16%, var(--card)); border-color:var(--pc, var(--ink)); font-weight:600; box-shadow:inset 0 0 0 1px var(--pc, var(--ink)); }
+  .pp.none i { background:transparent; box-shadow:inset 0 0 0 1.5px var(--mute); }
+  .pp.none[aria-checked="true"] { --pc:var(--ink2); }
+  .pp.add { border-style:dashed; color:var(--ink2); }
+  .pp.add i { display:none; }
+  .newproj { margin-top:10px; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--panel); display:grid; gap:10px; }
+  .newproj input { width:100%; }
+  .npsw { display:flex; gap:8px; flex-wrap:wrap; }
+  .npsw button { width:24px; height:24px; border-radius:50%; border:0; padding:0; background:var(--sw); }
+  .npsw button[aria-checked="true"] { box-shadow:0 0 0 2px var(--panel), 0 0 0 4px var(--sw); }
+
   /* ---------- Logros ---------- */
   .achgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
   .logros { background:#111213; color:#f0efec; border-radius:22px; padding:28px; margin:-6px 0 0; min-height:60vh; }
@@ -562,7 +581,16 @@
   <form id="form">
     <h3 id="dt">Nueva tarea</h3>
     <label for="fTitle">Título</label><input type="text" id="fTitle" required autocomplete="off">
-    <label for="fProjIn">Proyecto</label><select id="fProjIn"></select>
+    <label id="ppLbl">Proyecto</label><input type="hidden" id="fProjIn">
+    <div class="ppick" id="projPick" role="radiogroup" aria-labelledby="ppLbl"></div>
+    <div class="newproj" id="newProj" hidden>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input type="text" id="npName" placeholder="Nombre del proyecto" aria-label="Nombre del proyecto" autocomplete="off">
+        <input type="text" id="npGroup" list="npGroups" placeholder="Grupo (opcional)" aria-label="Grupo (opcional), por ejemplo Máster" autocomplete="off"><datalist id="npGroups"></datalist>
+      </div>
+      <div class="npsw" id="npSw" role="radiogroup" aria-label="Color del proyecto"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center"><small id="npMsg" style="margin-right:auto;color:var(--late)"></small><button type="button" id="npCancel">Cancelar</button><button type="button" class="primary" id="npSave">Crear proyecto</button></div>
+    </div>
     <label for="fDue">Fecha límite</label><input type="date" id="fDue">
     <div class="quick" id="quick">
       <button type="button" data-d="0">Hoy</button><button type="button" data-d="1">Mañana</button>
@@ -646,11 +674,25 @@
 
 <script>
 // ======================= Configuración de proyectos =======================
-const PROJECTS = [
-  { g:'Máster', color:'var(--c1)', items:['SIF','GMC','Fuentes de energía','Automatización'] },
-  { g:'Fútbol', color:'var(--c2)', items:['Fútbol'] },
-  { g:'Talgo',  color:'var(--c3)', items:['Talgo'] },
+// Proyectos por defecto (se copian a tu cuenta la primera vez; luego puedes crear más)
+const DEFAULT_PROJECTS = [
+  ...['SIF','GMC','Fuentes de energía','Automatización'].map(n => ({ name:n, group_name:'Máster', color:'#eb6834' })),
+  { name:'Fútbol', group_name:'', color:'#2e9e4f' },
+  { name:'Talgo', group_name:'', color:'#d49a00' },
 ];
+const PROJ_COLORS = [['Naranja','#eb6834'],['Rojo','#e34948'],['Rosa','#e0609e'],['Morado','#9c4fd0'],['Índigo','#5b5bd6'],['Azul','#1d8fe0'],
+  ['Celeste','#2aa7d6'],['Turquesa','#1fa98f'],['Verde','#2e9e4f'],['Lima','#8db32b'],['Amarillo','#d49a00'],['Marrón','#a0703c'],['Gris','#8e9097']];
+let projects = DEFAULT_PROJECTS.map(p => ({ ...p })), PROJECTS = [], projectsLoaded = false;
+function rebuildProjects() {
+  const groups = new Map();
+  for (const p of projects) {
+    const g = p.group_name || p.name;
+    if (!groups.has(g)) groups.set(g, { g, color:p.color, items:[] });
+    groups.get(g).items.push(p.name);
+  }
+  PROJECTS = [...groups.values()];
+}
+rebuildProjects();
 const STATES = { todo:'Pendiente', doing:'En proceso', done:'Completada' };
 const BUCKET = 'archivos';
 const VIEWS = ['lista','calendario','proyectos','archivos','estadisticas','logros'];
@@ -681,7 +723,7 @@ const size = n => n > 1e6 ? (n/1e6).toFixed(1).replace('.',',')+' MB' : Math.max
 const isLate = t => t.state !== 'done' && t.due && t.due < today();
 const newId = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c === 'x' ? r : (r&3|8)).toString(16); }));
 const groupOf = p => (PROJECTS.find(x => x.items.includes(p)) || {}).g;
-const colorOf = p => (PROJECTS.find(x => x.items.includes(p)) || {}).color || 'var(--c0)';
+const colorOf = p => (projects.find(x => x.name === p) || {}).color || (PROJECTS.find(x => x.items.includes(p)) || {}).color || 'var(--c0)';
 const projLabel = p => { const g = groupOf(p); return !p ? '' : g && g !== p ? `${g} · ${p}` : p; };
 const matchProj = t => !projFilter || (projFilter.startsWith('g:') ? groupOf(t.proj) === projFilter.slice(2) : t.proj === projFilter.slice(2));
 const matchQ = t => { const q = $('q').value.trim().toLowerCase(); return !q || [t.title, t.notes, t.proj, ...(t.files || []).map(f => f.name)].join(' ').toLowerCase().includes(q); };
@@ -817,6 +859,7 @@ async function loadAll() {
     return;
   }
   tasks = a.data.map(toTask);
+  if (!projectsLoaded) { projectsLoaded = true; loadProjects(); }
   general = b.data.map(r => ({ id:r.id, name:r.name, size:r.size, type:r.type, path:r.path, added:Date.parse(r.added_at) }));
   loaded = true; render();
 }
@@ -1527,12 +1570,69 @@ function openDlg(t, day) {
   editing = t || null; pending = t ? [...(t.files || [])] : [];
   $('dt').textContent = t ? 'Editar tarea' : 'Nueva tarea';
   $('fTitle').value = t?.title || '';
-  $('fProjIn').innerHTML = projOptions(t ? (t.proj || '') : projFilter.startsWith('p:') ? projFilter.slice(2) : '', false);
+  $('fProjIn').value = t ? (t.proj || '') : projFilter.startsWith('p:') ? projFilter.slice(2) : projFilter.startsWith('g:') ? (PROJECTS.find(x => x.g === projFilter.slice(2))?.items[0] || '') : '';
+  $('newProj').hidden = true; drawPick();
   $('fDue').value = t?.due || day || '';
   $('fState').value = t?.state || 'todo'; $('fNotes').value = t?.notes || ''; $('fFiles').value = '';
   $('fSave').disabled = false; $('fDel').hidden = !t;
   drawFiles(); $('dlg').showModal(); $('fTitle').focus();
 }
+// ---------- Selector de proyecto ----------
+let npColor = PROJ_COLORS[5][1];
+function drawPick() {
+  const cur = $('fProjIn').value;
+  const pillP = (name, label) => `<button type="button" class="pp" role="radio" aria-checked="${name === cur}" data-pp="${esc(name)}" style="--pc:${colorOf(name)}"><i></i>${esc(label || name)}</button>`;
+  const multi = PROJECTS.filter(g => g.items.length > 1 || g.items[0] !== g.g);
+  const singles = PROJECTS.filter(g => !multi.includes(g)).map(g => g.items[0]);
+  const known = projects.map(p => p.name);
+  const legacy = [...new Set(tasks.map(t => t.proj).filter(p => p && !known.includes(p)))];
+  if (cur && !known.includes(cur) && !legacy.includes(cur)) legacy.push(cur);
+  $('projPick').innerHTML =
+    multi.map(g => `<div class="ppg"><span class="ppl">${esc(g.g)}</span><div class="pprow">${g.items.map(n => pillP(n)).join('')}</div></div>`).join('')
+    + `<div class="ppg"><span class="ppl">${multi.length ? 'Otros' : 'Proyectos'}</span><div class="pprow">${singles.map(n => pillP(n)).join('')}${legacy.map(n => pillP(n)).join('')}
+       <button type="button" class="pp none" role="radio" aria-checked="${!cur}" data-pp=""><i></i>Sin proyecto</button>
+       <button type="button" class="pp add" id="ppAdd" aria-expanded="${!$('newProj').hidden}">+ Nuevo proyecto</button></div></div>`;
+}
+$('projPick').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'ppAdd') { openNewProj(); return; }
+  $('fProjIn').value = b.dataset.pp; $('newProj').hidden = true; drawPick();
+};
+function drawNpSw() { $('npSw').innerHTML = PROJ_COLORS.map(([n, c]) => `<button type="button" role="radio" aria-checked="${c === npColor}" aria-label="${n}" title="${n}" data-c="${c}" style="--sw:${c}"></button>`).join(''); }
+function openNewProj() {
+  const used = new Set(projects.map(p => p.color));
+  npColor = (PROJ_COLORS.find(([, c]) => !used.has(c)) || PROJ_COLORS[5])[1];
+  $('npName').value = ''; $('npGroup').value = ''; $('npMsg').textContent = '';
+  $('npGroups').innerHTML = [...new Set(projects.map(p => p.group_name).filter(Boolean))].map(g => `<option value="${esc(g)}">`).join('');
+  $('newProj').hidden = false; drawNpSw(); drawPick(); $('npName').focus();
+}
+$('npSw').onclick = e => { const c = e.target.dataset?.c; if (c) { npColor = c; drawNpSw(); } };
+$('npGroup').addEventListener('change', () => { const g = projects.find(p => p.group_name && p.group_name.toLowerCase() === $('npGroup').value.trim().toLowerCase()); if (g) { npColor = g.color; drawNpSw(); } });
+$('npCancel').onclick = () => { $('newProj').hidden = true; drawPick(); };
+['npName','npGroup'].forEach(i => $(i).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('npSave').click(); } }));
+$('npSave').onclick = async () => {
+  const name = $('npName').value.trim().replace(/\s+/g, ' '), group = $('npGroup').value.trim().replace(/\s+/g, ' ');
+  if (!name) { $('npMsg').textContent = 'Escribe un nombre.'; $('npName').focus(); return; }
+  if (projects.some(p => p.name.toLowerCase() === name.toLowerCase())) { $('npMsg').textContent = 'Ya tienes un proyecto con ese nombre.'; return; }
+  const g = group && projects.find(p => p.group_name.toLowerCase() === group.toLowerCase());
+  const row = { name, group_name:g ? g.group_name : group, color:npColor };
+  $('npSave').disabled = true;
+  const { data, error } = await sb.from('projects').insert(row).select().single();
+  $('npSave').disabled = false;
+  if (error) { $('npMsg').textContent = /projects|does not exist|schema cache/i.test(error.message) ? 'Falta ejecutar el script SQL nuevo en Supabase.' : errText(error); return; }
+  projects.push(data); rebuildProjects();
+  $('fProjIn').value = name; $('newProj').hidden = true; drawPick(); toast(`Proyecto «${name}» creado.`);
+};
+async function loadProjects() {
+  const { data, error } = await sb.from('projects').select('*').order('created_at');
+  if (error) return;                          // sin tabla todavía: se usan los proyectos por defecto
+  if (!data.length) {
+    const ins = await sb.from('projects').insert(DEFAULT_PROJECTS).select();
+    if (!ins.error) projects = ins.data;
+  } else projects = data;
+  rebuildProjects(); render();
+}
+
 function drawFiles() {
   $('fList').innerHTML = pending.map((f, i) => `<div class="fl"><span>📎 ${esc(f.name)} (${size(f.size)})${f._file ? ' · nuevo' : ''}</span><button type="button" class="linkish" data-x="${i}">quitar</button></div>`).join('');
 }
@@ -1939,7 +2039,7 @@ $('impf').onchange = async e => {
 // ======================= Arranque =======================
 function enterApp(u) {
   if (user && u && user.id === u.id && !$('appView').hidden) return;
-  user = u; loaded = false; tasks = []; general = []; extCals = []; extData = {}; extLoaded = false; clips = []; clipsErr = ''; achs = []; achLoaded = false; achErr = '';
+  user = u; loaded = false; tasks = []; general = []; extCals = []; extData = {}; extLoaded = false; clips = []; clipsErr = ''; achs = []; achLoaded = false; achErr = ''; projectsLoaded = false; projects = DEFAULT_PROJECTS.map(p => ({ ...p })); rebuildProjects();
   subClips();
   $('authView').hidden = true; $('appView').hidden = false;
   const h = location.hash.slice(1); view = VIEWS.includes(h) ? h : 'lista';

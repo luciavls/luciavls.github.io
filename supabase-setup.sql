@@ -165,3 +165,18 @@ create policy "cambiar logros" on storage.objects for update to authenticated
 drop policy if exists "borrar logros" on storage.objects;
 create policy "borrar logros" on storage.objects for delete to authenticated
   using (bucket_id = 'logros' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- 8) Proyectos (puedes crear los tuyos desde la app)
+create table if not exists public.projects (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  name       text not null,
+  group_name text not null default '',
+  color      text not null default '#8e9097',
+  created_at timestamptz not null default now(),
+  unique (user_id, name)
+);
+alter table public.projects enable row level security;
+drop policy if exists "proyectos propios" on public.projects;
+create policy "proyectos propios" on public.projects for all to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
