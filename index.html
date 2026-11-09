@@ -385,6 +385,20 @@
   .wxchip.rain { border-color:#9cc3f0; }
   @media (max-width:900px) { .wxchip { height:36px; padding:0 10px; } .wxchip .wmm, .wxchip .wr { display:none; } }
 
+  .wx-locbar { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 16px 0; font-size:14px; }
+  .wx-locbar small { color:var(--mute); }
+  .wx-locbar button { padding:5px 12px; border-radius:99px; font-size:13px; }
+  .wx-locmsg { font-size:13px; color:var(--mute); padding:8px 0; }
+  .wx-locmsg.warn { margin:8px 16px 0; padding:8px 12px; border-radius:10px; background:var(--acc-soft); color:var(--ink); }
+  .wx-loced { margin:10px 16px 0; padding:12px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+  .wx-loced form { display:flex; gap:8px; }
+  .wx-loced input { flex:1; min-width:0; }
+  .wx-cityres { display:grid; gap:4px; margin-top:8px; }
+  .wx-cityres button { text-align:left; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-size:14px; }
+  .wx-cityres small { color:var(--mute); }
+  .wx-useauto { margin-top:8px; width:100%; border-style:dashed; }
+  @media (min-width:760px) { .wx-locbar { padding:16px 30px 0; } .wx-locmsg.warn, .wx-loced { margin-left:30px; margin-right:30px; } }
+
   /* ---------- El tiempo (como en la liga de pádel) ---------- */
   .wx-strip{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 14px;text-shadow:0 1px 3px rgba(0,0,0,.25);padding:9px 12px;border:0;border-radius:14px;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.08);position:relative;text-align:left;font:inherit}
   .wx-ic{font-size:24px;line-height:1}
@@ -2152,7 +2166,37 @@ $('achForm').onsubmit = async e => {
 };
 
 // ======================= El tiempo (Open-Meteo, como en la liga de pádel) =======================
-const WX_LAT = 40.4405, WX_LON = -3.6894, WX_TTL = 15 * 60 * 1000, WX_PLACE = 'Madrid';
+const WX_TTL = 15 * 60 * 1000, WX_DEFAULT = { lat:40.4405, lon:-3.6894, name:'Madrid' };
+// Ubicación del tiempo (se guarda en cada dispositivo): 'auto' = la del dispositivo; 'manual' = la ciudad elegida
+let wxLoc = (() => { try { return JSON.parse(localStorage.getItem('wxLoc')) || { mode:'auto' }; } catch { return { mode:'auto' }; } })();
+let wxLocMsg = '', wxGeoTried = false, wxEditing = false, wxResults = [];
+const wxSaveLoc = () => { try { localStorage.setItem('wxLoc', JSON.stringify(wxLoc)); } catch {} };
+const wxPlace = () => wxLoc.lat != null ? wxLoc.name || 'Tu ubicación' : WX_DEFAULT.name;
+// Pide la ubicación al dispositivo; si no se puede, se queda con la última conocida o con Madrid
+function wxGeolocate() {
+  return new Promise(res => {
+    if (!navigator.geolocation) { wxLocMsg = 'Este navegador no puede darte tu ubicación. Elige una ciudad.'; return res(false); }
+    navigator.geolocation.getCurrentPosition(async pos => {
+      const lat = +pos.coords.latitude.toFixed(3), lon = +pos.coords.longitude.toFixed(3);
+      let name = wxLoc.mode === 'auto' && wxLoc.lat != null && Math.abs(wxLoc.lat - lat) < .05 && Math.abs(wxLoc.lon - lon) < .05 ? wxLoc.name : '';
+      if (!name) {
+        try {
+          const r = await (await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=es`)).json();
+          name = r.city || r.locality || r.principalSubdivision || '';
+        } catch {}
+      }
+      wxLoc = { mode:'auto', lat, lon, name:name || 'Tu ubicación' }; wxSaveLoc(); wxLocMsg = ''; res(true);
+    }, err => {
+      wxLocMsg = err.code === 1 ? 'No has dado permiso para usar tu ubicación. Puedes elegir una ciudad.' : 'No se pudo saber tu ubicación. Puedes elegir una ciudad.';
+      res(false);
+    }, { timeout:9000, maximumAge:30 * 60 * 1000 });
+  });
+}
+async function wxResolveLoc() {
+  if (wxLoc.mode === 'manual' || wxGeoTried) return;
+  wxGeoTried = true;
+  await wxGeolocate();
+}
 const WX_DAYN = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const WX_HOURS = [7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
 let wxData = null, wxAt = 0, wxDay = 0, wxLoading = false;
@@ -2204,7 +2248,9 @@ function wxFx(code, day, t) {
 }
 async function loadWeather(force) {
   if (!force && wxData && Date.now() - wxAt < WX_TTL) return wxData;
-  const u = `https://api.open-meteo.com/v1/forecast?latitude=${WX_LAT}&longitude=${WX_LON}&current=temperature_2m,weather_code,is_day,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability,is_day&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Europe%2FMadrid&forecast_days=7`;
+  await wxResolveLoc();
+  const L = wxLoc.lat != null ? wxLoc : WX_DEFAULT;
+  const u = `https://api.open-meteo.com/v1/forecast?latitude=${L.lat}&longitude=${L.lon}&current=temperature_2m,weather_code,is_day,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability,is_day&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&forecast_days=7`;
   const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 8000);
   try {
     const j = await (await fetch(u, { signal:ctrl.signal })).json();
@@ -2235,7 +2281,7 @@ function drawWxChip() {
   const c = wxData.cur, [ic, txt] = wxCode(c.code, c.day), td = wxData.daily[0], rl = wxRainLaterToday();
   el.hidden = false;
   el.classList.toggle('rain', !!(rl || wxIsRain(c.code)));
-  el.title = `${txt} en ${WX_PLACE} · Máx ${Math.round(td.max)}° · Mín ${Math.round(td.min)}°${rl ? ' · lluvia hacia las ' + rl : ''}`;
+  el.title = `${txt} en ${wxPlace()} · Máx ${Math.round(td.max)}° · Mín ${Math.round(td.min)}°${rl ? ' · lluvia hacia las ' + rl : ''}`;
   el.innerHTML = `<span class="wi">${ic}</span><b>${Math.round(c.t)}°</b><span class="wmm">${Math.round(td.max)}° / ${Math.round(td.min)}°</span>${rl ? `<span class="wr">☔ ${rl}</span>` : ''}`;
 }
 function ensureWx() { if (wxData || wxLoading) { drawWxChip(); return; } wxLoading = true; loadWeather().then(() => { wxLoading = false; drawWxChip(); }).catch(() => { wxLoading = false; }); }
@@ -2244,18 +2290,39 @@ function wxStripHTML() {
   const c = wxData.cur, [ic, txt] = wxCode(c.code, c.day), td = wxData.daily[0], rl = wxRainLaterToday();
   return `<button class="wx-strip wx-sky-${wxSky(c.code, c.day, c.t)}${rl || wxIsRain(c.code) ? ' wx-alert' : ''}" data-act="wx" aria-label="Ver el tiempo por horas">${wxFx(c.code, c.day, c.t)}
     <span class="wx-ic">${ic}</span><span class="wx-t">${Math.round(c.t)}°</span>
-    <span class="wx-mid"><b>${txt}<i class="wx-loc"> · ${WX_PLACE}</i></b><span class="wx-mm">Máx ${Math.round(td.max)}° · Mín ${Math.round(td.min)}°</span><span>${wxQuip(c.t, c.code, c.wind, rl, c.day)}</span></span>${wxNextHTML()}<span class="wx-go">›</span></button>`;
+    <span class="wx-mid"><b>${txt}<i class="wx-loc"> · ${wxPlace()}</i></b><span class="wx-mm">Máx ${Math.round(td.max)}° · Mín ${Math.round(td.min)}°</span><span>${wxQuip(c.t, c.code, c.wind, rl, c.day)}</span></span>${wxNextHTML()}<span class="wx-go">›</span></button>`;
 }
 function openWeather() {
   if (!wxData) return;
   wxDay = new Date().getHours() >= 22 && wxData.daily.length > 1 ? 1 : 0;
   let ov = $('wxSheet');
   if (!ov) { ov = document.createElement('div'); ov.id = 'wxSheet'; ov.className = 'wx-ov'; ov.innerHTML = '<div class="wx-bg" data-wxclose></div><div class="wx-sheet" id="wxSheetBody" role="dialog" aria-label="El tiempo"></div>'; document.body.appendChild(ov);
-    ov.addEventListener('click', e => { if (e.target.closest('[data-wxclose]')) closeWeather(); const d = e.target.closest('[data-wxday]'); if (d) { wxDay = +d.dataset.wxday; renderWeatherSheet(); } }); }
+    ov.addEventListener('click', async e => {
+      if (e.target.closest('[data-wxclose]')) closeWeather();
+      const d = e.target.closest('[data-wxday]'); if (d) { wxDay = +d.dataset.wxday; renderWeatherSheet(); }
+      if (e.target.closest('[data-wxedit]')) { wxEditing = !wxEditing; wxResults = []; renderWeatherSheet(); if (wxEditing) $('wxCity')?.focus(); }
+      if (e.target.closest('[data-wxauto]')) { wxEditing = false; wxLoc = { mode:'auto' }; wxSaveLoc(); wxGeoTried = false; await wxReload(); }
+      const pick = e.target.closest('[data-wxpick]');
+      if (pick) { const r = wxResults[+pick.dataset.wxpick]; wxLoc = { mode:'manual', lat:r.latitude, lon:r.longitude, name:r.name }; wxSaveLoc(); wxEditing = false; wxLocMsg = ''; await wxReload(); }
+    });
+    ov.addEventListener('submit', async e => {
+      e.preventDefault(); const q = $('wxCity').value.trim(); if (!q) return;
+      $('wxCityRes').innerHTML = '<div class="wx-locmsg">Buscando…</div>';
+      try { const r = await (await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=es&format=json`)).json(); wxResults = r.results || []; }
+      catch { wxResults = []; }
+      $('wxCityRes').innerHTML = wxResults.length ? wxResults.map((r, i) => `<button type="button" data-wxpick="${i}">📍 <b>${esc(r.name)}</b> <small>${esc([r.admin1, r.country].filter(Boolean).join(', '))}</small></button>`).join('') : '<div class="wx-locmsg">No encuentro esa ciudad. Prueba con otro nombre.</div>';
+    });
+  }
   renderWeatherSheet();
   requestAnimationFrame(() => ov.classList.add('open'));
 }
-function closeWeather() { $('wxSheet')?.classList.remove('open'); }
+function closeWeather() { $('wxSheet')?.classList.remove('open'); wxEditing = false; }
+async function wxReload() {
+  wxData = null; wxAt = 0;
+  const b = $('wxSheetBody'); if (b) b.insertAdjacentHTML('afterbegin', '<div class="wx-locmsg" style="padding:12px 16px">Cargando el tiempo…</div>');
+  try { await loadWeather(true); } catch {}
+  drawWxChip(); renderWeatherSheet();
+}
 function renderWeatherSheet() {
   const body = $('wxSheetBody'); if (!body || !wxData) return;
   const c = wxData.cur, [ic, txt] = wxCode(c.code, c.day), td = wxData.daily[0], rl = wxRainLaterToday();
@@ -2264,14 +2331,20 @@ function renderWeatherSheet() {
   const mine = dayTasks.length ? `<div class="wx-mine"><b>📌 ${dayTasks.length} tarea${dayTasks.length > 1 ? 's' : ''} ${wxDay === 0 ? 'para hoy' : 'ese día'}</b>${dayTasks.slice(0, 4).map(t => esc(t.title)).join(' · ')}${dayTasks.length > 4 ? ' …' : ''}</div>` : '';
   const hrs = wxData.hourly.filter(x => x.tm.startsWith(day.d) && WX_HOURS.includes(+x.tm.slice(11, 13)) && (wxDay !== 0 || +x.tm.slice(11, 13) >= nowH));
   body.innerHTML = `<div class="wx-top wx-sky-${wxSky(c.code, c.day, c.t)}">${wxFx(c.code, c.day, c.t)}<div class="wx-grab"></div>
-    <div class="wx-row"><div><div class="wx-cond">${WX_PLACE} · ahora</div><div class="wx-big">${Math.round(c.t)}°</div><div class="wx-cond">${ic} ${txt}</div><div class="wx-hl">Máx ${Math.round(td.max)}° · Mín ${Math.round(td.min)}°</div></div><button class="wx-x" data-wxclose aria-label="Cerrar">✕</button></div>
+    <div class="wx-row"><div><div class="wx-cond">${wxPlace()} · ahora</div><div class="wx-big">${Math.round(c.t)}°</div><div class="wx-cond">${ic} ${txt}</div><div class="wx-hl">Máx ${Math.round(td.max)}° · Mín ${Math.round(td.min)}°</div></div><button class="wx-x" data-wxclose aria-label="Cerrar">✕</button></div>
     <div class="wx-msg">${wxQuip(c.t, c.code, c.wind, rl, c.day)}</div></div>
+   <div class="wx-locbar"><span>📍 <b>${esc(wxPlace())}</b> <small>${wxLoc.mode === 'manual' ? 'elegida por ti' : wxLoc.lat != null ? 'tu ubicación' : 'por defecto'}</small></span>
+     <button type="button" data-wxedit>${wxEditing ? 'Cerrar' : 'Cambiar'}</button></div>
+   ${wxLocMsg && wxLoc.mode !== 'manual' ? `<div class="wx-locmsg warn">${esc(wxLocMsg)} <button type="button" class="linkish" data-wxedit>Elegir ciudad</button></div>` : ''}
+   ${wxEditing ? `<div class="wx-loced"><form><input id="wxCity" type="search" placeholder="Escribe una ciudad…" aria-label="Ciudad" autocomplete="off"><button class="primary">Buscar</button></form>
+     <div id="wxCityRes" class="wx-cityres"></div>
+     <button type="button" class="wx-useauto" data-wxauto>📡 Usar mi ubicación</button></div>` : ''}
    ${mine}
    <div class="wx-days">${wxData.daily.map((d, i) => { const dt = new Date(d.d + 'T12:00'); const [di] = wxCode(d.code, 1); const n = tasks.filter(t => t.due === d.d && t.state !== 'done').length;
      return `<button class="${i === wxDay ? 'on' : ''}" data-wxday="${i}">${i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : WX_DAYN[dt.getDay()] + ' ' + dt.getDate()}<small>${di} <b>${Math.round(d.max)}°</b> ${Math.round(d.min)}°${n ? ' · 📌' + n : ''}</small></button>`; }).join('')}</div>
    <div class="wx-hours">${hrs.length ? '' : '<div class="wx-closed">Por hoy ya no quedan horas. Mira mañana.</div>'}${hrs.map(x => { const H = +x.tm.slice(11, 13); const [hi] = wxCode(x.code, x.day);
      return `<div class="wx-h"><div class="wx-hh">${H}:00</div><div class="wx-hi">${hi}</div><div class="wx-ht">${Math.round(x.t)}°</div><div class="wx-hp">${x.p >= 20 ? '💧' + x.p + '%' : ''}</div></div>`; }).join('')}</div>
-   <div class="wx-legend">${WX_PLACE} · 💧 probabilidad de lluvia · 📌 tareas con fecha ese día · Datos: Open-Meteo</div>`;
+   <div class="wx-legend">${wxPlace()} · 💧 probabilidad de lluvia · 📌 tareas con fecha ese día · Datos: Open-Meteo</div>`;
 }
 setInterval(() => { if (document.visibilityState === 'visible' && user) loadWeather(true).then(drawWxChip).catch(() => {}); }, WX_TTL);
 
