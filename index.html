@@ -349,6 +349,158 @@
   .extitem .bar { width:4px; border-radius:4px; background:var(--pc); justify-self:center; height:100%; min-height:20px; }
   .extitem .ti { font-size:15px; }
   .extitem .meta { font-size:12px; color:var(--mute); margin-top:3px; }
+  /* ---------- Menú Más (móvil) ---------- */
+  .navmore { display:none; }
+  .sheet-ov { position:fixed; inset:0; z-index:40; }
+  .sheet-bg { position:absolute; inset:0; background:var(--scrim); }
+  .sheet { position:absolute; left:0; right:0; bottom:0; background:var(--card); border-radius:22px 22px 0 0; padding:10px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); box-shadow:0 -10px 40px rgba(0,0,0,.2); animation:sheetUp .2s ease-out; }
+  @keyframes sheetUp { from { transform:translateY(40px); opacity:.4; } }
+  .sheet-grab { width:40px; height:4px; border-radius:4px; background:var(--line2); margin:0 auto 14px; }
+  .sheet-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .sheet-grid a { display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 6px; border-radius:16px; background:var(--panel); color:var(--ink); text-decoration:none; font-size:13px; font-weight:600; }
+  .sheet-grid a svg.i { width:24px; height:24px; }
+  .sheet-grid a[aria-current="page"] { background:var(--acc-soft); color:var(--acc-ink); }
+  .sheet-list { display:grid; margin-top:14px; border-top:1px solid var(--line); }
+  .sheet-list button { display:flex; align-items:center; justify-content:space-between; background:none; border:0; border-bottom:1px solid var(--line); border-radius:0; padding:14px 4px; font-size:15px; text-align:left; }
+  .sheet-list .sw { width:40px; height:22px; border-radius:99px; background:var(--line2); position:relative; }
+  .sheet-list .sw::after { content:""; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition:transform .2s; }
+  .sheet-list .sw.on { background:var(--sv); } .sheet-list .sw.on::after { transform:translateX(18px); }
+  .sheet-who { font-size:12px; color:var(--mute); text-align:center; margin-top:12px; }
+  @media (max-width:900px) {
+    .nav { grid-template-columns:repeat(4,1fr) !important; }
+    .nav a.sec2 { display:none !important; }
+    .navmore { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:6px 2px; font-size:11px; border:0; background:none; border-radius:10px; color:var(--ink); font-weight:500; }
+    .navmore svg.i { width:22px; height:22px; }
+    .navmore.on { color:var(--acc-ink); }
+    #gearBtn { display:none; }
+  }
+  @media (min-width:901px) { .sheet-ov { display:none !important; } }
+
+  /* ---------- El tiempo: chip discreto en la barra de arriba ---------- */
+  .wxchip { display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 12px; border-radius:99px; border:1px solid var(--line2); background:var(--card); font-size:14px; white-space:nowrap; }
+  .wxchip .wi { font-size:17px; line-height:1; }
+  .wxchip b { font-weight:700; font-variant-numeric:tabular-nums; }
+  .wxchip .wmm { color:var(--mute); font-size:12px; font-variant-numeric:tabular-nums; }
+  .wxchip .wr { color:#2f7de1; font-size:12px; font-weight:600; }
+  .wxchip.rain { border-color:#9cc3f0; }
+  @media (max-width:900px) { .wxchip { height:36px; padding:0 10px; } .wxchip .wmm, .wxchip .wr { display:none; } }
+
+  /* ---------- El tiempo (como en la liga de pádel) ---------- */
+  .wx-strip{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 14px;text-shadow:0 1px 3px rgba(0,0,0,.25);padding:9px 12px;border:0;border-radius:14px;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.08);position:relative;text-align:left;font:inherit}
+  .wx-ic{font-size:24px;line-height:1}
+  .wx-t{font-size:22px;font-weight:800;letter-spacing:-.02em}
+  .wx-mid{flex:1;min-width:0}
+  .wx-mid b{display:block;font-size:13px}
+  .wx-mid span{display:block;font-size:12px;opacity:.92;line-height:1.3}
+  .wx-mid .wx-mm{font-weight:700;opacity:1;font-size:12.5px}
+  .wx-go{font-size:22px;font-weight:700;opacity:.85}
+  .wx-next{display:none}
+  .wx-loc{font-style:normal}
+  @media (min-width:760px){
+   .wx-strip{padding:18px 22px;gap:16px;border-radius:20px;min-height:120px}
+   .wx-ic{font-size:44px}
+   .wx-t{font-size:52px;font-weight:300;letter-spacing:-.03em;line-height:1}
+   .wx-mid{flex:0 1 280px}
+   .wx-mid b{font-size:17px;margin-bottom:3px}
+   .wx-mid span{font-size:14px}
+   .wx-next{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0;padding-left:18px;border-left:1px solid rgba(255,255,255,.3)}
+   .wx-next-l{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;opacity:.85}
+   .wx-next-row{display:flex;justify-content:space-between;gap:6px}
+   .wx-nh{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:13px;font-weight:700;min-width:40px}
+   .wx-nhi{font-size:22px}
+   .wx-nh b{font-size:16px}
+   .wx-nh em{font-style:normal;font-size:11.5px;font-weight:800;color:#d6ecff;min-height:14px}
+   .wx-go{font-size:28px}
+   .wx-sun{right:70px;top:-20px;width:64px;height:64px}
+   .wx-sunrays{right:-28px;top:-120px;width:260px;height:260px}
+   .wx-moon{right:80px;top:-8px;width:44px;height:44px;box-shadow:inset -12px -4px 0 0 #f4f1d8}
+  }
+  @media (min-width:760px) and (max-width:1200px){ .wx-nh:nth-child(n+6){display:none} }
+  .wx-alert{box-shadow:inset 0 0 0 2px #ffd54a,0 4px 14px rgba(0,0,0,.08)}
+  .wx-sky-sun{background:linear-gradient(135deg,#2f8ff0,#6cc3ff)}
+  .wx-sky-part{background:linear-gradient(135deg,#4f86c6,#9ab8d8)}
+  .wx-sky-cloud{background:linear-gradient(135deg,#6b7b8c,#9aa7b4)}
+  .wx-sky-rain{background:linear-gradient(135deg,#3b4a63,#5f7390)}
+  .wx-sky-storm{background:linear-gradient(135deg,#262b3d,#4b4f6b)}
+  .wx-sky-night{background:linear-gradient(135deg,#141c3a,#2d3a6b)}
+  .wx-sky-cold{background:linear-gradient(135deg,#4a7fa8,#a9cde6)}
+.wx-sky-hot{background:linear-gradient(135deg,#f07a2f,#ffb347)}
+.wx-strip,.wx-top{overflow:hidden;position:relative}
+.wx-strip>*:not(.wx-fx),.wx-top>*:not(.wx-fx){position:relative;z-index:1}
+.wx-fx{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.wx-fx i{position:absolute;display:block}
+.wx-cloud{left:-45%;width:55%;height:70%;min-width:120px;background:radial-gradient(closest-side,rgba(255,255,255,.55),rgba(255,255,255,0));filter:blur(2px);animation:wxDrift linear infinite}
+.wx-cloud.dk{background:radial-gradient(closest-side,rgba(225,232,240,.38),rgba(225,232,240,0))}
+@keyframes wxDrift{from{left:-55%}to{left:110%}}
+.wx-drop{top:-25%;width:1.4px;border-radius:2px;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(230,240,255,.9));transform:rotate(12deg);animation:wxDrop linear infinite}
+@keyframes wxDrop{from{top:-25%;margin-left:0}to{top:110%;margin-left:-16px}}
+.wx-flash{inset:0;background:radial-gradient(ellipse at 30% 0%,rgba(255,255,255,.95),rgba(220,230,255,.35) 60%,rgba(255,255,255,0));opacity:0;animation:wxFlash 6s infinite}
+@keyframes wxFlash{0%,80%,100%{opacity:0}81%{opacity:.85}82%{opacity:.1}84%{opacity:.6}87%{opacity:0}}
+.wx-sun{right:46px;top:-16px;width:40px;height:40px;border-radius:50%;background:radial-gradient(circle,#fff7c2 0,#ffe066 55%,#ffd23f 100%);box-shadow:0 0 22px 8px rgba(255,226,110,.55),0 0 60px 26px rgba(255,214,90,.25);animation:wxGlow 4s ease-in-out infinite}
+.wx-sun.hot{background:radial-gradient(circle,#fff1b8 0,#ffc04d 55%,#ff9a2e 100%);box-shadow:0 0 24px 10px rgba(255,170,70,.6),0 0 70px 30px rgba(255,140,40,.3)}
+@keyframes wxGlow{0%,100%{box-shadow:0 0 22px 8px rgba(255,226,110,.5),0 0 60px 26px rgba(255,214,90,.22)}50%{box-shadow:0 0 28px 12px rgba(255,226,110,.7),0 0 80px 34px rgba(255,214,90,.3)}}
+.wx-sunrays{right:-34px;top:-96px;width:200px;height:200px;border-radius:50%;background:repeating-conic-gradient(rgba(255,240,180,.28) 0 6deg,rgba(255,240,180,0) 6deg 22deg);-webkit-mask:radial-gradient(circle,#000 18%,transparent 68%);mask:radial-gradient(circle,#000 18%,transparent 68%);animation:wxSpin 40s linear infinite}
+.wx-sunrays.hot{background:repeating-conic-gradient(rgba(255,210,140,.35) 0 6deg,rgba(255,210,140,0) 6deg 22deg)}
+@keyframes wxSpin{to{transform:rotate(360deg)}}
+.wx-moon{right:52px;top:-6px;width:28px;height:28px;border-radius:50%;box-shadow:inset -8px -3px 0 0 #f4f1d8;filter:drop-shadow(0 0 8px rgba(240,236,200,.45))}
+.wx-star{border-radius:50%;background:#fff;box-shadow:0 0 4px rgba(255,255,255,.8);animation:wxTwinkle ease-in-out infinite alternate}
+@keyframes wxTwinkle{from{opacity:.15;transform:scale(.7)}to{opacity:1;transform:scale(1.15)}}
+.wx-flake{top:-10px;border-radius:50%;background:radial-gradient(circle,#fff 40%,rgba(255,255,255,.2));opacity:.85;filter:blur(.3px);animation:wxFall linear infinite,wxSway ease-in-out infinite alternate}
+@keyframes wxFall{from{top:-10px}to{top:110%}}
+@keyframes wxSway{from{margin-left:-6px}to{margin-left:6px}}
+@media (prefers-reduced-motion:reduce){.wx-fx i{animation:none!important}}
+
+  .wx-ov{position:fixed;inset:0;z-index:60;pointer-events:none}
+  .wx-bg{position:absolute;inset:0;background:rgba(0,0,0,.35);opacity:0;transition:opacity .2s}
+  .wx-sheet{position:absolute;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;max-height:88vh;overflow:auto;background:var(--card);color:var(--ink);border-radius:24px 24px 0 0;transform:translateY(100%);transition:transform .25s;padding-bottom:calc(18px + env(safe-area-inset-bottom, 0px))}
+  .wx-ov.open{pointer-events:auto}.wx-ov.open .wx-bg{opacity:1}.wx-ov.open .wx-sheet{transform:none}
+  .wx-top{padding:16px 16px 14px;color:#fff;border-radius:24px 24px 0 0;text-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .wx-grab{width:40px;height:4px;border-radius:4px;background:rgba(255,255,255,.6);margin:0 auto 10px}
+  .wx-row{display:flex;align-items:center;justify-content:space-between}
+  .wx-big{font-size:46px;font-weight:300;line-height:1}
+  .wx-cond{font-size:15px;font-weight:700}
+  .wx-hl{font-size:13px;opacity:.9}
+  .wx-x{border:0;background:rgba(255,255,255,.22);color:#fff;border-radius:999px;width:30px;height:30px;font-size:16px;cursor:pointer;padding:0}
+  .wx-msg{margin-top:8px;font-size:13.5px;font-weight:700}
+  .wx-mine{margin:10px 16px 0;border-radius:14px;padding:10px 12px;font-size:13px;background:var(--acc-soft);color:var(--ink)}
+  .wx-mine b{display:block;font-size:13.5px}
+  .wx-days{display:flex;gap:6px;overflow-x:auto;padding:12px 16px 4px;scrollbar-width:none}
+  .wx-days button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:6px 10px;font-size:12.5px;font-weight:800;text-align:center;line-height:1.25}
+  .wx-days button small{display:block;font-weight:600;color:var(--mute);font-size:11px}
+  .wx-days small b{font-weight:800}
+  .wx-days button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}.wx-days button.on small{color:var(--line2)}
+  .wx-hours{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 6px}
+  .wx-h{flex:0 0 54px;border-radius:14px;background:var(--panel);text-align:center;padding:8px 0;font-size:12px}
+  .wx-hh{font-weight:800;color:var(--mute)}
+  .wx-hi{font-size:22px;margin:4px 0}
+  .wx-ht{font-weight:800;font-size:14px}
+  .wx-hp{font-size:11px;font-weight:800;color:#2f7de1;min-height:14px}
+  .wx-closed{padding:18px 6px;font-size:13.5px;color:var(--mute);text-align:center;width:100%}
+  .wx-legend{padding:4px 16px 0;font-size:11.5px;color:var(--mute)}
+  @media (min-width:760px){
+   .wx-sheet{top:50%;bottom:auto;left:50%;right:auto;width:min(980px,92vw);max-width:none;max-height:90vh;margin:0;border-radius:26px;transform:translate(-50%,-46%) scale(.97);opacity:0;transition:transform .22s,opacity .22s;padding-bottom:22px}
+   .wx-ov.open .wx-sheet{transform:translate(-50%,-50%);opacity:1}
+   .wx-top{padding:26px 30px 24px;border-radius:26px 26px 0 0}
+   .wx-grab{display:none}
+   .wx-big{font-size:84px}
+   .wx-cond{font-size:19px}
+   .wx-hl{font-size:16px}
+   .wx-msg{font-size:17px;margin-top:12px}
+   .wx-x{width:40px;height:40px;font-size:20px}
+   .wx-mine{margin:18px 30px 0;padding:14px 18px;font-size:15px}
+   .wx-days{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;padding:20px 30px 6px;overflow:visible}
+   .wx-days button{padding:12px 6px;font-size:15px;border-radius:16px}
+   .wx-days button small{font-size:14px;margin-top:4px}
+   .wx-hours{display:grid;grid-template-columns:repeat(9,1fr);gap:8px;padding:16px 30px 8px;overflow:visible}
+   .wx-h{padding:12px 0;border-radius:16px;font-size:14px}
+   .wx-hi{font-size:28px;margin:6px 0}
+   .wx-ht{font-size:18px}
+   .wx-legend{padding:10px 30px 0;font-size:13px}
+   .wx-sheet .wx-sun{right:120px;top:-10px;width:80px;height:80px}
+   .wx-sheet .wx-sunrays{right:-10px;top:-120px;width:320px;height:320px}
+   .wx-sheet .wx-moon{right:130px;top:10px;width:56px;height:56px;box-shadow:inset -15px -5px 0 0 #f4f1d8}
+  }
+
   /* ---------- Selector de proyecto ---------- */
   .ppick { display:grid; gap:10px; }
   .ppg { display:grid; gap:6px; }
@@ -497,6 +649,7 @@
   <symbol id="i-board" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></symbol>
   <symbol id="i-clip" viewBox="0 0 24 24"><path d="M20 11.5l-7.8 7.8a5 5 0 01-7.1-7.1l8.5-8.5a3.3 3.3 0 014.7 4.7l-8.5 8.5a1.7 1.7 0 01-2.4-2.4l7.8-7.8"/></symbol>
   <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 01-8 0zM8 6H5a3 3 0 003 4M16 6h3a3 3 0 01-3 4M12 13v4M8 20h8M9.5 17h5"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
   <symbol id="i-stats" viewBox="0 0 24 24"><path d="M5 20V10M10 20V4M15 20v-8M20 20v-5"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 119.5 4a6.5 6.5 0 0010.5 10.5z"/></symbol>
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1112 0v5l1.5 2h-15zM10 20.5a2 2 0 004 0"/></symbol>
@@ -535,10 +688,11 @@
     <nav class="nav" aria-label="Secciones">
       <a href="#lista" data-view="lista"><svg class="i"><use href="#i-list"/></svg>Lista</a>
       <a href="#calendario" data-view="calendario"><svg class="i"><use href="#i-cal"/></svg>Calendario</a>
-      <a href="#proyectos" data-view="proyectos"><svg class="i"><use href="#i-board"/></svg>Proyectos</a>
+      <a href="#proyectos" data-view="proyectos" class="sec2"><svg class="i"><use href="#i-board"/></svg>Proyectos</a>
       <a href="#archivos" data-view="archivos"><svg class="i"><use href="#i-clip"/></svg>Archivos</a>
-      <a href="#estadisticas" data-view="estadisticas"><svg class="i"><use href="#i-stats"/></svg>Estadísticas</a>
-      <a href="#logros" data-view="logros"><svg class="i"><use href="#i-trophy"/></svg>Logros</a>
+      <a href="#estadisticas" data-view="estadisticas" class="sec2"><svg class="i"><use href="#i-stats"/></svg>Estadísticas</a>
+      <a href="#logros" data-view="logros" class="sec2"><svg class="i"><use href="#i-trophy"/></svg>Logros</a>
+      <button type="button" class="navmore" id="moreBtn" aria-haspopup="dialog" aria-controls="moreSheet"><svg class="i"><use href="#i-menu"/></svg>Más</button>
     </nav>
     <div class="side-foot">
       <button class="toggle" id="darkT" role="switch" aria-checked="false"><span style="display:flex;gap:10px;align-items:center"><svg class="i"><use href="#i-moon"/></svg>Modo oscuro</span><span class="sw"></span></button>
@@ -554,6 +708,7 @@
         <a href="#proyectos" data-view="proyectos">Proyectos</a>
       </nav>
       <label class="search"><svg class="i" style="color:var(--mute)"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Buscar…" aria-label="Buscar"></label>
+      <button class="wxchip" id="wxChip" data-act="wx" hidden aria-label="Ver el tiempo"></button>
       <div class="menuwrap">
         <button class="icon" id="bellBtn" aria-label="Avisos" aria-expanded="false"><svg class="i"><use href="#i-bell"/></svg><span class="badge" id="bellN" hidden></span></button>
         <div class="card pop" id="bellPop" hidden></div>
@@ -668,6 +823,27 @@
     <div class="dr"><button type="button" id="pwCancel">Cancelar</button><button class="primary" type="submit" id="pwSave">Guardar</button></div>
   </form>
 </dialog>
+
+<div class="sheet-ov" id="moreSheet" role="dialog" aria-modal="true" aria-label="Más opciones" hidden>
+  <div class="sheet-bg" data-close></div>
+  <div class="sheet">
+    <div class="sheet-grab"></div>
+    <div class="sheet-grid">
+      <a href="#proyectos" data-view="proyectos" data-close><svg class="i"><use href="#i-board"/></svg>Proyectos</a>
+      <a href="#logros" data-view="logros" data-close><svg class="i"><use href="#i-trophy"/></svg>Logros</a>
+      <a href="#estadisticas" data-view="estadisticas" data-close><svg class="i"><use href="#i-stats"/></svg>Estadísticas</a>
+    </div>
+    <div class="sheet-list">
+      <button type="button" data-act="ext" data-close>Calendarios del iPhone</button>
+      <button type="button" data-act="dark">Modo oscuro <span class="sw" aria-hidden="true"></span></button>
+      <button type="button" data-act="pw" data-close>Cambiar contraseña</button>
+      <button type="button" data-act="export" data-close>Exportar copia</button>
+      <button type="button" data-act="import" data-close>Importar copia</button>
+      <button type="button" data-act="logout" data-close style="color:var(--late)">Cerrar sesión</button>
+    </div>
+    <div class="sheet-who" id="sheetWho"></div>
+  </div>
+</div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <div class="tip" id="tip" hidden></div>
@@ -1120,6 +1296,7 @@ function renderSide() {
   const bell = open.filter(t => isLate(t) || t.due === t0).length;
   $('bellN').hidden = !bell; $('bellN').textContent = bell;
   document.querySelectorAll('[data-view]').forEach(a => a.setAttribute('aria-current', a.dataset.view === view ? 'page' : 'false'));
+  $('moreBtn').classList.toggle('on', SEC2.includes(view));
   const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
   $('darkT').setAttribute('aria-checked', String(dark));
 }
@@ -1128,6 +1305,7 @@ function renderSide() {
 function render() {
   if (!user) return;
   renderSide();
+  ensureWx();
   $('fab').hidden = view === 'logros';
   if (!loaded) { $('content').innerHTML = '<div class="empty">Cargando tus tareas…</div>'; return; }
   ({ lista:renderList, calendario:renderCal, proyectos:renderBoard, archivos:renderFiles, estadisticas:renderStats, logros:renderLogros })[view]();
@@ -1471,6 +1649,7 @@ document.addEventListener('click', async e => {
     case 'pclear': clearPaste(); render(); break;
     case 'psave': savePaste(); break;
     case 'achnew': openAch(null); break;
+    case 'wx': openWeather(); break;
     case 'achedit': openAch(achs.find(x => x.id === id)); break;
     case 'achcat': achCat = el.dataset.v; render(); break;
     case 'achdl': { const a = achs.find(x => x.id === id); const f = a?.files[+el.dataset.i]; if (f) achDownload([f], f.name); break; }
@@ -1490,7 +1669,7 @@ document.addEventListener('dblclick', e => { const c = e.target.closest('.cell')
 document.addEventListener('keydown', e => {
   const c = e.target.closest?.('.cell');
   if (c && e.target === c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); calSel = parse(c.dataset.day); render(); return; }
-  if (e.key === 'Escape') closePops();
+  if (e.key === 'Escape') { closePops(); closeWeather(); closeMore(); }
   if (!user || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return;
   const tag = e.target.tagName; if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
   if (e.key === 'n' || e.key === 'N') { e.preventDefault(); $('add').click(); }
@@ -1971,6 +2150,143 @@ $('achForm').onsubmit = async e => {
   achs.sort((x, y) => (y.date || '').localeCompare(x.date || ''));
   toast(achEditing ? 'Logro guardado.' : 'Logro añadido.'); render();
 };
+
+// ======================= El tiempo (Open-Meteo, como en la liga de pádel) =======================
+const WX_LAT = 40.4405, WX_LON = -3.6894, WX_TTL = 15 * 60 * 1000, WX_PLACE = 'Madrid';
+const WX_DAYN = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const WX_HOURS = [7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
+let wxData = null, wxAt = 0, wxDay = 0, wxLoading = false;
+function wxCode(code, day = 1) {
+  if (code === 0) return day ? ['☀️','Despejado','sun'] : ['🌙','Despejado','night'];
+  if (code <= 2) return day ? ['🌤️','Poco nuboso','part'] : ['☁️','Poco nuboso','night'];
+  if (code === 3) return ['☁️','Nublado','cloud'];
+  if (code === 45 || code === 48) return ['🌫️','Niebla','cloud'];
+  if (code >= 51 && code <= 57) return ['🌦️','Llovizna','rain'];
+  if (code >= 61 && code <= 67) return ['🌧️','Lluvia','rain'];
+  if (code >= 71 && code <= 77) return ['❄️','Nieve','cold'];
+  if (code >= 80 && code <= 82) return ['🌦️','Chubascos','rain'];
+  if (code >= 95) return ['⛈️','Tormenta','storm'];
+  return ['⛅','Variable','part'];
+}
+const wxIsRain = c => (c >= 51 && c <= 67) || (c >= 80 && c <= 82) || c >= 95;
+function wxSky(code, day, t) { const s = wxCode(code, day)[2]; if (s === 'sun' && t >= 32) return 'hot'; if ((s === 'sun' || s === 'part') && t <= 7) return 'cold'; return s; }
+function wxQuip(t, code, wind, rainLater, day = 1) {
+  if (code >= 95) return 'Tormenta: mejor quedarse a hacer tareas ⛈️';
+  if (wxIsRain(code)) return 'Llueve: no salgas sin paraguas ☔';
+  if (rainLater) return `Ojo: lluvia hacia las ${rainLater}. Coge paraguas`;
+  if (t >= 32) return 'Calor fuerte: bebe agua 🥵';
+  if (t <= 7) return 'Hace frío: abrígate bien 🥶';
+  if (wind >= 30) return 'Mucho viento hoy 💨';
+  if (!day) return code <= 2 ? 'Noche despejada 🌙' : 'Noche nublada 😴';
+  if (code === 0) return 'Día de sol: crema solar 😎';
+  if (code <= 2) return 'Buen día para salir 🌤️';
+  return 'Nublado, pero sin lluvia 👌';
+}
+function wxRand(seed) { let x = seed; return () => ((x = (x * 16807) % 2147483647) - 1) / 2147483646; }
+function wxFx(code, day, t) {
+  const cl = (n, dark) => Array.from({ length:n }, (_, i) => `<i class="wx-cloud${dark ? ' dk' : ''}" style="top:${[-8,28,6,44][i%4]}%;animation-duration:${[38,52,45,60][i%4]}s;animation-delay:-${[0,17,30,9][i%4]}s;transform:scale(${[1,.8,1.2,.9][i%4]})"></i>`).join('');
+  const drops = (n, heavy) => { const r = wxRand(7); return Array.from({ length:n }, () => { const len = (heavy ? 13 : 9) + r() * 9, dur = (heavy ? .42 : .55) + r() * .3, op = .3 + r() * .5;
+    return `<i class="wx-drop" style="left:${(r()*110-5).toFixed(1)}%;height:${len.toFixed(0)}px;opacity:${op.toFixed(2)};animation-duration:${dur.toFixed(2)}s;animation-delay:-${(r()*2).toFixed(2)}s"></i>`; }).join(''); };
+  const stars = n => { const r = wxRand(3); return Array.from({ length:n }, () => { const sz = 1 + r() * 1.8;
+    return `<i class="wx-star" style="left:${(r()*100).toFixed(1)}%;top:${(r()*100).toFixed(1)}%;width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;animation-duration:${(1.8+r()*2.5).toFixed(2)}s;animation-delay:-${(r()*3).toFixed(2)}s"></i>`; }).join(''); };
+  const flakes = n => { const r = wxRand(11); return Array.from({ length:n }, () => { const sz = 2.5 + r() * 3.5;
+    return `<i class="wx-flake" style="left:${(r()*100).toFixed(1)}%;width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;animation-duration:${(4+r()*4).toFixed(2)}s,${(1.8+r()*1.5).toFixed(2)}s;animation-delay:-${(r()*6).toFixed(2)}s,-${(r()*2).toFixed(2)}s"></i>`; }).join(''); };
+  const sun = hot => `<i class="wx-sunrays${hot ? ' hot' : ''}"></i><i class="wx-sun${hot ? ' hot' : ''}"></i>`;
+  let h = '';
+  if (code >= 95) h = cl(4, true) + drops(80, true) + '<i class="wx-flash"></i>';
+  else if (code >= 71 && code <= 77) h = cl(2, false) + flakes(18);
+  else if (wxIsRain(code)) h = cl(4, true) + drops(code >= 63 && code !== 80 ? 70 : 45, code >= 63 && code !== 80);
+  else if (!day) h = '<i class="wx-moon"></i>' + stars(34) + (code >= 1 ? cl(code >= 3 ? 3 : 1, true) : '');
+  else if (code === 0) h = sun(t >= 32);
+  else if (code <= 2) h = sun(false) + cl(2, false);
+  else h = cl(4, false);
+  return `<span class="wx-fx" aria-hidden="true">${h}</span>`;
+}
+async function loadWeather(force) {
+  if (!force && wxData && Date.now() - wxAt < WX_TTL) return wxData;
+  const u = `https://api.open-meteo.com/v1/forecast?latitude=${WX_LAT}&longitude=${WX_LON}&current=temperature_2m,weather_code,is_day,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability,is_day&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Europe%2FMadrid&forecast_days=7`;
+  const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const j = await (await fetch(u, { signal:ctrl.signal })).json();
+    wxData = { cur:{ t:j.current.temperature_2m, code:j.current.weather_code, day:j.current.is_day, wind:j.current.wind_speed_10m },
+      hourly:j.hourly.time.map((tm, i) => ({ tm, t:j.hourly.temperature_2m[i], code:j.hourly.weather_code[i], p:j.hourly.precipitation_probability[i] ?? 0, day:j.hourly.is_day[i] })),
+      daily:j.daily.time.map((d, i) => ({ d, max:j.daily.temperature_2m_max[i], min:j.daily.temperature_2m_min[i], code:j.daily.weather_code[i] })) };
+    wxAt = Date.now();
+  } finally { clearTimeout(tm); }
+  return wxData;
+}
+function wxRainLaterToday() {
+  const nowH = new Date().getHours(), td = today();
+  const h = wxData.hourly.find(x => x.tm.startsWith(td) && +x.tm.slice(11, 13) > nowH && +x.tm.slice(11, 13) <= 22 && (x.p >= 60 || wxIsRain(x.code)));
+  return h ? h.tm.slice(11, 16) : null;
+}
+function wxNextHTML() {
+  const now = new Date(), nowH = now.getHours();
+  let d = today(), from = nowH, label = 'Próximas horas';
+  if (nowH >= 22) { d = plusDays(1); from = 8; label = 'Mañana'; }
+  const hrs = wxData.hourly.filter(x => x.tm.startsWith(d) && +x.tm.slice(11, 13) >= from).slice(0, 7);
+  if (!hrs.length) return '';
+  return `<span class="wx-next"><span class="wx-next-l">${label}</span><span class="wx-next-row">${hrs.map(x => { const H = +x.tm.slice(11, 13); const [hi] = wxCode(x.code, x.day);
+    return `<span class="wx-nh"><span>${H === nowH && d === today() ? 'Ahora' : H + ':00'}</span><span class="wx-nhi">${hi}</span><b>${Math.round(x.t)}°</b><em>${x.p >= 20 ? '💧' + x.p + '%' : ''}</em></span>`; }).join('')}</span></span>`;
+}
+function drawWxChip() {
+  const el = $('wxChip'); if (!el) return;
+  if (!wxData) { el.hidden = true; return; }
+  const c = wxData.cur, [ic, txt] = wxCode(c.code, c.day), td = wxData.daily[0], rl = wxRainLaterToday();
+  el.hidden = false;
+  el.classList.toggle('rain', !!(rl || wxIsRain(c.code)));
+  el.title = `${txt} en ${WX_PLACE} · Máx ${Math.round(td.max)}° · Mín ${Math.round(td.min)}°${rl ? ' · lluvia hacia las ' + rl : ''}`;
+  el.innerHTML = `<span class="wi">${ic}</span><b>${Math.round(c.t)}°</b><span class="wmm">${Math.round(td.max)}° / ${Math.round(td.min)}°</span>${rl ? `<span class="wr">☔ ${rl}</span>` : ''}`;
+}
+function ensureWx() { if (wxData || wxLoading) { drawWxChip(); return; } wxLoading = true; loadWeather().then(() => { wxLoading = false; drawWxChip(); }).catch(() => { wxLoading = false; }); }
+function wxStripHTML() {
+  if (!wxData) { if (!wxLoading) { wxLoading = true; loadWeather().then(() => { wxLoading = false; const el = $('wxStrip'); if (el) el.innerHTML = wxStripHTML(); }).catch(() => { wxLoading = false; }); } return ''; }
+  const c = wxData.cur, [ic, txt] = wxCode(c.code, c.day), td = wxData.daily[0], rl = wxRainLaterToday();
+  return `<button class="wx-strip wx-sky-${wxSky(c.code, c.day, c.t)}${rl || wxIsRain(c.code) ? ' wx-alert' : ''}" data-act="wx" aria-label="Ver el tiempo por horas">${wxFx(c.code, c.day, c.t)}
+    <span class="wx-ic">${ic}</span><span class="wx-t">${Math.round(c.t)}°</span>
+    <span class="wx-mid"><b>${txt}<i class="wx-loc"> · ${WX_PLACE}</i></b><span class="wx-mm">Máx ${Math.round(td.max)}° · Mín ${Math.round(td.min)}°</span><span>${wxQuip(c.t, c.code, c.wind, rl, c.day)}</span></span>${wxNextHTML()}<span class="wx-go">›</span></button>`;
+}
+function openWeather() {
+  if (!wxData) return;
+  wxDay = new Date().getHours() >= 22 && wxData.daily.length > 1 ? 1 : 0;
+  let ov = $('wxSheet');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'wxSheet'; ov.className = 'wx-ov'; ov.innerHTML = '<div class="wx-bg" data-wxclose></div><div class="wx-sheet" id="wxSheetBody" role="dialog" aria-label="El tiempo"></div>'; document.body.appendChild(ov);
+    ov.addEventListener('click', e => { if (e.target.closest('[data-wxclose]')) closeWeather(); const d = e.target.closest('[data-wxday]'); if (d) { wxDay = +d.dataset.wxday; renderWeatherSheet(); } }); }
+  renderWeatherSheet();
+  requestAnimationFrame(() => ov.classList.add('open'));
+}
+function closeWeather() { $('wxSheet')?.classList.remove('open'); }
+function renderWeatherSheet() {
+  const body = $('wxSheetBody'); if (!body || !wxData) return;
+  const c = wxData.cur, [ic, txt] = wxCode(c.code, c.day), td = wxData.daily[0], rl = wxRainLaterToday();
+  const day = wxData.daily[wxDay], nowH = new Date().getHours();
+  const dayTasks = tasks.filter(t => t.due === day.d && t.state !== 'done');
+  const mine = dayTasks.length ? `<div class="wx-mine"><b>📌 ${dayTasks.length} tarea${dayTasks.length > 1 ? 's' : ''} ${wxDay === 0 ? 'para hoy' : 'ese día'}</b>${dayTasks.slice(0, 4).map(t => esc(t.title)).join(' · ')}${dayTasks.length > 4 ? ' …' : ''}</div>` : '';
+  const hrs = wxData.hourly.filter(x => x.tm.startsWith(day.d) && WX_HOURS.includes(+x.tm.slice(11, 13)) && (wxDay !== 0 || +x.tm.slice(11, 13) >= nowH));
+  body.innerHTML = `<div class="wx-top wx-sky-${wxSky(c.code, c.day, c.t)}">${wxFx(c.code, c.day, c.t)}<div class="wx-grab"></div>
+    <div class="wx-row"><div><div class="wx-cond">${WX_PLACE} · ahora</div><div class="wx-big">${Math.round(c.t)}°</div><div class="wx-cond">${ic} ${txt}</div><div class="wx-hl">Máx ${Math.round(td.max)}° · Mín ${Math.round(td.min)}°</div></div><button class="wx-x" data-wxclose aria-label="Cerrar">✕</button></div>
+    <div class="wx-msg">${wxQuip(c.t, c.code, c.wind, rl, c.day)}</div></div>
+   ${mine}
+   <div class="wx-days">${wxData.daily.map((d, i) => { const dt = new Date(d.d + 'T12:00'); const [di] = wxCode(d.code, 1); const n = tasks.filter(t => t.due === d.d && t.state !== 'done').length;
+     return `<button class="${i === wxDay ? 'on' : ''}" data-wxday="${i}">${i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : WX_DAYN[dt.getDay()] + ' ' + dt.getDate()}<small>${di} <b>${Math.round(d.max)}°</b> ${Math.round(d.min)}°${n ? ' · 📌' + n : ''}</small></button>`; }).join('')}</div>
+   <div class="wx-hours">${hrs.length ? '' : '<div class="wx-closed">Por hoy ya no quedan horas. Mira mañana.</div>'}${hrs.map(x => { const H = +x.tm.slice(11, 13); const [hi] = wxCode(x.code, x.day);
+     return `<div class="wx-h"><div class="wx-hh">${H}:00</div><div class="wx-hi">${hi}</div><div class="wx-ht">${Math.round(x.t)}°</div><div class="wx-hp">${x.p >= 20 ? '💧' + x.p + '%' : ''}</div></div>`; }).join('')}</div>
+   <div class="wx-legend">${WX_PLACE} · 💧 probabilidad de lluvia · 📌 tareas con fecha ese día · Datos: Open-Meteo</div>`;
+}
+setInterval(() => { if (document.visibilityState === 'visible' && user) loadWeather(true).then(drawWxChip).catch(() => {}); }, WX_TTL);
+
+// ======================= Menú «Más» del móvil =======================
+const SEC2 = ['proyectos','estadisticas','logros'];
+function openMore() { $('moreSheet').hidden = false; drawMore(); }
+function closeMore() { $('moreSheet').hidden = true; }
+function drawMore() {
+  const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  $('moreSheet').querySelector('.sw').classList.toggle('on', dark);
+  $('moreSheet').querySelectorAll('[data-view]').forEach(a => a.setAttribute('aria-current', a.dataset.view === view ? 'page' : 'false'));
+  $('sheetWho').textContent = user ? 'Sesión iniciada como ' + displayName(user) : '';
+}
+$('moreBtn').onclick = openMore;
+$('moreSheet').addEventListener('click', e => { if (e.target.closest('[data-close]')) setTimeout(closeMore, 0); else if (e.target.closest('[data-act="dark"]')) setTimeout(drawMore, 0); });
 
 // ======================= Cambiar contraseña =======================
 function openPw() { $('pw1').value = $('pw2').value = ''; $('pwMsg').hidden = true; $('pwSave').disabled = false; $('pwDlg').showModal(); $('pw1').focus(); }
