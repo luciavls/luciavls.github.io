@@ -351,6 +351,51 @@
   .extitem .bar { width:4px; border-radius:4px; background:var(--pc); justify-self:center; height:100%; min-height:20px; }
   .extitem .ti { font-size:15px; }
   .extitem .meta { font-size:12px; color:var(--mute); margin-top:3px; }
+  /* ---------- Logros: línea de vida ---------- */
+  .gart { position:relative; overflow:hidden; isolation:isolate; background:#141518; display:flex; align-items:flex-end; padding:14px 16px; }
+  .gart::before { content:""; position:absolute; inset:-20%; z-index:-2; filter:blur(6px) saturate(1.1);
+    background:radial-gradient(40% 50% at var(--x1) var(--y1), var(--c) 0, transparent 70%), radial-gradient(35% 45% at var(--x2) var(--y2), var(--c2) 0, transparent 70%), radial-gradient(50% 60% at 50% 120%, color-mix(in srgb, var(--c) 50%, #000) 0, transparent 70%); }
+  .gart::after { content:""; position:absolute; inset:0; z-index:-1; mix-blend-mode:overlay; opacity:.35; background-image:radial-gradient(rgba(255,255,255,.55) .8px, transparent .8px); background-size:7px 7px; }
+  .gart.lines::after { background-image:repeating-linear-gradient(var(--ang), rgba(255,255,255,.35) 0 1px, transparent 1px 9px); opacity:.28; }
+  .gart.rings::after { background-image:repeating-radial-gradient(circle at 80% 20%, rgba(255,255,255,.35) 0 1px, transparent 1px 14px); opacity:.3; }
+  .gart .ab { font:800 62px/.85 var(--f-body); letter-spacing:-.06em; color:#0f1011; white-space:nowrap; }
+  .achpv.gart { height:120px; border-radius:12px; margin:12px 0 4px; } .achpv.gart .ab { font-size:54px; } .achpv .k { position:absolute; right:12px; top:12px; }
+  .logros .lhead { align-items:flex-end; justify-content:space-between; }
+  .logros .lhead h2 { font:800 clamp(44px,5.5vw,68px)/.92 var(--f-body); letter-spacing:-.05em; margin:10px 0 0; }
+  .logros .lhead h2 em { font:400 italic 1.08em "Instrument Serif", Georgia, serif; color:#ee6a45; letter-spacing:0; }
+  .lright { display:flex; flex-direction:column; align-items:flex-end; gap:12px; }
+  .tlk { font:500 11px var(--f-mono); text-transform:uppercase; letter-spacing:.12em; color:#8d9096; }
+  .logros .lchips { margin:26px 0 0; }
+  .tl { position:relative; margin-top:34px; padding-left:130px; }
+  .tl::before { content:""; position:absolute; left:104px; top:6px; bottom:0; width:2px; background:linear-gradient(#ee6a45, #3a2a24 55%, transparent); }
+  .tly { position:relative; margin-bottom:10px; }
+  .tlyr { position:absolute; left:-130px; top:14px; font:400 40px/1 "Instrument Serif", Georgia, serif; color:#f0efec; }
+  .tli { position:relative; display:grid; grid-template-columns:260px minmax(0,1fr); background:#1b1c1f; border:1px solid #2c2d31; border-radius:20px; overflow:hidden; margin-bottom:16px; transition:transform .25s var(--ease), border-color .25s; }
+  .tli::before { content:""; position:absolute; left:-33px; top:30px; width:12px; height:12px; border-radius:50%; background:var(--c); box-shadow:0 0 0 5px #111213, 0 0 0 7px var(--c); }
+  .tli:hover { border-color:#3c3d42; transform:translateX(4px); }
+  .tli .gart { min-height:160px; }
+  .tli .achedit { position:absolute; left:12px; top:12px; }
+  .tlt { padding:18px 22px; display:flex; flex-direction:column; gap:8px; min-width:0; }
+  .tlt .tlk { color:var(--c); }
+  .tlt h3 { margin:0; font-size:22px; letter-spacing:-.02em; color:#f2f1ee; }
+  .tlt p { margin:0; color:#c3c2bd; font-size:13.5px; max-width:70ch; }
+  .tlf { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:auto; padding-top:8px; }
+  .tlfile { display:inline-flex; align-items:center; gap:6px; max-width:230px; background:#232428; border:1px solid #2f3034; color:#e6e5e2; border-radius:99px; padding:4px 10px 4px 5px; font-size:12px; }
+  .tlfile span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tlfile:hover { background:#2d2e33; border-color:#45464c; }
+  .tlall { margin-left:auto; background:transparent; border:1px solid #3a3b40; color:#f2f1ee; border-radius:99px; padding:6px 12px; font-size:12px; }
+  .tlall:hover { background:#f2f1ee; color:#141414; }
+  .tlnone { color:#8d9096; font-size:12px; }
+  @media (max-width:900px) {
+    .logros .lhead { flex-direction:row; align-items:flex-end; gap:10px; } .logros .lhead h2 { font-size:34px; margin-top:6px; }
+    .lright { align-items:flex-end; gap:8px; } .lright .tlk { font-size:10px; letter-spacing:.06em; } .lright .primary { padding:7px 12px; font-size:12px; }
+    .logros .lchips { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; margin-top:16px; } .logros .lchip { flex:none; padding:5px 12px; font-size:12px; }
+    .tl { margin-top:20px; }
+    .tl { padding-left:22px; } .tl::before { left:4px; } .tlyr { position:static; display:block; margin:6px 0 10px; font-size:30px; }
+    .tli { grid-template-columns:1fr; } .tli::before { left:-24px; top:22px; width:10px; height:10px; } .tli .gart { min-height:110px; } .tli:hover { transform:none; }
+    .tlall { margin-left:0; }
+  }
+
   /* ---------- Archivos: biblioteca ---------- */
   .fv { position:relative; }
   .fhead { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
@@ -2478,32 +2523,43 @@ async function achDownload(files, title) {
     $('toast').hidden = true;
   } catch (e) { toast('No se pudo descargar: ' + errText(e)); }
 }
-function achCard(a) {
+// Portada generativa: manchas de luz + trama, distinta para cada logro
+const hashStr = x => { let h = 2166136261; for (const ch of String(x)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; };
+function artStyle(a) {
+  const h = hashStr(a.id || a.title), ci = Math.max(0, ACH_COLORS.findIndex(c => c[1].toLowerCase() === String(a.color).toLowerCase()));
+  const c2 = ACH_COLORS[(ci + 2 + (h % 3)) % ACH_COLORS.length][1];
+  return { cls:['dots','lines','rings'][h % 3], css:`--c:${a.color};--c2:${c2};--x1:${15 + h % 30}%;--y1:${20 + (h >> 3) % 30}%;--x2:${60 + (h >> 6) % 30}%;--y2:${50 + (h >> 9) % 35}%;--ang:${100 + (h >> 12) % 80}deg` };
+}
+const genArt = (a, extra = '') => { const st = artStyle(a); return `<div class="gart ${st.cls}" style="${st.css}">${extra}<span class="ab">${esc(coverText(a))}</span></div>`; };
+function achItem(a) {
   const files = a.files || [];
-  return `<article class="ach">
-    <div class="cov" style="--cc:${esc(a.color)}">${a.category ? `<span class="k">${esc(a.category)}</span>` : ''}<span class="ab">${esc(coverText(a))}</span>
-      <button class="achedit" data-act="achedit" data-id="${a.id}" aria-label="Editar ${esc(a.title)}">Editar</button></div>
-    <div class="bd">${a.date ? `<span class="mt">${fmt(a.date)} ${a.date.slice(0, 4)}</span>` : ''}<h4>${esc(a.title)}</h4>${a.description ? `<p>${esc(a.description)}</p>` : ''}
-      ${files.length ? `<div class="afiles">${files.map((f, i) => `<button class="afile" data-act="achdl" data-id="${a.id}" data-i="${i}">${ftag(f.name)}<b>${esc(f.name)}</b><small>${size(f.size)} ↓</small></button>`).join('')}</div>` : '<span style="font-size:12px;color:#8d9096">Sin archivos</span>'}
-      ${files.length > 1 ? `<div class="afoot"><button class="abtn" data-act="achzip" data-id="${a.id}">↓ Descargar todo (${files.length})</button></div>` : ''}
+  return `<article class="tli" style="--c:${esc(a.color)}">
+    ${genArt(a, `<button class="achedit" data-act="achedit" data-id="${a.id}" aria-label="Editar ${esc(a.title)}">Editar</button>`)}
+    <div class="tlt"><span class="tlk">${esc(a.category || 'Logro')}${a.date ? ' · ' + fmt(a.date) + ' ' + a.date.slice(0, 4) : ''}</span>
+      <h3>${esc(a.title)}</h3>${a.description ? `<p>${esc(a.description)}</p>` : ''}
+      <div class="tlf">${files.map((f, i) => `<button class="tlfile" data-act="achdl" data-id="${a.id}" data-i="${i}" title="Descargar ${esc(f.name)} · ${size(f.size)}">${ftag(f.name)}<span>${esc(f.name)}</span></button>`).join('') || '<span class="tlnone">Sin archivos</span>'}
+        ${files.length ? `<button class="tlall" data-act="${files.length > 1 ? 'achzip' : 'achdl'}" data-id="${a.id}" data-i="0">↓ Descargar${files.length > 1 ? ' todo' : ''}</button>` : ''}</div>
     </div></article>`;
 }
 function renderLogros() {
-  if (!achLoaded && !achErr) { $('content').innerHTML = '<div class="empty">Cargando tus logros…</div>'; loadLogros(); return; }
+  if (!achLoaded && !achErr) { $('content').innerHTML = '<div class="logros"><div class="lempty">Cargando tus logros…</div></div>'; loadLogros(); return; }
   const q = $('q').value.trim().toLowerCase();
   const cats = [...new Set(achs.map(a => a.category).filter(Boolean))];
   if (achCat && !cats.includes(achCat)) achCat = '';
   const list = achs.filter(a => (!achCat || a.category === achCat) && (!q || [a.title, a.description, a.category, ...(a.files || []).map(f => f.name)].join(' ').toLowerCase().includes(q)));
+  const years = [...new Set(list.map(a => a.date ? a.date.slice(0, 4) : 'Sin fecha'))];
+  const nFiles = achs.reduce((n, a) => n + (a.files || []).length, 0);
   $('content').innerHTML = `<div class="logros">
-    <div class="lhead"><h2>Logros<em>.</em></h2><button class="primary" data-act="achnew">+ Nuevo logro</button></div>
-    <p class="llead">Tus trabajos definitivos, certificados y proyectos. Solo los ves tú.</p>
+    <div class="lhead"><div><span class="tlk">Lo que he terminado</span><h2>Mi línea<br>de <em>logros</em></h2></div>
+      <div class="lright"><span class="tlk">${achs.length} logro${achs.length === 1 ? '' : 's'} · ${nFiles} archivo${nFiles === 1 ? '' : 's'}</span><button class="primary" data-act="achnew">+ Nuevo logro</button></div></div>
     ${cats.length > 1 ? `<div class="lchips">${['', ...cats].map(c => `<button class="lchip" data-act="achcat" data-v="${esc(c)}" aria-pressed="${c === achCat}">${c ? esc(c) : 'Todos'}</button>`).join('')}</div>` : ''}
-    ${achErr ? `<div class="msg">${esc(achErr)}</div>` : list.length ? `<div class="achgrid">${list.map(achCard).join('')}</div>`
+    ${achErr ? `<div class="msg">${esc(achErr)}</div>` : list.length ? `<div class="tl">${years.map(y => `<section class="tly"><span class="tlyr">${y}</span>${list.filter(a => (a.date ? a.date.slice(0, 4) : 'Sin fecha') === y).map(achItem).join('')}</section>`).join('')}</div>`
       : `<div class="lempty">${achs.length ? 'Ningún logro coincide con la búsqueda.' : '<b>Aún no tienes logros.</b>Pulsa «+ Nuevo logro» y sube tus archivos definitivos.'}</div>`}
   </div>`;
 }
 function drawAchPreview() {
-  const pv = $('achPv'); pv.style.setProperty('--cc', achColor);
+  const pv = $('achPv'), st = artStyle({ id:achEditing?.id || 'nuevo', title:$('achTitle').value, color:achColor });
+  pv.className = 'achpv gart ' + st.cls; pv.setAttribute('style', st.css);
   $('achPvAb').textContent = ($('achCover').value.trim() || initials($('achTitle').value || '')) || '★';
   $('achPvK').textContent = $('achCat').value.trim();
   $('achSw').innerHTML = ACH_COLORS.map(([n, c]) => `<button type="button" role="radio" aria-checked="${c === achColor}" aria-label="${n}" title="${n}" data-c="${c}" style="--sw:${c}"></button>`).join('');
