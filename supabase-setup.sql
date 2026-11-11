@@ -180,3 +180,22 @@ alter table public.projects enable row level security;
 drop policy if exists "proyectos propios" on public.projects;
 create policy "proyectos propios" on public.projects for all to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- 9) Subtareas (se guardan dentro de cada tarea)
+alter table public.tasks add column if not exists subtasks jsonb not null default '[]'::jsonb;
+
+-- 10) Pomodoros: cada bloque de foco que terminas (para ver cuántos haces cada día)
+create table if not exists public.pomodoros (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  task_id    uuid references public.tasks(id) on delete set null,
+  started_at timestamptz not null default now(),
+  minutes    int not null default 60,
+  kind       text not null default 'focus',
+  created_at timestamptz not null default now()
+);
+create index if not exists pomodoros_user_started on public.pomodoros (user_id, started_at);
+alter table public.pomodoros enable row level security;
+drop policy if exists "pomodoros propios" on public.pomodoros;
+create policy "pomodoros propios" on public.pomodoros for all to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
