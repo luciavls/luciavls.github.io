@@ -858,6 +858,69 @@
     .pop:not(.check) { animation:dlgIn .18s var(--ease); }
     .badge { animation:pop .45s var(--spring); }
   }
+  /* ---------- Al pasar el ratón: cada cosa reacciona ---------- */
+  @media (hover:hover) and (prefers-reduced-motion: no-preference) {
+    /* Tareas del resumen: se iluminan, el título se desplaza y aparecen acciones rápidas */
+    .rs-r { position:relative; transition:background-color .2s var(--ease), padding .2s var(--ease); border-radius:10px; }
+    .rs-r:hover { background:var(--card); box-shadow:0 1px 2px rgba(20,20,20,.04), 0 8px 22px rgba(20,20,20,.06); margin:0 -12px; padding-left:12px; padding-right:12px; border-bottom-color:transparent; }
+    .rs-r .rs-t { transition:transform .22s var(--ease); }
+    .rs-r:hover .rs-t { transform:translateX(3px); }
+    .rs-q { display:none; gap:6px; }
+    .rs-r:hover .rs-q { display:inline-flex; animation:qIn .2s var(--ease); }
+    .rs-r:hover .rs-wd { display:none; }
+    .rs-q button { font:500 11px var(--f-mono); text-transform:uppercase; letter-spacing:.04em; padding:5px 10px; border-radius:99px; border:1px solid var(--line2); background:var(--card); color:var(--ink2); }
+    .rs-q button:hover { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+    @keyframes qIn { from { opacity:0; transform:translateX(6px); } }
+    .rs-r .rs-f { transition:color .15s; } .rs-r .rs-f:hover { color:var(--acc-ink); }
+    /* Cuadro de la semana: el cuadrado naranja crece y gira un poco */
+    .rs-big .rs-n i { transition:transform .45s var(--spring); }
+    .rs-big:hover .rs-n i { transform:rotate(-8deg) scale(1.18); }
+    .rs-big { transition:transform .25s var(--ease), box-shadow .25s var(--ease); }
+    .rs-big:hover { transform:translateY(-2px); box-shadow:0 18px 40px rgba(20,20,20,.18); }
+    .rs-kpis button { position:relative; }
+    .rs-kpis button::after { content:""; position:absolute; left:0; bottom:-4px; height:2px; width:0; background:var(--acc); transition:width .25s var(--ease); }
+    .rs-kpis button:hover::after { width:100%; }
+    /* Pestañas de proyecto: la raya crece desde la izquierda */
+    .rs-tabs button { position:relative; }
+    .rs-tabs button::after { content:""; position:absolute; left:0; bottom:-1px; height:2px; width:100%; background:var(--ink); transform:scaleX(0); transform-origin:left; transition:transform .25s var(--ease); }
+    .rs-tabs button:hover::after { transform:scaleX(1); }
+    .rs-tabs button[aria-pressed="true"]::after { display:none; }
+    /* Proyectos: la barra engorda y se ilumina */
+    .rs-pr { transition:transform .2s var(--ease); } .rs-pr:hover { transform:translateX(3px); }
+    .rs-bar { transition:height .2s var(--ease); } .rs-pr:hover .rs-bar { height:9px; } .rs-pr:hover .rs-bar i { filter:brightness(1.1) saturate(1.2); }
+    /* Botones y chips */
+    .chip:hover, .lchip:hover, .ovpill:hover { transform:translateY(-1px); }
+    button.primary { position:relative; overflow:hidden; }
+    button.primary::before { content:""; position:absolute; top:0; left:-60%; width:40%; height:100%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent); transform:skewX(-20deg); transition:left .6s var(--ease); }
+    button.primary:hover::before { left:130%; }
+    /* Logo, campana y tiempo */
+    .brand .logo i { transition:transform .4s var(--spring); } .brand:hover .logo i { transform:translate(-3px,-3px) rotate(90deg); }
+    #bellBtn:hover svg { animation:ring .7s var(--ease); transform-origin:50% 10%; }
+    @keyframes ring { 0%,100% { transform:rotate(0); } 20% { transform:rotate(14deg); } 40% { transform:rotate(-12deg); } 60% { transform:rotate(8deg); } 80% { transform:rotate(-4deg); } }
+    #gearBtn:hover svg { transform:rotate(60deg); transition:transform .5s var(--ease); }
+    .wxchip:hover .wi { display:inline-block; animation:bob .8s var(--ease); }
+    @keyframes bob { 0%,100% { transform:translateY(0); } 40% { transform:translateY(-3px) rotate(-6deg); } }
+    /* Calendario: las casillas se levantan y aparece un «+» para añadir */
+    .cell { position:relative; }
+    .cell:not(.out)::after { content:"+"; position:absolute; right:8px; top:6px; width:22px; height:22px; border-radius:50%; display:grid; place-items:center; font-size:14px; color:var(--mute); opacity:0; transform:scale(.6); transition:opacity .18s, transform .25s var(--spring); }
+    .cell:not(.out):hover::after { opacity:1; transform:scale(1); background:var(--panel); }
+    .ev { transition:transform .15s var(--ease), box-shadow .15s; } .ev:hover { transform:translateY(-1px); box-shadow:0 3px 8px rgba(20,20,20,.12); }
+    /* Tablero: las tarjetas se inclinan como si las fueras a coger */
+    .kcard:hover { transform:translateY(-2px) rotate(-.6deg); }
+    /* Archivos: la portada se acerca y aparece «Descargar» */
+    .fcard .fcov { position:relative; }
+    .fcard:hover .fcov::after { content:"Descargar ↓"; position:absolute; inset:auto 10px 10px auto; font:600 11px var(--f-body); color:#fff; background:rgba(20,20,20,.72); padding:4px 9px; border-radius:99px; animation:qIn .2s var(--ease); }
+    .frow2 .fi { transition:transform .25s var(--spring); } .frow2:hover .fi { transform:scale(1.12) rotate(-4deg); }
+    /* Menú lateral: una barrita naranja aparece a la izquierda */
+    .nav a { position:relative; }
+    .nav a::before { content:""; position:absolute; left:0; top:50%; width:3px; height:0; border-radius:3px; background:var(--acc); transform:translateY(-50%); transition:height .22s var(--ease); }
+    .nav a:hover::before { height:60%; }
+    .nav a[aria-current="page"]::before { height:0; }
+    /* Logros: la portada se ilumina */
+    .ach .cov { transition:filter .3s var(--ease); } .ach:hover .cov { filter:brightness(1.12) saturate(1.15); }
+    .ach:hover { transform:translateY(-3px); }
+  }
+
   /* Esqueleto de carga */
   .skel { display:grid; gap:12px; }
   .skel i, .skrow i { display:block; border-radius:14px; background:linear-gradient(90deg, var(--line) 0%, var(--panel) 50%, var(--line) 100%); background-size:200% 100%; animation:shimmer 1.2s linear infinite; }
@@ -1613,7 +1676,7 @@ function rsRow(t, when, compact) {
     <button class="check ${checkCls(t)}" data-act="toggle" data-id="${t.id}" aria-label="${t.state === 'done' ? 'Marcar como pendiente' : 'Marcar como completada'}"></button>
     <div class="rs-b"><div class="rs-t" data-act="edit" data-id="${t.id}">${esc(t.title)}</div>
       <div class="rs-s">${t.proj ? `<span><i class="dot" style="--pc:${colorOf(t.proj)}"></i>${esc(projLabel(t.proj))}</span>` : ''}${t.state === 'doing' && !compact ? '<span class="rs-doing">En curso</span>' : ''}${files}</div></div>
-    <span class="rs-w">${when || ''}</span></div>`;
+    <span class="rs-w"><span class="rs-wd">${when || ''}</span>${t.state !== 'done' ? `<span class="rs-q"><button data-act="later" data-id="${t.id}" title="Pasar a mañana">→ Mañana</button><button data-act="edit" data-id="${t.id}" title="Editar">Editar</button></span>` : ''}</span></div>`;
 }
 function row(t) {
   const late = isLate(t);
@@ -1999,6 +2062,7 @@ document.addEventListener('click', async e => {
     case 'pclear': clearPaste(); render(); break;
     case 'psave': savePaste(); break;
     case 'achnew': openAch(null); break;
+    case 'later': if (t) { const tm = plusDays(1), nd = !t.due || t.due < tm ? tm : ymd(addDays(parse(t.due), 1)); if (await saveTask({ ...t, due:nd })) toast(`«${t.title}» pasa al ${fmt(nd)}.`); } break;
     case 'wx': openWeather(); break;
     case 'achedit': openAch(achs.find(x => x.id === id)); break;
     case 'achcat': achCat = el.dataset.v; render(); break;
