@@ -357,7 +357,7 @@
   .rs-date { font:500 12px var(--f-mono); text-transform:uppercase; letter-spacing:.1em; color:var(--mute); }
   .rs-lead { font:400 14px/1.55 var(--f-mono); letter-spacing:-.01em; color:var(--ink2); margin:8px 0 0; max-width:110ch; text-wrap:pretty; }
   .rs-lead b { color:var(--ink); font-weight:500; } .rs-lead .lt { color:var(--late); }
-  .rs-bento { display:grid; grid-template-columns:220px minmax(0,1fr); gap:16px; margin-top:22px; align-items:start; }
+  .rs-bento { display:grid; grid-template-columns:220px minmax(0,1fr); grid-template-rows:230px; gap:16px; margin-top:22px; align-items:start; }
   .rs-card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:20px 22px; box-shadow:var(--shadow); min-width:0; }
   .rs-card h3 { display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin:0 0 6px; font-size:13px; font-weight:600; color:var(--ink2); }
   .rs-card .m, .rs-pr .m { color:var(--mute); font-weight:400; font-size:13px; text-decoration:none; }
@@ -399,6 +399,9 @@
   .rs-r.done .rs-t { text-decoration:line-through; color:var(--mute); }
   .rs.muted .rs-t { color:var(--ink2); font-weight:500; }
   .rs-today .rs-r:last-child { border-bottom:0; }
+  /* «Hoy» tiene siempre el mismo alto (con scroll si hay muchas), para que la fila de pestañas no se mueva */
+  .rs-today { height:230px; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+  .rs-today h3 { position:sticky; top:-20px; background:var(--card); padding-top:2px; z-index:1; }
   .rs-today .rs-r.doing { margin:4px -10px; padding:12px 10px; }
   .rs-empty { padding:40px 0; color:var(--mute); }
   .rs-aside { display:grid; gap:16px; }
@@ -417,6 +420,7 @@
     .rs-sub { display:none; } .rs-kpis { margin:0; padding:0; justify-content:flex-end; gap:14px; align-self:center; } .rs-kpis b { font-size:15px; }
     .rs-lead { font-size:12px; line-height:1.5; }
     .rs-card { padding:16px; border-radius:18px; }
+    .rs-bento { grid-template-rows:auto; } .rs-today { height:220px; } .rs-today h3 { top:-16px; }
     .rs-cols { margin-top:22px; }
     .rs-tabs { flex-wrap:nowrap; overflow-x:auto; gap:16px; scrollbar-width:none; }
     .rs-tabs button { flex:none; }
