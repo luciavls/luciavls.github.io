@@ -355,8 +355,8 @@
   body.v-lista .side .sumrow, body.v-lista .side .prog { display:none; }
   .rsm { max-width:1180px; }
   .rs-date { font:500 12px var(--f-mono); text-transform:uppercase; letter-spacing:.1em; color:var(--mute); }
-  .rs-lead { font-size:clamp(20px,2.2vw,26px); line-height:1.35; letter-spacing:-.015em; color:var(--ink2); margin:10px 0 0; max-width:46ch; text-wrap:pretty; }
-  .rs-lead b { color:var(--ink); font-weight:600; } .rs-lead .lt { color:var(--late); }
+  .rs-lead { font:400 19px/1.55 var(--f-mono); letter-spacing:-.01em; color:var(--ink2); margin:12px 0 0; max-width:62ch; text-wrap:pretty; }
+  .rs-lead b { color:var(--ink); font-weight:500; } .rs-lead .lt { color:var(--late); }
   .rs-bento { display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:16px; margin-top:26px; }
   .rs-card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:20px 22px; box-shadow:var(--shadow); min-width:0; }
   .rs-card h3 { display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin:0 0 6px; font-size:13px; font-weight:600; color:var(--ink2); }
@@ -410,12 +410,12 @@
   .rs-drop:hover, .rs-drop.over { border-color:var(--acc); background:var(--acc-soft); }
   @media (max-width:1150px) { .rs-cols { grid-template-columns:1fr; } .rs-aside { grid-template-columns:1fr 1fr; } }
   @media (max-width:900px) {
-    .rs-lead { font-size:17px; margin-top:6px; }
+    .rs-lead { margin-top:6px; }
     .rs-bento { grid-template-columns:1fr; gap:12px; margin-top:16px; }
     .rs-big { display:grid; grid-template-columns:auto 1fr; column-gap:18px; align-items:end; padding:16px 18px; }
     .rs-big { grid-template-columns:auto 1fr; padding:14px 16px; } .rs-k { display:none; } .rs-n { font-size:52px; margin:0; } .rs-n i { bottom:-5px; }
     .rs-sub { display:none; } .rs-kpis { margin:0; justify-content:flex-end; gap:16px; align-self:center; } .rs-kpis b { font-size:18px; }
-    .rs-lead { font-size:16px; }
+    .rs-lead { font-size:14px; line-height:1.5; }
     .rs-card { padding:16px; border-radius:18px; }
     .rs-cols { margin-top:22px; }
     .rs-tabs { flex-wrap:nowrap; overflow-x:auto; gap:16px; scrollbar-width:none; }
