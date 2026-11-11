@@ -3293,56 +3293,99 @@ function chime(kind) {
 }
 async function loadPomos() {
   const since = new Date(Date.now() - 400 * 864e5).toISOString();
-  const { data, error } = await sb.from('pomodoros').select('started_at,minutes,kind,task_id').gte('started_at', since).order('started_at');
+  const { data, error } = await sb.from('pomodoros').select('id,started_at,minutes,kind,task_id').gte('started_at', since).order('started_at');
   if (error) { pomoTable = false; pomos = lsGet('pomoLog', []); }
   else { pomoTable = true; pomos = data; }
   if (view === 'estadisticas') render();
+  pullPomo(); subPomo();
 }
 async function savePomo(rec) {
+  if (pomos.some(p => p.id === rec.id)) return;
   pomos.push(rec);
   if (pomoTable) {
-    const { error } = await sb.from('pomodoros').insert(rec);
+    // el id es el de la sesión: aunque el pomodoro esté abierto en varios dispositivos, se guarda una sola vez
+    const { error } = await sb.from('pomodoros').upsert(rec, { onConflict:'id', ignoreDuplicates:true });
     if (!error) return;
     pomoTable = false; toast('Para guardar tus pomodoros en la nube falta ejecutar el script SQL nuevo en Supabase. De momento se guardan en este dispositivo.', 8000);
   }
   const log = lsGet('pomoLog', []); log.push(rec); lsSet('pomoLog', log);
 }
+// ---- Sincronización entre pestañas y dispositivos ----
+// Cada acción tuya (empezar, pausar, seguir, parar) lleva una marca de tiempo; gana siempre la más reciente.
+// Los cambios de fase (foco → descanso → fin) no se envían: cada dispositivo los calcula igual a partir de las horas.
+let pomoTs = lsGet('pomoTs', 0), pomoChan = null, pomoSync = true;
+function pomoSet(state) {
+  pomo = state; pomoTs = Date.now();
+  lsSet('pomo', pomo); lsSet('pomoTs', pomoTs);
+  pomoRun(); pushPomo();
+}
+async function pushPomo() {
+  if (!pomoSync || !user) return;
+  const { error } = await sb.from('pomo_activo').upsert({ user_id:user.id, state:pomo, ts:pomoTs, updated_at:new Date().toISOString() });
+  if (error && /pomo_activo|does not exist|schema cache/i.test(error.message)) { pomoSync = false; toast('Para ver el pomodoro en todos tus dispositivos falta ejecutar el script SQL nuevo en Supabase.', 8000); }
+}
+function adoptPomo(state, ts) {
+  if (!(ts > pomoTs)) return;
+  const was = pomo;
+  pomo = state || null; pomoTs = ts;
+  lsSet('pomo', pomo); lsSet('pomoTs', pomoTs);
+  quietCheck = true; pomoRun(); quietCheck = false;
+  if (!was && pomo && pomo.phase === 'focus') toast(`Pomodoro en marcha desde otro dispositivo${pomo.title ? `: «${pomo.title}»` : ''}.`);
+}
+async function pullPomo() {
+  if (!pomoSync || !user) return;
+  const { data, error } = await sb.from('pomo_activo').select('state,ts').eq('user_id', user.id).maybeSingle();
+  if (error) { if (/pomo_activo|does not exist|schema cache/i.test(error.message)) pomoSync = false; return; }
+  if (data) adoptPomo(data.state, +data.ts);
+}
+function subPomo() {
+  if (pomoChan) { sb.removeChannel(pomoChan); pomoChan = null; }
+  if (!user || !sb.channel) return;
+  pomoChan = sb.channel('pomo-' + user.id)
+    .on('postgres_changes', { event:'*', schema:'public', table:'pomo_activo' }, p => { if (p.new && p.new.user_id === user.id) adoptPomo(p.new.state, +p.new.ts); })
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'pomodoros' }, p => { if (p.new && !pomos.some(x => x.id === p.new.id)) { pomos.push(p.new); pomoDraw(); if (view === 'estadisticas') render(); } })
+    .subscribe();
+}
+addEventListener('storage', e => { if (e.key === 'pomoTs') adoptPomo(lsGet('pomo', null), +lsGet('pomoTs', 0)); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && user) pullPomo(); });
+
 function pomoStart(taskId) {
   const t = tasks.find(x => x.id === taskId);
-  pomo = { phase:'focus', start:Date.now(), end:Date.now() + POMO_FOCUS * 6e4, task:t?.id || null, title:t?.title || '' };
-  lsSet('pomo', pomo);
   try { actx ||= new (window.AudioContext || window.webkitAudioContext)(); actx.resume?.(); } catch {}
+  pomoSet({ sid:newId(), phase:'focus', start:Date.now(), end:Date.now() + POMO_FOCUS * 6e4, task:t?.id || null, title:t?.title || '' });
   if (t && t.state === 'todo') setState(t, 'doing');
-  toast(`Pomodoro empezado: 60 minutos de foco${t ? ` en «${t.title}»` : ''}.`);
-  pomoRun();
+  toast(`Pomodoro empezado: 60 minutos de foco${t ? ` en «${t.title}»` : ''}. Lo verás también en tus otros dispositivos.`);
 }
-function pomoBreak() { pomo = { ...pomo, phase:'break', start:Date.now(), end:Date.now() + POMO_BREAK * 6e4, left:null }; lsSet('pomo', pomo); pomoRun(); }
 async function pomoStop(ask) {
   if (!pomo) return;
   if (pomo.phase === 'focus') {
     const mins = Math.floor((POMO_FOCUS * 6e4 - Math.max(0, pomo.left ?? pomo.end - Date.now())) / 6e4);
     if (ask && mins >= 1 && !(await window.ask('¿Parar el pomodoro?', mins >= 5 ? `Llevas ${mins} minutos de foco. Se guardan como horas de foco, pero no cuenta como pomodoro completo.` : 'Aún no llevas 5 minutos, así que no se guardará.', 'Parar'))) return;
-    if (mins >= 5) savePomo({ started_at:new Date(pomo.start).toISOString(), minutes:Math.min(mins, POMO_FOCUS - 1), kind:'focus', task_id:pomo.task });
+    if (!pomo) return;
+    if (mins >= 5) savePomo({ id:pomo.sid || newId(), started_at:new Date(pomo.start).toISOString(), minutes:Math.min(mins, POMO_FOCUS - 1), kind:'focus', task_id:pomo.task });
   }
-  pomo = null; lsSet('pomo', null); pomoRun();
+  pomoSet(null);
 }
 function pomoPause() {
   if (!pomo || pomo.phase === 'ready') return;
-  if (pomo.left) { pomo.end = Date.now() + pomo.left; pomo.left = null; }
-  else pomo.left = Math.max(0, pomo.end - Date.now());
-  lsSet('pomo', pomo); pomoDraw();
+  const p = { ...pomo };
+  if (p.left) { p.end = Date.now() + p.left; p.left = null; } else p.left = Math.max(0, p.end - Date.now());
+  pomoSet(p);
 }
+let quietCheck = false;
 function pomoCheck() {
   if (!pomo || pomo.left || pomo.phase === 'ready' || Date.now() < pomo.end) return;
+  const fresh = !quietCheck && Date.now() - pomo.end < 2 * 6e4;   // solo suena si acaba de pasar, no al abrir la app horas después
   if (pomo.phase === 'focus') {
-    savePomo({ started_at:new Date(pomo.end - POMO_FOCUS * 6e4).toISOString(), minutes:POMO_FOCUS, kind:'focus', task_id:pomo.task });
-    const n = pomoToday();
-    chime('break'); notify('¡Pomodoro completado! ☕', `Llevas ${n} hoy. Ahora 10 minutos de descanso.`, 'pomo');
-    if (Date.now() - pomo.end < POMO_BREAK * 6e4) { const end0 = pomo.end; pomoBreak(); pomo.end = end0 + POMO_BREAK * 6e4; pomo.start = end0; lsSet('pomo', pomo); }
-    else { pomo = { phase:'ready', task:pomo.task, title:pomo.title }; lsSet('pomo', pomo); }
+    savePomo({ id:pomo.sid || newId(), started_at:new Date(pomo.end - POMO_FOCUS * 6e4).toISOString(), minutes:POMO_FOCUS, kind:'focus', task_id:pomo.task });
+    if (fresh) { chime('break'); notify('¡Pomodoro completado! ☕', `Llevas ${pomoToday()} hoy. Ahora 10 minutos de descanso.`, 'pomo'); }
+    const end0 = pomo.end;
+    pomo = Date.now() - end0 < POMO_BREAK * 6e4 ? { ...pomo, phase:'break', start:end0, end:end0 + POMO_BREAK * 6e4, left:null } : { phase:'ready', task:pomo.task, title:pomo.title };
+    lsSet('pomo', pomo);
     if (view === 'estadisticas') render();
+    if (pomo.phase === 'break') { pomoCheck(); }
   } else if (pomo.phase === 'break') {
-    chime('focus'); notify('Descanso terminado', '¿Empezamos otro pomodoro?', 'pomo');
+    if (fresh) { chime('focus'); notify('Descanso terminado', '¿Empezamos otro pomodoro?', 'pomo'); }
     pomo = { phase:'ready', task:pomo.task, title:pomo.title }; lsSet('pomo', pomo);
   }
   pomoDraw();

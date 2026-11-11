@@ -199,3 +199,23 @@ alter table public.pomodoros enable row level security;
 drop policy if exists "pomodoros propios" on public.pomodoros;
 create policy "pomodoros propios" on public.pomodoros for all to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- 11) Pomodoro en marcha, compartido entre todos tus dispositivos y pestañas (al momento)
+create table if not exists public.pomo_activo (
+  user_id    uuid primary key default auth.uid() references auth.users(id) on delete cascade,
+  state      jsonb,
+  ts         bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+alter table public.pomo_activo enable row level security;
+drop policy if exists "pomodoro activo propio" on public.pomo_activo;
+create policy "pomodoro activo propio" on public.pomo_activo for all to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+do $$ begin
+  alter publication supabase_realtime add table public.pomo_activo;
+exception when duplicate_object then null; when undefined_object then null;
+end $$;
+do $$ begin
+  alter publication supabase_realtime add table public.pomodoros;
+exception when duplicate_object then null; when undefined_object then null;
+end $$;
