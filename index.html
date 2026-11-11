@@ -400,6 +400,7 @@
   .rs.muted .rs-t { color:var(--ink2); font-weight:500; }
   .rs-today .rs-r:last-child { border-bottom:0; }
   /* «Hoy» tiene siempre el mismo alto (con scroll si hay muchas), para que la fila de pestañas no se mueva */
+  .rs-big { height:230px; }
   .rs-today { height:230px; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; }
   .rs-today h3 { position:sticky; top:-20px; background:var(--card); padding-top:2px; z-index:1; }
   .rs-today .rs-r.doing { margin:4px -10px; padding:12px 10px; }
@@ -420,7 +421,7 @@
     .rs-sub { display:none; } .rs-kpis { margin:0; padding:0; justify-content:flex-end; gap:14px; align-self:center; } .rs-kpis b { font-size:15px; }
     .rs-lead { font-size:12px; line-height:1.5; }
     .rs-card { padding:16px; border-radius:18px; }
-    .rs-bento { grid-template-rows:auto; } .rs-today { height:220px; } .rs-today h3 { top:-16px; }
+    .rs-bento { grid-template-rows:auto; } .rs-today { height:220px; } .rs-big { height:auto; } .rs-today h3 { top:-16px; }
     .rs-cols { margin-top:22px; }
     .rs-tabs { flex-wrap:nowrap; overflow-x:auto; gap:16px; scrollbar-width:none; }
     .rs-tabs button { flex:none; }
