@@ -15,7 +15,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
   // ======= CONFIGURACIÓN DE SUPABASE =======
@@ -349,6 +349,80 @@
   .extitem .bar { width:4px; border-radius:4px; background:var(--pc); justify-self:center; height:100%; min-height:20px; }
   .extitem .ti { font-size:15px; }
   .extitem .meta { font-size:12px; color:var(--mute); margin-top:3px; }
+  /* ---------- Resumen (mezcla editorial + panel) ---------- */
+  body.v-lista .side .sumrow, body.v-lista .side .prog { display:none; }
+  .rsm { max-width:1180px; }
+  .rs-date { font:500 12px var(--f-mono); text-transform:uppercase; letter-spacing:.1em; color:var(--mute); }
+  .rs-lead { font-size:clamp(20px,2.2vw,26px); line-height:1.35; letter-spacing:-.015em; color:var(--ink2); margin:10px 0 0; max-width:46ch; text-wrap:pretty; }
+  .rs-lead b { color:var(--ink); font-weight:600; } .rs-lead .lt { color:var(--late); }
+  .rs-bento { display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:16px; margin-top:26px; }
+  .rs-card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:20px 22px; box-shadow:var(--shadow); min-width:0; }
+  .rs-card h3 { display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin:0 0 6px; font-size:13px; font-weight:600; color:var(--ink2); }
+  .rs-card .m, .rs-pr .m { color:var(--mute); font-weight:400; font-size:13px; text-decoration:none; }
+  :root { --rsbig:#141414; } :root[data-theme="dark"] { --rsbig:#26272b; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --rsbig:#26272b; } }
+  .rs-big { background:var(--rsbig); color:#f2f1ee; border-radius:20px; padding:20px 24px 22px; position:relative; overflow:hidden; }
+  .rs-k { display:block; font-size:13px; font-weight:600; color:#9c9da2; }
+  .rs-n { position:relative; display:inline-block; isolation:isolate; font-size:clamp(84px,9vw,118px); font-weight:800; letter-spacing:-.06em; line-height:.85; margin-top:12px; font-variant-numeric:tabular-nums; }
+  .rs-n i { position:absolute; right:-6px; bottom:-8px; width:40%; aspect-ratio:1; background:var(--acc); z-index:-1; }
+  .rs-sub { display:block; color:#b9bac0; margin-top:14px; font-size:14px; }
+  .rs-kpis { display:flex; gap:22px; margin-top:18px; }
+  .rs-kpis > * { background:none; border:0; padding:0; color:#9c9da2; font-size:12px; text-align:left; }
+  .rs-kpis b { display:block; font-size:22px; color:#f2f1ee; font-weight:700; font-variant-numeric:tabular-nums; }
+  .rs-kpis button:hover b { color:var(--acc); }
+  .rs-free { color:var(--mute); padding:14px 0 4px; font-size:15px; } .rs-free b { color:var(--ink); }
+  .rs-cols { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:28px; margin-top:34px; align-items:start; }
+  .rs-tabs { display:flex; gap:20px; border-bottom:1px solid var(--line2); flex-wrap:wrap; }
+  .rs-tabs button { border:0; background:none; border-radius:0; padding:0 0 12px; font-size:14px; color:var(--mute); border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .rs-tabs button:hover { color:var(--ink); }
+  .rs-tabs button[aria-pressed="true"] { color:var(--ink); border-color:var(--ink); font-weight:600; }
+  .rs-st { margin-left:auto; } .rs-st button { font-size:13px; }
+  .rs { margin-top:30px; }
+  .rs h2 { display:flex; align-items:baseline; gap:10px; margin:0 0 4px; font:400 28px/1.1 "Instrument Serif", Georgia, serif; letter-spacing:-.005em; }
+  .rs h2 small { font:500 11px var(--f-mono); color:var(--mute); text-transform:uppercase; letter-spacing:.08em; }
+  .rs.late h2 { color:var(--late); } .rs.late .rs-w { color:var(--late); }
+  .rs-r { display:grid; grid-template-columns:22px minmax(0,1fr) auto; gap:14px; align-items:start; padding:15px 0; border-bottom:1px solid var(--line); }
+  .rs-r.over { outline:2px dashed var(--acc); outline-offset:-2px; background:var(--acc-soft); }
+  .rs-r .check { margin-top:1px; }
+  .rs-t { font-size:17px; font-weight:600; letter-spacing:-.01em; line-height:1.3; cursor:pointer; word-break:break-word; }
+  .rs-t:hover { text-decoration:underline; text-underline-offset:3px; }
+  .rs-s { display:flex; flex-wrap:wrap; gap:4px 12px; align-items:center; margin-top:5px; color:var(--mute); font-size:13px; }
+  .rs-s .dot { width:7px; height:7px; margin-right:6px; vertical-align:1px; }
+  .rs-f { background:none; border:0; padding:0; border-radius:0; font-size:13px; color:var(--ink2); }
+  .rs-f:hover { text-decoration:underline; }
+  .rs-doing { color:var(--acc-ink); font-weight:600; }
+  .rs-w { font:500 12px var(--f-mono); text-transform:uppercase; letter-spacing:.04em; color:var(--ink2); padding-top:3px; white-space:nowrap; }
+  .rs-r.doing { background:linear-gradient(90deg, var(--acc-soft), transparent 75%); margin:0 -14px; padding:15px 14px; border-radius:12px; border-bottom-color:transparent; }
+  .rs-r.doing .rs-w { color:var(--acc-ink); }
+  .rs-r.done .rs-t { text-decoration:line-through; color:var(--mute); }
+  .rs.muted .rs-t { color:var(--ink2); font-weight:500; }
+  .rs-today .rs-r:last-child { border-bottom:0; }
+  .rs-today .rs-r.doing { margin:4px -10px; padding:12px 10px; }
+  .rs-empty { padding:40px 0; color:var(--mute); }
+  .rs-aside { display:grid; gap:16px; }
+  .rs-pr { margin-top:12px; font-size:14px; } .rs-pr > div:first-child { display:flex; align-items:center; gap:8px; } .rs-pr .m { margin-left:auto; }
+  .rs-pr .dot { width:8px; height:8px; }
+  .rs-bar { height:6px; border-radius:99px; background:var(--line); margin-top:7px; overflow:hidden; } .rs-bar i { display:block; height:100%; background:var(--pc); border-radius:99px; }
+  .rs-drop { border:1.5px dashed var(--line2); border-radius:14px; padding:20px 10px; text-align:center; cursor:pointer; font-size:14px; margin-top:8px; }
+  .rs-drop small { display:block; font-size:12px; color:var(--mute); margin-top:3px; }
+  .rs-drop:hover, .rs-drop.over { border-color:var(--acc); background:var(--acc-soft); }
+  @media (max-width:1150px) { .rs-cols { grid-template-columns:1fr; } .rs-aside { grid-template-columns:1fr 1fr; } }
+  @media (max-width:900px) {
+    .rs-lead { font-size:17px; margin-top:6px; }
+    .rs-bento { grid-template-columns:1fr; gap:12px; margin-top:16px; }
+    .rs-big { display:grid; grid-template-columns:auto 1fr; column-gap:18px; align-items:end; padding:16px 18px; }
+    .rs-big { grid-template-columns:auto 1fr; padding:14px 16px; } .rs-k { display:none; } .rs-n { font-size:52px; margin:0; } .rs-n i { bottom:-5px; }
+    .rs-sub { display:none; } .rs-kpis { margin:0; justify-content:flex-end; gap:16px; align-self:center; } .rs-kpis b { font-size:18px; }
+    .rs-lead { font-size:16px; }
+    .rs-card { padding:16px; border-radius:18px; }
+    .rs-cols { margin-top:22px; }
+    .rs-tabs { flex-wrap:nowrap; overflow-x:auto; gap:16px; scrollbar-width:none; }
+    .rs-tabs button { flex:none; }
+    .rs-aside { display:none; }
+    .rs h2 { font-size:24px; }
+    .rs-t { font-size:16px; }
+  }
+
   /* ---------- Menú Más (móvil) ---------- */
   .navmore { display:none; }
   .sheet-ov { position:fixed; inset:0; z-index:40; }
@@ -1319,6 +1393,7 @@ function renderSide() {
 function render() {
   if (!user) return;
   renderSide();
+  document.body.classList.toggle('v-lista', view === 'lista');
   ensureWx();
   $('fab').hidden = view === 'logros';
   if (!loaded) { $('content').innerHTML = '<div class="empty">Cargando tus tareas…</div>'; return; }
@@ -1328,26 +1403,80 @@ const projSelect = () => `<select id="fProj" aria-label="Filtrar por proyecto">$
 
 // ---------- Lista ----------
 function renderList() {
-  const all = visible(), late = all.filter(isLate), open = all.filter(t => t.state !== 'done'), wb = weekInfo().b, t0 = today();
-  const vis = all.filter(t => listFilter === 'all' ? true : listFilter === 'done' ? t.state === 'done' : listFilter === 'late' ? isLate(t)
-    : listFilter === 'today' ? t.state !== 'done' && t.due === t0 : listFilter === 'week' ? t.state !== 'done' && t.due && t.due >= t0 && t.due <= wb : t.state !== 'done');
-  const byDoneDesc = (a,b) => (b.done_at||0) - (a.done_at||0);
-  const groups = listFilter === 'done' ? [['', vis.sort(byDoneDesc)]] : [
-    ['Vencidas', vis.filter(isLate).sort(byDue), 'warn'],
-    ['Con fecha', vis.filter(t => t.state !== 'done' && !isLate(t) && t.due).sort(byDue)],
-    ['Sin fecha', vis.filter(t => t.state !== 'done' && !t.due).sort((a,b) => (b.state === 'doing') - (a.state === 'doing') || a.created - b.created)],
-    ['Completadas', vis.filter(t => t.state === 'done').sort(byDoneDesc)],
-  ];
-  const nonEmpty = groups.filter(g => g[1].length);
-  const chips = [['open',`Abiertas (${open.length})`,''],['late',`Vencidas (${late.length})`,'warn'],['today','Hoy',''],['week','Esta semana',''],['done','Completadas',''],['all','Todas','']];
-  let emptyMsg;
-  if (!tasks.length) emptyMsg = '<b>Aún no tienes tareas.</b>Pulsa «+ Nueva tarea» o la tecla N para crear la primera.';
-  else if ($('q').value || projFilter) emptyMsg = 'Ninguna tarea coincide con la búsqueda o el filtro.';
-  else emptyMsg = { late:'No tienes tareas vencidas.', done:'Todavía no has completado ninguna tarea.', today:'Nada para hoy.', week:'Nada más para esta semana.' }[listFilter] || 'No tienes tareas abiertas. Buen trabajo.';
-  $('content').innerHTML = `
-    <div class="head sec"><h2 class="sec">Lista</h2></div>
-    <div class="chips">${chips.map(([k,n,c]) => `<button class="chip ${c}" data-act="lf" data-v="${k}" aria-pressed="${listFilter===k}">${n}</button>`).join('')}<span class="chipsel">${projSelect()}</span></div>
-    <div class="list">${vis.length ? nonEmpty.map(([n, items, c]) => (nonEmpty.length > 1 && n ? `<div class="grp ${c||''}">${n} · ${items.length}</div>` : '') + items.map(row).join('')).join('') : `<div class="card empty">${emptyMsg}</div>`}</div>`;
+  const all = visible(), t0 = today(), wb = weekInfo().b, w = weekInfo();
+  const open = all.filter(t => t.state !== 'done');
+  const late = open.filter(isLate).sort(byDue);
+  const doing = open.filter(t => t.state === 'doing' && t.due !== t0 && !isLate(t));
+  const todayL = open.filter(t => t.due === t0).sort((a, b) => (b.state === 'doing') - (a.state === 'doing') || a.created - b.created);
+  const week = open.filter(t => t.due && t.due > t0 && t.due <= wb && t.state !== 'doing').sort(byDue);
+  const later = open.filter(t => t.due && t.due > wb && t.state !== 'doing').sort(byDue);
+  const nodate = open.filter(t => !t.due && t.state !== 'doing');
+  const doneL = all.filter(t => t.state === 'done').sort((a, b) => (b.done_at || 0) - (a.done_at || 0));
+  const nWeek = late.length + todayL.length + week.length;
+  const now = new Date();
+  const parts = [];
+  parts.push(nWeek ? `Esta semana tienes <b>${nWeek} tarea${nWeek === 1 ? '' : 's'}</b>` : 'No tienes nada pendiente esta semana');
+  if (late.length) parts.push(`<b class="lt">${late.length} vencida${late.length === 1 ? '' : 's'}</b>`);
+  const cur = open.find(t => t.state === 'doing');
+  let lead = parts.join(', ') + '.';
+  if (cur) lead += ` En curso: <b>${esc(cur.title)}</b>.`;
+  else if (todayL.length) lead += ` Para hoy: <b>${todayL.length}</b>.`;
+  // Proyectos: hechas / total
+  const projStats = PROJECTS.map(g => { const ts = all.filter(t => groupOf(t.proj) === g.g); return { g:g.g, color:g.color, done:ts.filter(t => t.state === 'done').length, total:ts.length }; }).filter(x => x.total);
+  const sec = (title, list, cls = '', when = t => fmt(t.due)) => list.length ? `<section class="rs ${cls}"><h2>${title} <small>${list.length}</small></h2>${list.map(t => rsRow(t, when(t))).join('')}</section>` : '';
+  const only = { late:'late', today:'today', week:'week', done:'done' }[listFilter];
+  let body;
+  if (only === 'done') body = sec('Completadas', doneL, '', t => t.done_at ? fmt(ymd(new Date(t.done_at))) : '');
+  else if (only === 'late') body = sec('Vencidas', late, 'late');
+  else if (only === 'today') body = sec('Hoy', todayL, '', () => 'Hoy');
+  else if (only === 'week') body = sec('Esta semana', [...todayL, ...week], '', t => t.due === t0 ? 'Hoy' : fmt(t.due));
+  else body = sec('Vencidas', late, 'late') + sec('Esta semana', week) + sec('Más adelante', later) + sec('Sin fecha', nodate, 'muted', () => '—');
+  if (!body) body = `<div class="rs-empty">${!tasks.length ? 'Aún no tienes tareas. Pulsa «+ Nueva tarea» para crear la primera.' : $('q').value || projFilter ? 'Ninguna tarea coincide con la búsqueda o el filtro.' : only ? 'No hay nada aquí.' : 'Nada más pendiente. Buen trabajo.'}</div>`;
+  const hoyList = [...doing, ...todayL];
+  $('content').innerHTML = `<div class="rsm">
+    <header class="rs-top">
+      <div class="rs-date">${cap(DOWL[(now.getDay() + 6) % 7])} · ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}</div>
+      <p class="rs-lead">${lead}</p>
+    </header>
+    <div class="rs-bento">
+      <section class="rs-big">
+        <span class="rs-k">Esta semana</span>
+        <div class="rs-n"><span>${String(nWeek).padStart(2, '0')}</span><i></i></div>
+        <span class="rs-sub">tareas pendientes${cur ? ' · 1 en curso' : ''}</span>
+        <div class="rs-kpis"><button data-act="lf" data-v="late"><b>${late.length}</b>vencidas</button><button data-act="lf" data-v="today"><b>${todayL.length}</b>para hoy</button><div><b>${w.pct === null ? '—' : w.pct + '%'}</b>hecho</div></div>
+      </section>
+      <section class="rs-card rs-today">
+        <h3><span>Hoy · ${DOWL[(now.getDay() + 6) % 7]} ${now.getDate()}</span><span class="m">${hoyList.length} tarea${hoyList.length === 1 ? '' : 's'}</span></h3>
+        ${hoyList.length ? hoyList.map(t => rsRow(t, t.state === 'doing' ? 'En curso' : '', true)).join('') : `<div class="rs-free">Nada para hoy.${week[0] ? ` Lo siguiente: <b>${esc(week[0].title)}</b> (${fmt(week[0].due)}).` : ''}</div>`}
+      </section>
+    </div>
+    <div class="rs-cols">
+      <div class="rs-main">
+        <nav class="rs-tabs">${['', ...PROJECTS.map(g => 'g:' + g.g)].map(v => `<button data-act="ovproj" data-v="${esc(v)}" aria-pressed="${projFilter === v || (!v && !projFilter)}">${v ? esc(v.slice(2)) : 'Todo'}</button>`).join('')}
+          <span class="rs-st">${only ? `<button data-act="lf" data-v="open">← Ver todo</button>` : `<button data-act="lf" data-v="done">Completadas</button>`}</span></nav>
+        ${body}
+      </div>
+      <aside class="rs-aside">
+        ${projStats.length ? `<section class="rs-card"><h3><span>Proyectos</span></h3>${projStats.map(x => `<div class="rs-pr"><div><span class="dot" style="--pc:${x.color}"></span>${esc(x.g)}<span class="m">${x.done}/${x.total}</span></div><div class="rs-bar"><i style="--pc:${x.color};width:${Math.max(3, Math.round(x.done / x.total * 100))}%"></i></div></div>`).join('')}</section>` : ''}
+        <section class="rs-card"><h3><span>Adjuntar archivos</span>${general.length ? `<a class="m" href="#archivos">${general.length} sueltos →</a>` : ''}</h3>
+          <div class="rs-drop" id="ovDrop" tabindex="0" role="button" aria-label="Adjuntar archivos sueltos">Suelta aquí Excel, docs o PDF<small>o haz clic para elegir</small></div><input id="ovFile" type="file" multiple hidden></section>
+      </aside>
+    </div></div>`;
+  const drop = $('ovDrop');
+  drop.onclick = () => $('ovFile').click();
+  drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('ovFile').click(); } };
+  $('ovFile').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; if (fs.length) addGeneral(fs); };
+  ['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); drop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove('over')));
+  drop.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); if (e.dataTransfer.files.length) addGeneral([...e.dataTransfer.files]); });
+}
+function rsRow(t, when, compact) {
+  const files = (t.files || []).map((f, i) => `<button class="rs-f" data-act="dl" data-id="${t.id}" data-i="${i}">📎 ${esc(f.name)}</button>`).join('');
+  return `<div class="rs-r ${t.state} ${compact ? 'c' : ''}" data-drop="${t.id}">
+    <button class="check ${checkCls(t)}" data-act="toggle" data-id="${t.id}" aria-label="${t.state === 'done' ? 'Marcar como pendiente' : 'Marcar como completada'}"></button>
+    <div class="rs-b"><div class="rs-t" data-act="edit" data-id="${t.id}">${esc(t.title)}</div>
+      <div class="rs-s">${t.proj ? `<span><i class="dot" style="--pc:${colorOf(t.proj)}"></i>${esc(projLabel(t.proj))}</span>` : ''}${t.state === 'doing' && !compact ? '<span class="rs-doing">En curso</span>' : ''}${files}</div></div>
+    <span class="rs-w">${when || ''}</span></div>`;
 }
 function row(t) {
   const late = isLate(t);
@@ -1634,7 +1763,8 @@ document.addEventListener('click', async e => {
   if (!el || !user) return;
   const a = el.dataset.act, id = el.dataset.id, t = id && tasks.find(x => x.id === id);
   switch (a) {
-    case 'lf': listFilter = el.dataset.v; render(); break;
+    case 'lf': listFilter = el.dataset.v; if (view !== 'lista') go('lista'); else render(); break;
+    case 'ovproj': projFilter = el.dataset.v; render(); break;
     case 'goLate': listFilter = 'late'; go('lista'); break;
     case 'goToday': listFilter = 'today'; go('lista'); break;
     case 'goWeek': listFilter = 'week'; go('lista'); break;
