@@ -816,7 +816,57 @@
     .row:hover { transform:none; }
     .toast { bottom:calc(150px + env(safe-area-inset-bottom, 0px)); }
   }
-  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+  /* ---------- Detalles de calidad: movimiento suave y respuestas al tacto ---------- */
+  :root { --ease:cubic-bezier(.2,.7,.2,1); --spring:cubic-bezier(.34,1.56,.64,1); }
+  ::selection { background:var(--acc-soft); color:var(--ink); }
+  html { scroll-behavior:smooth; }
+  button, .chip, .pill, .nav a, input, select, textarea { transition:background-color .18s var(--ease), border-color .18s var(--ease), color .18s var(--ease), box-shadow .18s var(--ease), transform .12s var(--ease), opacity .18s var(--ease); }
+  button:active:not(:disabled), .nav a:active { transform:scale(.97); }
+  .card, .rs-card, .fcard, .kcard, .ach { transition:transform .22s var(--ease), box-shadow .22s var(--ease), border-color .22s var(--ease); }
+  .rs-card:hover, .fcard:hover, .kcard:hover { box-shadow:0 2px 4px rgba(20,20,20,.05), 0 14px 34px rgba(20,20,20,.09); }
+  .fcov { transition:transform .35s var(--ease), filter .35s var(--ease); }
+  .fcard:hover .fcov { transform:scale(1.03); filter:saturate(1.08); }
+  .fdl { transition:transform .2s var(--spring), background-color .15s, color .15s; } .fcard:hover .fdl { transform:scale(1.08); }
+  .nav a svg.i { transition:transform .25s var(--spring); } .nav a:hover svg.i { transform:translateX(2px); }
+  .nav a[aria-current="page"] svg.i { transform:none; }
+  /* Círculo de completar: aparece el check al pasar y "salta" al marcar */
+  .check { position:relative; transition:border-color .18s, background-color .2s var(--ease), transform .2s var(--spring); }
+  .check:not(.on):hover::after { content:"✓"; font-size:12px; font-weight:700; color:var(--good); opacity:.55; }
+  .check.pop { animation:pop .42s var(--spring); }
+  @keyframes pop { 0% { transform:scale(.8); } 55% { transform:scale(1.18); } 100% { transform:scale(1); } }
+  .completing { transition:opacity .38s var(--ease), transform .38s var(--ease) !important; opacity:.35; transform:translateX(6px); }
+  .completing .rs-t, .completing .ti, .completing .ovt { text-decoration:line-through; text-decoration-color:var(--good); color:var(--mute); }
+  /* Entrada escalonada de listas y tarjetas */
+  @media (prefers-reduced-motion: no-preference) {
+    .rs-r, .fcard, .frow2, .kcard, .row, .ach, .rs-card, .rs-big, .stats > .tile, .minis > .mini { animation:rise .38s var(--ease) both; }
+    .rs-r:nth-child(2), .fcard:nth-child(2), .frow2:nth-child(2), .kcard:nth-child(2), .ach:nth-child(2) { animation-delay:.03s; }
+    .rs-r:nth-child(3), .fcard:nth-child(3), .frow2:nth-child(3), .kcard:nth-child(3), .ach:nth-child(3) { animation-delay:.06s; }
+    .rs-r:nth-child(4), .fcard:nth-child(4), .frow2:nth-child(4), .kcard:nth-child(4), .ach:nth-child(4) { animation-delay:.09s; }
+    .rs-r:nth-child(5), .fcard:nth-child(5), .frow2:nth-child(5), .kcard:nth-child(5), .ach:nth-child(5) { animation-delay:.12s; }
+    .rs-r:nth-child(n+6), .fcard:nth-child(n+6), .frow2:nth-child(n+6), .kcard:nth-child(n+6), .ach:nth-child(n+6) { animation-delay:.15s; }
+    .rs-today { animation-delay:.05s; } .rs-aside .rs-card:nth-child(2) { animation-delay:.08s; }
+    @keyframes rise { from { opacity:0; transform:translateY(6px); } }
+    .rs-bar i, .prog .fill { animation:grow .8s var(--ease) both .15s; transform-origin:left; }
+    @keyframes grow { from { transform:scaleX(0); } }
+    /* Ventanas y avisos */
+    dialog[open] { animation:dlgIn .24s var(--ease); }
+    dialog[open]::backdrop { animation:fadeIn .24s var(--ease); }
+    @keyframes dlgIn { from { opacity:0; transform:translateY(10px) scale(.98); } }
+    @keyframes fadeIn { from { opacity:0; } }
+    .toast:not([hidden]) { animation:toastIn .32s var(--spring); }
+    @keyframes toastIn { from { opacity:0; transform:translate(-50%, 14px) scale(.96); } }
+    .pop:not(.check) { animation:dlgIn .18s var(--ease); }
+    .badge { animation:pop .45s var(--spring); }
+  }
+  /* Esqueleto de carga */
+  .skel { display:grid; gap:12px; }
+  .skel i, .skrow i { display:block; border-radius:14px; background:linear-gradient(90deg, var(--line) 0%, var(--panel) 50%, var(--line) 100%); background-size:200% 100%; animation:shimmer 1.2s linear infinite; }
+  .skrow { display:grid; grid-template-columns:220px 1fr; gap:16px; margin:10px 0; }
+  @keyframes shimmer { from { background-position:200% 0; } to { background-position:-200% 0; } }
+  /* Barras de desplazamiento finas */
+  * { scrollbar-width:thin; scrollbar-color:var(--line2) transparent; }
+  ::-webkit-scrollbar { width:10px; height:10px; } ::-webkit-scrollbar-thumb { background:var(--line2); border-radius:10px; border:3px solid var(--bg); } ::-webkit-scrollbar-track { background:transparent; }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
 </style>
 </head>
 <body>
@@ -1482,7 +1532,7 @@ function render() {
   document.body.classList.toggle('v-lista', view === 'lista');
   ensureWx();
   $('fab').hidden = view === 'logros' || view === 'archivos';
-  if (!loaded) { $('content').innerHTML = '<div class="empty">Cargando tus tareas…</div>'; return; }
+  if (!loaded) { $('content').innerHTML = `<div class="skel" aria-label="Cargando tus tareas"><i style="width:30%;height:14px"></i><i style="width:60%;height:18px"></i><div class="skrow"><i style="height:180px"></i><i style="height:180px"></i></div>${'<i style="height:56px"></i>'.repeat(5)}</div>`; return; }
   ({ lista:renderList, calendario:renderCal, proyectos:renderBoard, archivos:renderFiles, estadisticas:renderStats, logros:renderLogros })[view]();
 }
 const projSelect = () => `<select id="fProj" aria-label="Filtrar por proyecto">${projOptions(projFilter, true)}</select>`;
@@ -1527,7 +1577,7 @@ function renderList() {
     <div class="rs-bento">
       <section class="rs-big">
         <span class="rs-k">Esta semana</span>
-        <div class="rs-n"><span>${String(nWeek).padStart(2, '0')}</span><i></i></div>
+        <div class="rs-n"><span data-count="${nWeek}">${String(nWeek).padStart(2, '0')}</span><i></i></div>
         <span class="rs-sub">tareas pendientes${cur ? ' · 1 en curso' : ''}</span>
         <div class="rs-kpis"><button data-act="lf" data-v="late"><b>${late.length}</b>vencidas</button><button data-act="lf" data-v="today"><b>${todayL.length}</b>para hoy</button><div><b>${w.pct === null ? '—' : w.pct + '%'}</b>hecho</div></div>
       </section>
@@ -1548,6 +1598,7 @@ function renderList() {
           <div class="rs-drop" id="ovDrop" tabindex="0" role="button" aria-label="Adjuntar archivos sueltos">Suelta aquí Excel, docs o PDF<small>o haz clic para elegir</small></div><input id="ovFile" type="file" multiple hidden></section>
       </aside>
     </div></div>`;
+  countUp();
   const drop = $('ovDrop');
   drop.onclick = () => $('ovFile').click();
   drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('ovFile').click(); } };
@@ -1912,7 +1963,15 @@ document.addEventListener('click', async e => {
     case 'goLate': listFilter = 'late'; go('lista'); break;
     case 'goToday': listFilter = 'today'; go('lista'); break;
     case 'goWeek': listFilter = 'week'; go('lista'); break;
-    case 'toggle': if (t) { const s = t.state === 'done' ? 'todo' : 'done'; if (await setState(t, s) && s === 'done') toast(`«${t.title}» completada.`); } break;
+    case 'toggle': if (t) {
+      const s = t.state === 'done' ? 'todo' : 'done';
+      if (s === 'done' && !REDUCED) {   // pequeña animación antes de que la tarea cambie de sitio
+        const host = el.closest('.rs-r, .row, .kcard, .dayitem');
+        el.classList.add('on', 'pop'); host?.classList.add('completing');
+        await new Promise(r => setTimeout(r, 420));
+      }
+      if (await setState(t, s) && s === 'done') toast(`✓ «${t.title}» completada.`);
+    } break;
     case 'state': if (t) setState(t, el.dataset.s); break;
     case 'edit': if (t) openDlg(t); break;
     case 'del': if (t && await ask('¿Borrar la tarea?', `«${t.title}» y sus archivos se borrarán. No se puede deshacer.`)) removeTask(t); break;
@@ -2624,6 +2683,19 @@ function renderWeatherSheet() {
    <div class="wx-legend">${wxPlace()} · 💧 probabilidad de lluvia · 📌 tareas con fecha ese día · Datos: Open-Meteo</div>`;
 }
 setInterval(() => { if (document.visibilityState === 'visible' && user) loadWeather(true).then(drawWxChip).catch(() => {}); }, WX_TTL);
+
+// ======================= Detalles de movimiento =======================
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let lastCount = null;
+function countUp() {
+  const el = document.querySelector('[data-count]'); if (!el) return;
+  const to = +el.dataset.count, from = lastCount === null ? 0 : lastCount; lastCount = to;
+  if (REDUCED || from === to) return;
+  const t0 = performance.now(), dur = 520;
+  const step = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = String(Math.round(from + (to - from) * e)).padStart(2, '0'); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
 
 // ======================= Menú «Más» del móvil =======================
 const SEC2 = ['proyectos','estadisticas','logros'];
