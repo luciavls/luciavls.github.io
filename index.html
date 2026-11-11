@@ -351,6 +351,26 @@
   .extitem .bar { width:4px; border-radius:4px; background:var(--pc); justify-self:center; height:100%; min-height:20px; }
   .extitem .ti { font-size:15px; }
   .extitem .meta { font-size:12px; color:var(--mute); margin-top:3px; }
+  /* ---------- Logros: toda la zona en negro, sin franjas claras ---------- */
+  body.v-logros .main, body.v-logros .topbar { background:#111213; }
+  body.v-logros .content { padding-top:8px; }
+  body.v-logros .logros { border-radius:0; margin:0; padding-left:0; padding-right:0; background:transparent; }
+  body.v-logros .search { background:#1b1c1f; border-color:#2c2d31; color:#f0efec; } body.v-logros .search input { color:#f0efec; }
+  body.v-logros .topbar button.icon, body.v-logros .wxchip { background:#1b1c1f; border-color:#2c2d31; color:#f0efec; }
+  @media (max-width:900px) {
+    body.v-logros { background:#111213; }
+    body.v-logros .side { background:#111213; border-color:#111213; } body.v-logros .brand b { color:#f0efec; }
+    body.v-logros .brand .logo { background:#f0efec; color:#141414; }
+    body.v-logros .nav { background:rgba(17,18,19,.92); border-top-color:#2c2d31; } body.v-logros .nav a, body.v-logros .navmore { color:#c3c2bd; }
+    body.v-logros .navmore.on { color:#ff9a78; }
+  }
+
+  /* ---------- Móvil: el buscador se esconde y aparece al deslizar ---------- */
+  @media (max-width:900px) {
+    .topbar { max-height:80px; overflow:hidden; transition:max-height .28s var(--ease), padding .28s var(--ease), opacity .2s; }
+    body.tb-hidden .topbar { max-height:0; padding-top:0; padding-bottom:0; opacity:0; pointer-events:none; }
+  }
+
   /* ---------- Logros: línea de vida ---------- */
   .gart { position:relative; overflow:hidden; isolation:isolate; background:#141518; display:flex; align-items:flex-end; padding:14px 16px; }
   .gart::before { content:""; position:absolute; inset:-20%; z-index:-2; filter:blur(6px) saturate(1.1);
@@ -1638,6 +1658,7 @@ function render() {
   if (!user) return;
   renderSide();
   document.body.classList.toggle('v-lista', view === 'lista');
+  document.body.classList.toggle('v-logros', view === 'logros');
   ensureWx();
   $('fab').hidden = view === 'logros' || view === 'archivos';
   if (!loaded) { $('content').innerHTML = `<div class="skel" aria-label="Cargando tus tareas"><i style="width:30%;height:14px"></i><i style="width:60%;height:18px"></i><div class="skrow"><i style="height:180px"></i><i style="height:180px"></i></div>${'<i style="height:56px"></i>'.repeat(5)}</div>`; return; }
@@ -2816,6 +2837,27 @@ function countUp() {
     el.textContent = String(Math.round(from + (to - from) * e)).padStart(2, '0'); if (k < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }
+
+// ======================= Móvil: buscador que aparece al deslizar =======================
+(() => {
+  const mobile = matchMedia('(max-width:900px)');
+  let lastY = scrollY, startY = null;
+  const keep = () => document.activeElement === $('q') || $('q').value;
+  const show = () => document.body.classList.remove('tb-hidden');
+  const hide = () => { if (!keep()) document.body.classList.add('tb-hidden'); };
+  const init = () => { if (mobile.matches) hide(); else show(); };
+  init(); mobile.addEventListener?.('change', init);
+  addEventListener('scroll', () => {
+    if (!mobile.matches) return;
+    const y = scrollY, dy = y - lastY;
+    if (dy < -6) show(); else if (dy > 6 && y > 40) hide();
+    lastY = y;
+  }, { passive:true });
+  // Arriba del todo: tirar hacia abajo con el dedo lo muestra
+  addEventListener('touchstart', e => { startY = scrollY <= 2 ? e.touches[0].clientY : null; }, { passive:true });
+  addEventListener('touchmove', e => { if (startY !== null && e.touches[0].clientY - startY > 40) { show(); startY = null; } }, { passive:true });
+  $('q').addEventListener('blur', () => { if (mobile.matches && scrollY > 40) hide(); });
+})();
 
 // ======================= Menú «Más» del móvil =======================
 const SEC2 = ['proyectos','estadisticas','logros'];
