@@ -412,17 +412,27 @@
   .fdrop { display:none; position:absolute; inset:-8px; border:2px dashed var(--acc); border-radius:20px; background:color-mix(in srgb, var(--acc-soft) 85%, transparent); place-items:center; font-size:18px; font-weight:600; color:var(--acc-ink); pointer-events:none; z-index:3; }
   .fv.over .fdrop { display:grid; }
   @media (max-width:900px) {
-    .fhead h2 { font-size:22px; width:100%; } .fhead .primary { margin-left:auto; }
-    .fchips { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; }
-    .fchips .chip { flex:none; }
-    .fgrid { grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
-    .fcov { height:96px; }
-    .frow2 { grid-template-columns:34px minmax(0,1fr) auto; }
+    /* Móvil: solo lo esencial */
+    .fhead { gap:8px; flex-wrap:nowrap; }
+    .fhead h2 { font-size:22px; } .fhead h2 small, .fhead select { display:none; }
+    .fvt button { padding:5px 10px; font-size:13px; }
+    .fup { width:36px; height:36px; padding:0; border-radius:50%; font-size:16px; } .fup span { display:none; }
+    .fchips { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; margin:10px calc(-1 * max(16px, env(safe-area-inset-left, 0px))) 0; padding:0 max(16px, env(safe-area-inset-left, 0px)); gap:6px; }
+    .fchips .chip { flex:none; padding:4px 10px; font-size:12px; }
+    .clipstrip { margin-top:10px; gap:8px; padding:6px 6px 6px 12px; border-radius:12px; } .clipstrip b, .clipstrip .csall { display:none; }
+    .clipstrip .cs { font-size:12px; cursor:pointer; } .clipstrip button { padding:5px 10px; font-size:12px; }
+    .fsec { font-size:21px; margin:18px 0 8px; }
+    .fgrid { grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; }
+    .fcard { border-radius:12px; box-shadow:none; } .fcard:hover { transform:none; }
+    .fcov { height:74px; } .fext { font-size:20px; } .fext small { display:none; }
+    .ftag2, .fdel { display:none; }
+    .fdl { width:26px; height:26px; right:6px; top:6px; font-size:12px; }
+    .fin { padding:7px 9px 9px; } .fnm { font-size:13px; }
+    .fmt { font-size:11px; } .fmt .fassign, .fmt .ftask { font-size:11px; }
+    .fcov.bas pre { display:none; } .fcov.bas { place-items:center; } .fcov.bas .fext { position:static; font-size:20px; }
+    .frow2 { grid-template-columns:30px minmax(0,1fr) auto; gap:10px; padding:8px 10px; } .fi { width:30px; height:30px; }
     .frow2 .fwhere, .frow2 .fsz { display:none; }
-    .clipstrip { gap:8px; padding:8px 8px 8px 12px; } .clipstrip b { display:none; } .clipstrip .cs { font-size:12px; }
-    .fcov.bas pre { inset:36px 10px auto; font-size:8.5px; } .fcov.bas .fext { font-size:20px; right:10px; bottom:8px; }
-    .fext { font-size:24px; }
-    .fhead select, .fvt { order:2; } .fhead .primary { order:3; }
+    .flist { border-radius:12px; box-shadow:none; }
   }
 
   /* ---------- Resumen (mezcla editorial + panel) ---------- */
@@ -1471,7 +1481,7 @@ function render() {
   renderSide();
   document.body.classList.toggle('v-lista', view === 'lista');
   ensureWx();
-  $('fab').hidden = view === 'logros';
+  $('fab').hidden = view === 'logros' || view === 'archivos';
   if (!loaded) { $('content').innerHTML = '<div class="empty">Cargando tus tareas…</div>'; return; }
   ({ lista:renderList, calendario:renderCal, proyectos:renderBoard, archivos:renderFiles, estadisticas:renderStats, logros:renderLogros })[view]();
 }
@@ -1735,10 +1745,10 @@ function renderFiles() {
     <div class="fhead"><h2>Archivos<small>${count} archivo${count === 1 ? '' : 's'}${count ? ' · ' + size(total) : ''}</small></h2>
       <select id="fSort" aria-label="Ordenar"><option value="recent" ${fSort === 'recent' ? 'selected' : ''}>Más recientes</option><option value="name" ${fSort === 'name' ? 'selected' : ''}>Nombre</option><option value="size" ${fSort === 'size' ? 'selected' : ''}>Tamaño</option></select>
       <div class="fvt" role="group" aria-label="Vista"><button data-act="fview" data-v="grid" aria-pressed="${fView === 'grid'}" title="Cuadrícula">▦</button><button data-act="fview" data-v="list" aria-pressed="${fView === 'list'}" title="Lista">☰</button></div>
-      <button class="primary" data-act="pickLoose">↑ Subir archivos</button><input id="gfile" type="file" multiple hidden></div>
+      <button class="primary fup" data-act="pickLoose" aria-label="Subir archivos">↑<span> Subir archivos</span></button><input id="gfile" type="file" multiple hidden></div>
     <div class="fchips">${chips.map(([k, n, c]) => `<button class="chip" data-act="ffilter" data-v="${k}" aria-pressed="${fFilter === k}">${esc(n)}${k ? ` (${c})` : ''}</button>`).join('')}</div>
-    <div class="clipstrip" id="clipStrip">📋 <b>Portapapeles</b><span class="cs">${c0 ? `${esc(c0.content.replace(/\s+/g, ' ').slice(0, 140))} · ${esc(ago(c0.created_at))}${c0.device ? ' · ' + esc(c0.device) : ''}` : 'Vacío. Pega aquí textos para tenerlos en todos tus dispositivos.'}</span>
-      ${c0 ? `<button data-act="ccopy" data-id="${c0.id}">Copiar</button>` : ''}<button data-act="clippanel">${clipPanel ? 'Cerrar' : clips.length > 1 ? `Ver todo (${clips.length})` : 'Abrir'}</button></div>
+    <div class="clipstrip" id="clipStrip">📋 <b>Portapapeles</b><span class="cs" data-act="clippanel">${c0 ? `${esc(c0.content.replace(/\s+/g, ' ').slice(0, 140))} · ${esc(ago(c0.created_at))}${c0.device ? ' · ' + esc(c0.device) : ''}` : 'Vacío. Pega aquí textos para tenerlos en todos tus dispositivos.'}</span>
+      ${c0 ? `<button data-act="ccopy" data-id="${c0.id}">Copiar</button>` : ''}<button class="csall" data-act="clippanel">${clipPanel ? 'Cerrar' : clips.length > 1 ? `Ver todo (${clips.length})` : 'Abrir'}</button></div>
     ${clipPanel ? pasteBoxHTML(open) : ''}
     ${block('Sin clasificar', loose)}${block('En tus tareas', inT)}
     ${!vis.length ? `<div class="fempty">${count ? 'Ningún archivo coincide con el filtro o la búsqueda.' : '<b>Aún no tienes archivos.</b>Arrástralos aquí o pulsa «↑ Subir archivos».'}</div>` : ''}
