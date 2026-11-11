@@ -351,6 +351,80 @@
   .extitem .bar { width:4px; border-radius:4px; background:var(--pc); justify-self:center; height:100%; min-height:20px; }
   .extitem .ti { font-size:15px; }
   .extitem .meta { font-size:12px; color:var(--mute); margin-top:3px; }
+  /* ---------- Archivos: biblioteca ---------- */
+  .fv { position:relative; }
+  .fhead { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .fhead h2 { margin:0 auto 0 0; font-size:28px; letter-spacing:-.02em; }
+  .fhead h2 small { font:500 12px var(--f-mono); color:var(--mute); margin-left:10px; letter-spacing:.04em; }
+  .fhead select { border-radius:99px; padding:8px 12px; font-size:13px; }
+  .fvt { display:inline-flex; border:1px solid var(--line2); border-radius:99px; overflow:hidden; background:var(--card); }
+  .fvt button { border:0; border-radius:0; padding:7px 13px; font-size:15px; background:transparent; color:var(--mute); }
+  .fvt button[aria-pressed="true"] { background:var(--ink); color:var(--bg); }
+  .fhead .primary { border-radius:99px; background:var(--ink); border-color:var(--ink); color:var(--bg); }
+  .fchips { display:flex; gap:6px; flex-wrap:wrap; margin-top:14px; }
+  .fchips .chip { padding:6px 12px; font-size:13px; }
+  .clipstrip { display:flex; align-items:center; gap:12px; margin-top:16px; background:#141414; color:#f2f1ee; border-radius:16px; padding:10px 12px 10px 16px; }
+  .clipstrip b { font-weight:600; flex:none; }
+  .clipstrip .cs { flex:1; min-width:0; color:#a7a8ad; font:400 13px var(--f-mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .clipstrip button { background:#2a2b2f; border:1px solid #3a3b40; color:#f2f1ee; border-radius:99px; padding:6px 12px; font-size:13px; flex:none; }
+  .clipstrip button:hover { background:#34353a; }
+  .fsec { font:400 26px "Instrument Serif", Georgia, serif; margin:26px 0 12px; display:flex; align-items:baseline; gap:8px; }
+  .fsec small { font:500 11px var(--f-mono); color:var(--mute); text-transform:uppercase; letter-spacing:.08em; }
+  .fgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:14px; }
+  .fcard { position:relative; background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden; box-shadow:var(--shadow); min-width:0; transition:transform .15s; }
+  .fcard:hover { transform:translateY(-2px); }
+  .fcov { height:118px; display:grid; place-items:center; background:color-mix(in srgb, var(--c) 11%, var(--card)); border-bottom:1px solid var(--line); background-size:cover; background-position:center; }
+  .fext { font:700 30px var(--f-body); letter-spacing:-.03em; color:var(--c); text-align:center; line-height:1; }
+  .fext small { display:block; font:500 10px var(--f-mono); letter-spacing:.12em; margin-top:4px; opacity:.8; }
+  .fcov.img.has .fext { display:none; }
+  .fcov.bas { background:linear-gradient(160deg, #18213a, #22305a); position:relative; place-items:end start; padding:12px 14px; }
+  .fcov.bas pre { position:absolute; inset:40px 14px auto; margin:0; font:400 10px/1.45 var(--f-mono); color:#8aa1d6; white-space:pre; overflow:hidden; opacity:.9; }
+  .fcov.bas pre b { color:#c792ea; font-weight:400; } .fcov.bas pre i { color:#82aaff; font-style:normal; } .fcov.bas pre u { color:#c3e88d; text-decoration:none; }
+  .fcov.bas .fext { color:#fff; justify-self:end; align-self:end; position:absolute; right:14px; bottom:12px; font-size:26px; }
+  .fcov.bas .fext small { color:#9fb4ff; }
+  .ftag2 { position:absolute; left:10px; top:10px; font:500 10px var(--f-mono); text-transform:uppercase; letter-spacing:.04em; background:var(--card); border-radius:99px; padding:3px 8px; color:var(--ink2); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+  .fdl { position:absolute; right:10px; top:10px; width:30px; height:30px; border-radius:50%; padding:0; display:grid; place-items:center; background:var(--card); border:0; box-shadow:0 2px 8px rgba(0,0,0,.12); font-size:14px; }
+  .fdl:hover { background:var(--ink); color:var(--bg); }
+  .fin { padding:10px 12px 12px; }
+  .fnm { display:block; width:100%; background:none; border:0; padding:0; border-radius:0; font-weight:600; font-size:14px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fnm:hover { text-decoration:underline; }
+  .fmt { display:flex; align-items:center; gap:6px; color:var(--mute); font-size:12px; margin-top:3px; white-space:nowrap; min-width:0; }
+  .ftask { background:none; border:0; padding:0; border-radius:0; font-size:12px; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; display:inline-flex; align-items:center; gap:5px; }
+  .ftask .dot { width:6px; height:6px; flex:none; }
+  .ftask:hover { text-decoration:underline; }
+  .fassign { -webkit-appearance:none; appearance:none; border:0; background:transparent; padding:0; font-size:12px; color:var(--acc-ink); text-decoration:underline; min-width:0; max-width:130px; cursor:pointer; text-overflow:ellipsis; }
+  .fdel { background:none; border:0; padding:0 2px; margin-left:auto; font-size:13px; opacity:.55; }
+  .fdel:hover { opacity:1; }
+  .flist { background:var(--card); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; }
+  .frow2 { display:grid; grid-template-columns:34px minmax(0,2fr) minmax(0,1.6fr) 70px 70px 64px; gap:12px; align-items:center; padding:9px 14px; border-top:1px solid var(--line); }
+  .frow2:first-child { border-top:0; }
+  .frow2:hover { background:var(--panel); }
+  .fi { width:34px; height:34px; border-radius:8px; display:grid; place-items:center; font:600 9px var(--f-mono); background:color-mix(in srgb, var(--c) 14%, var(--card)); color:var(--c); background-size:cover; background-position:center; }
+  .fi.img.has { color:transparent; }
+  .fi.bas { background:linear-gradient(160deg, #18213a, #22305a); color:#9fb4ff; }
+  .frow2 .fnm { font-weight:500; }
+  .fwhere { min-width:0; display:flex; } .fwhere .ftask { font-size:13px; }
+  .fsz { font:500 12px var(--f-mono); color:var(--mute); white-space:nowrap; }
+  .facts { display:flex; gap:4px; justify-content:flex-end; }
+  .facts button { width:30px; height:30px; padding:0; border:0; background:transparent; border-radius:8px; font-size:14px; }
+  .facts button:hover { background:var(--bg); }
+  .fempty { padding:50px 0; color:var(--mute); text-align:center; } .fempty b { display:block; color:var(--ink); font-size:18px; margin-bottom:4px; }
+  .fdrop { display:none; position:absolute; inset:-8px; border:2px dashed var(--acc); border-radius:20px; background:color-mix(in srgb, var(--acc-soft) 85%, transparent); place-items:center; font-size:18px; font-weight:600; color:var(--acc-ink); pointer-events:none; z-index:3; }
+  .fv.over .fdrop { display:grid; }
+  @media (max-width:900px) {
+    .fhead h2 { font-size:22px; width:100%; } .fhead .primary { margin-left:auto; }
+    .fchips { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; }
+    .fchips .chip { flex:none; }
+    .fgrid { grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+    .fcov { height:96px; }
+    .frow2 { grid-template-columns:34px minmax(0,1fr) auto; }
+    .frow2 .fwhere, .frow2 .fsz { display:none; }
+    .clipstrip { gap:8px; padding:8px 8px 8px 12px; } .clipstrip b { display:none; } .clipstrip .cs { font-size:12px; }
+    .fcov.bas pre { inset:36px 10px auto; font-size:8.5px; } .fcov.bas .fext { font-size:20px; right:10px; bottom:8px; }
+    .fext { font-size:24px; }
+    .fhead select, .fvt { order:2; } .fhead .primary { order:3; }
+  }
+
   /* ---------- Resumen (mezcla editorial + panel) ---------- */
   .side .sumrow, .side .prog { display:none !important; }
   .rsm { max-width:none; }
@@ -1329,6 +1403,7 @@ async function pasteFromClipboard() {
   } catch { toast('Este navegador no deja leer el portapapeles: mantén pulsado el cuadro y elige «Pegar».'); $('pText')?.focus(); }
 }
 function drawClips() {
+  if (view === 'archivos' && $('clipStrip') && !$('clipList')) { render(); return; }
   const el = $('clipList'); if (!el) return;
   const q = $('q').value.trim().toLowerCase();
   const list = clips.filter(c => !q || c.content.toLowerCase().includes(q));
@@ -1588,21 +1663,100 @@ function renderBoard() {
 }
 
 // ---------- Archivos ----------
+// Tipos de archivo: color, filtro y portada
+const FTYPES = {
+  pdf:  { n:'PDF', c:'#e5534b', ex:['pdf'] },
+  xls:  { n:'Excel', c:'#2e9e4f', ex:['xls','xlsx','xlsm','xlsb','csv','ods'] },
+  doc:  { n:'Word', c:'#2f7de1', ex:['doc','docx','odt','rtf'] },
+  ppt:  { n:'PowerPoint', c:'#ee6a45', ex:['ppt','pptx','key','odp'] },
+  img:  { n:'Imágenes', c:'#d49a00', ex:['png','jpg','jpeg','gif','webp','heic','svg','bmp'] },
+  bas:  { n:'Macros VBA', c:'#5b7cfa', ex:['bas','cls','frm','vba','vbs'] },
+  zip:  { n:'ZIP', c:'#9c4fd0', ex:['zip','rar','7z'] },
+  txt:  { n:'Texto', c:'#8e9097', ex:['txt','md'] },
+};
+const ftypeOf = name => { const e = extOf(name); return Object.keys(FTYPES).find(k => FTYPES[k].ex.includes(e)) || 'other'; };
+const fcolor = name => (FTYPES[ftypeOf(name)] || {}).c || '#8e9097';
+let fView = (() => { try { return localStorage.getItem('fView') || 'grid'; } catch { return 'grid'; } })();
+let fFilter = '', fSort = 'recent', clipPanel = false;
+const thumbs = {};
+async function loadThumbs(paths) {
+  const need = paths.filter(p => p && !(p in thumbs)); if (!need.length || !sb?.storage) return;
+  need.forEach(p => thumbs[p] = '');
+  try {
+    const { data } = await sb.storage.from(BUCKET).createSignedUrls(need, 3600);
+    for (const r of data || []) if (r.signedUrl) thumbs[r.path] = r.signedUrl;
+  } catch {}
+  document.querySelectorAll('[data-thumb]').forEach(el => { const u = thumbs[el.dataset.thumb]; if (u && !el.style.backgroundImage) { el.style.backgroundImage = `url("${u}")`; el.classList.add('has'); } });
+}
+// Portada de cada archivo (en grande en la cuadrícula, en pequeño en la lista)
+function fCover(name, path, small) {
+  const t = ftypeOf(name), e = (extOf(name) || 'file').toUpperCase().slice(0, 4), c = fcolor(name);
+  if (t === 'bas') return small ? `<span class="fi bas">BAS</span>`
+    : `<div class="fcov bas"><pre><b>Attribute</b> VB_Name = "${esc(baseOf(name)).slice(0, 18)}"
+<i>Sub</i> Macro()
+  <u>Range</u>("A1").Value = 1
+<i>End Sub</i></pre><span class="fext">${e}<small>VBA</small></span></div>`;
+  if (t === 'img') return small ? `<span class="fi img" data-thumb="${esc(path || '')}" style="--c:${c}">${e}</span>`
+    : `<div class="fcov img" data-thumb="${esc(path || '')}" style="--c:${c}"><span class="fext">${e}</span></div>`;
+  return small ? `<span class="fi" style="--c:${c}">${e}</span>` : `<div class="fcov" style="--c:${c}"><span class="fext">${e}</span></div>`;
+}
 function renderFiles() {
   const q = $('q').value.trim().toLowerCase();
-  const loose = general.filter(f => !q || f.name.toLowerCase().includes(q));
-  const inTasks = tasks.filter(matchProj).flatMap(t => (t.files || []).map((f, i) => ({ t, f, i }))).filter(x => !q || (x.f.name + ' ' + x.t.title).toLowerCase().includes(q));
   const open = tasks.filter(t => t.state !== 'done');
-  const count = general.length + tasks.reduce((s,t) => s + (t.files||[]).length, 0);
-  const total = general.reduce((s, f) => s + (f.size||0), 0) + tasks.reduce((s, t) => s + (t.files||[]).reduce((a, f) => a + (f.size||0), 0), 0);
-  $('content').innerHTML = `
-    <div class="head"><h2 class="sec">Archivos</h2><span style="color:var(--mute);font-size:13px">${count} archivo${count === 1 ? '' : 's'}${count ? ' · ' + size(total) : ''}</span>${projSelect()}</div>
-    <section class="card box" id="pasteBox" style="margin-bottom:18px">
-      <h3>Portapapeles</h3>
-      <p class="sub">Pega aquí un texto y pulsa «Guardar»: aparece al momento en tus otros dispositivos, listo para copiarlo con un toque. Las imágenes y capturas que pegues se guardan como archivos.</p>
-      <div style="display:grid;gap:8px">
-        <textarea id="pText" rows="4" placeholder="Pega o escribe aquí…" aria-label="Texto para el portapapeles" style="width:100%;resize:vertical">${esc(pasteText)}</textarea>
-      </div>
+  const items = [
+    ...general.map(f => ({ kind:'loose', id:f.id, name:f.name, size:f.size || 0, path:f.path, date:f.added || 0 })),
+    ...tasks.filter(matchProj).flatMap(t => (t.files || []).map((f, i) => ({ kind:'task', t, i, name:f.name, size:f.size || 0, path:f.path, date:t.updated || t.created || 0 }))),
+  ];
+  const count = items.length, total = items.reduce((a, x) => a + x.size, 0);
+  const counts = {}; items.forEach(x => { const k = ftypeOf(x.name); counts[k] = (counts[k] || 0) + 1; });
+  let vis = items.filter(x => (!q || (x.name + ' ' + (x.t?.title || '')).toLowerCase().includes(q))
+    && (!fFilter || (fFilter === 'loose' ? x.kind === 'loose' : ftypeOf(x.name) === fFilter)));
+  vis.sort(fSort === 'name' ? (a, b) => a.name.localeCompare(b.name, 'es') : fSort === 'size' ? (a, b) => b.size - a.size : (a, b) => b.date - a.date);
+  const loose = vis.filter(x => x.kind === 'loose'), inT = vis.filter(x => x.kind === 'task');
+  const chips = [['', 'Todos', count], ['loose', 'Sueltos', general.length], ...Object.keys(FTYPES).filter(k => counts[k]).map(k => [k, FTYPES[k].n, counts[k]])];
+  const assignSel = x => `<select class="fassign" data-assign="${x.id}" aria-label="Asignar ${esc(x.name)} a una tarea"><option value="">Asignar a tarea ▾</option>${open.map(t => `<option value="${t.id}">${esc(t.title.slice(0, 40))}</option>`).join('')}</select>`;
+  const dlAttrs = x => x.kind === 'loose' ? `data-act="gdl" data-id="${x.id}"` : `data-act="dl" data-id="${x.t.id}" data-i="${x.i}"`;
+  const card = x => `<article class="fcard">
+      ${fCover(x.name, x.path)}
+      <span class="ftag2">${x.kind === 'loose' ? 'Suelto' : esc(groupOf(x.t.proj) || x.t.proj || 'Tarea')}</span>
+      <button class="fdl" ${dlAttrs(x)} aria-label="Descargar ${esc(x.name)}" title="Descargar">↓</button>
+      <div class="fin"><button class="fnm" ${dlAttrs(x)} title="${esc(x.name)}">${esc(x.name)}</button>
+        <div class="fmt">${size(x.size)} · ${x.kind === 'loose' ? `${assignSel(x)}<button class="fdel" data-act="gdel" data-id="${x.id}" aria-label="Borrar ${esc(x.name)}" title="Borrar">🗑</button>`
+          : `<button class="ftask" data-act="edit" data-id="${x.t.id}" title="${esc(x.t.title)}"><i class="dot" style="--pc:${colorOf(x.t.proj)}"></i>${esc(x.t.title)}</button>`}</div></div></article>`;
+  const row = x => `<div class="frow2">
+      ${fCover(x.name, x.path, true)}
+      <button class="fnm" ${dlAttrs(x)} title="${esc(x.name)}">${esc(x.name)}</button>
+      <span class="fwhere">${x.kind === 'loose' ? assignSel(x) : `<button class="ftask" data-act="edit" data-id="${x.t.id}"><i class="dot" style="--pc:${colorOf(x.t.proj)}"></i>${esc(x.t.title)}</button>`}</span>
+      <span class="fsz">${x.date ? fmt(ymd(new Date(x.date))) : ''}</span><span class="fsz">${size(x.size)}</span>
+      <span class="facts"><button ${dlAttrs(x)} aria-label="Descargar ${esc(x.name)}" title="Descargar">↓</button>${x.kind === 'loose' ? `<button data-act="gdel" data-id="${x.id}" aria-label="Borrar ${esc(x.name)}" title="Borrar">🗑</button>` : '<span></span>'}</span></div>`;
+  const block = (title, list) => list.length ? `<h2 class="fsec">${title}<small>${list.length}</small></h2>${fView === 'grid' ? `<div class="fgrid">${list.map(card).join('')}</div>` : `<div class="flist">${list.map(row).join('')}</div>`}` : '';
+  const c0 = clips[0];
+  $('content').innerHTML = `<div class="fv" id="fv">
+    <div class="fhead"><h2>Archivos<small>${count} archivo${count === 1 ? '' : 's'}${count ? ' · ' + size(total) : ''}</small></h2>
+      <select id="fSort" aria-label="Ordenar"><option value="recent" ${fSort === 'recent' ? 'selected' : ''}>Más recientes</option><option value="name" ${fSort === 'name' ? 'selected' : ''}>Nombre</option><option value="size" ${fSort === 'size' ? 'selected' : ''}>Tamaño</option></select>
+      <div class="fvt" role="group" aria-label="Vista"><button data-act="fview" data-v="grid" aria-pressed="${fView === 'grid'}" title="Cuadrícula">▦</button><button data-act="fview" data-v="list" aria-pressed="${fView === 'list'}" title="Lista">☰</button></div>
+      <button class="primary" data-act="pickLoose">↑ Subir archivos</button><input id="gfile" type="file" multiple hidden></div>
+    <div class="fchips">${chips.map(([k, n, c]) => `<button class="chip" data-act="ffilter" data-v="${k}" aria-pressed="${fFilter === k}">${esc(n)}${k ? ` (${c})` : ''}</button>`).join('')}</div>
+    <div class="clipstrip" id="clipStrip">📋 <b>Portapapeles</b><span class="cs">${c0 ? `${esc(c0.content.replace(/\s+/g, ' ').slice(0, 140))} · ${esc(ago(c0.created_at))}${c0.device ? ' · ' + esc(c0.device) : ''}` : 'Vacío. Pega aquí textos para tenerlos en todos tus dispositivos.'}</span>
+      ${c0 ? `<button data-act="ccopy" data-id="${c0.id}">Copiar</button>` : ''}<button data-act="clippanel">${clipPanel ? 'Cerrar' : clips.length > 1 ? `Ver todo (${clips.length})` : 'Abrir'}</button></div>
+    ${clipPanel ? pasteBoxHTML(open) : ''}
+    ${block('Sin clasificar', loose)}${block('En tus tareas', inT)}
+    ${!vis.length ? `<div class="fempty">${count ? 'Ningún archivo coincide con el filtro o la búsqueda.' : '<b>Aún no tienes archivos.</b>Arrástralos aquí o pulsa «↑ Subir archivos».'}</div>` : ''}
+    <div class="fdrop" aria-hidden="true">Suelta para subir a «Sin clasificar»</div>
+  </div>`;
+  loadThumbs(vis.filter(x => ftypeOf(x.name) === 'img').map(x => x.path));
+  $('fSort').onchange = e => { fSort = e.target.value; render(); };
+  $('gfile').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; if (fs.length) addGeneral(fs); };
+  const fv = $('fv');
+  fv.addEventListener('dragover', e => { if (e.dataTransfer.types.includes('Files') && !e.target.closest('#pasteBox')) { e.preventDefault(); fv.classList.add('over'); } });
+  fv.addEventListener('dragleave', e => { if (!fv.contains(e.relatedTarget)) fv.classList.remove('over'); });
+  fv.addEventListener('drop', e => { fv.classList.remove('over'); if (e.target.closest('#pasteBox')) return; if (e.dataTransfer.files.length) { e.preventDefault(); e.stopPropagation(); addGeneral([...e.dataTransfer.files]); } });
+  if (clipPanel) wirePasteBox();
+}
+function pasteBoxHTML(open) {
+  return `<section class="card box" id="pasteBox" style="margin:12px 0 4px">
+      <p class="sub" style="margin-top:0">Pega aquí un texto y pulsa «Guardar»: aparece al momento en tus otros dispositivos. Las imágenes y capturas que pegues se guardan como archivos.</p>
+      <textarea id="pText" rows="3" placeholder="Pega o escribe aquí…" aria-label="Texto para el portapapeles" style="width:100%;resize:vertical">${esc(pasteText)}</textarea>
       ${pasteFiles.length ? `<input type="text" id="pName" placeholder="Nombre de la imagen (opcional)" value="${esc(pasteName)}" aria-label="Nombre del archivo" autocomplete="off" style="width:100%;margin-top:8px">` : ''}
       ${pasteFiles.length ? `<div class="pthumbs">${pasteFiles.map((f, i) => `<div class="pthumb">${f._url ? `<img src="${f._url}" alt="">` : '<span class="pico">📎</span>'}<small>${esc(f.name)}</small><button type="button" data-act="pdel" data-i="${i}" aria-label="Quitar ${esc(f.name)}">×</button></div>`).join('')}</div>` : ''}
       <div class="dr" style="margin-top:12px;align-items:center">
@@ -1612,24 +1766,10 @@ function renderFiles() {
         <button type="button" class="primary" data-act="psave" ${pasteBusy ? 'disabled' : ''}>${pasteBusy ? 'Guardando…' : 'Guardar'}</button>
       </div>
       <div id="clipList"></div>
-    </section>
-    <div class="filesgrid">
-      <section class="card box">
-        <h3>Archivos sueltos</h3><p class="sub">Súbelos aquí y asígnalos a una tarea cuando sepas dónde van.</p>
-        <div class="drop" id="drop" tabindex="0" role="button" data-act="pickLoose">Suelta aquí Excel, Word, PDF…<br><small style="color:var(--mute)">o haz clic para elegir (máx. 50 MB cada uno)</small></div>
-        <input id="gfile" type="file" multiple hidden>
-        <div style="margin-top:10px">${loose.map(f => `<div class="frow">
-          <button class="n linkish" data-act="gdl" data-id="${f.id}">📎 ${esc(f.name)}</button><small>${size(f.size)}</small>
-          <select data-assign="${f.id}" aria-label="Asignar ${esc(f.name)} a una tarea"><option value="">Asignar a tarea…</option>${open.map(t => `<option value="${t.id}">${esc(t.title.slice(0,40))}</option>`).join('')}</select>
-          <button data-act="gdel" data-id="${f.id}">Borrar</button></div>`).join('') || '<p class="sub" style="margin:8px 0 0">No hay archivos sueltos.</p>'}</div>
-      </section>
-      <section class="card box">
-        <h3>En tus tareas</h3><p class="sub">También puedes arrastrar archivos sobre una tarea de la lista.</p>
-        ${inTasks.map(({ t, f, i }) => `<div class="frow"><button class="n linkish" data-act="dl" data-id="${t.id}" data-i="${i}">📎 ${esc(f.name)}</button>
-          <button class="linkish" style="color:var(--ink2);font-size:13px;text-decoration:none" data-act="edit" data-id="${t.id}">${esc(t.title.slice(0,40))}</button>${pill(t.proj)}<small>${size(f.size)}</small></div>`).join('') || '<p class="sub" style="margin:0">Ninguna tarea tiene archivos todavía.</p>'}
-      </section>
-    </div>`;
-  const pb = $('pasteBox');
+    </section>`;
+}
+function wirePasteBox() {
+  const pb = $('pasteBox'); if (!pb) return;
   $('pText').oninput = e => { pasteText = e.target.value; };
   if ($('pName')) $('pName').oninput = e => { pasteName = e.target.value; };
   if ($('pTask')) $('pTask').onchange = e => { pasteTask = e.target.value; };
@@ -1638,18 +1778,11 @@ function renderFiles() {
   pb.addEventListener('paste', e => {
     const cd = e.clipboardData; if (!cd) return;
     const files = [...cd.files], hasText = !!cd.getData('text/plain');
-    // Desde Excel o Word llega el texto y además una imagen: nos quedamos con el texto
     if (files.length && !hasText) { e.preventDefault(); addPasteFiles(files); }
   });
   pb.addEventListener('dragover', e => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); pb.classList.add('over'); } });
   pb.addEventListener('dragleave', e => { if (!pb.contains(e.relatedTarget)) pb.classList.remove('over'); });
   pb.addEventListener('drop', e => { pb.classList.remove('over'); if (e.dataTransfer.files.length) { e.preventDefault(); e.stopPropagation(); addPasteFiles([...e.dataTransfer.files]); } });
-  const drop = $('drop');
-  ['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
-  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove('over')));
-  drop.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); if (e.dataTransfer.files.length) addGeneral([...e.dataTransfer.files]); });
-  drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('gfile').click(); } };
-  $('gfile').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; if (fs.length) addGeneral(fs); };
 }
 
 // ---------- Estadísticas ----------
@@ -1778,6 +1911,9 @@ document.addEventListener('click', async e => {
     case 'gdl': { const f = general.find(x => x.id === id); if (f) downloadRef(f); break; }
     case 'gdel': deleteLoose(id); break;
     case 'pickLoose': $('gfile').click(); break;
+    case 'fview': fView = el.dataset.v; try { localStorage.setItem('fView', fView); } catch {} render(); break;
+    case 'ffilter': fFilter = el.dataset.v; render(); break;
+    case 'clippanel': clipPanel = !clipPanel; render(); if (clipPanel) $('pText')?.focus(); break;
     case 'pick': calSel = parse(el.dataset.day); render(); break;
     case 'newOn': openDlg(null, el.dataset.day); break;
     case 'calPrev': calShift(-1); break;
