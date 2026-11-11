@@ -3322,7 +3322,7 @@ function pomoSet(state) {
 async function pushPomo() {
   if (!pomoSync || !user) return;
   const { error } = await sb.from('pomo_activo').upsert({ user_id:user.id, state:pomo, ts:pomoTs, updated_at:new Date().toISOString() });
-  if (error && /pomo_activo|does not exist|schema cache/i.test(error.message)) { pomoSync = false; toast('Para ver el pomodoro en todos tus dispositivos falta ejecutar el script SQL nuevo en Supabase.', 8000); }
+  if (error && /pomo_activo|does not exist|schema cache/i.test(error.message) && !pushPomo.warned) { pushPomo.warned = true; toast('Para ver el pomodoro en todos tus dispositivos falta ejecutar el script SQL nuevo en Supabase.', 8000); }
 }
 function adoptPomo(state, ts) {
   if (!(ts > pomoTs)) return;
@@ -3335,8 +3335,13 @@ function adoptPomo(state, ts) {
 async function pullPomo() {
   if (!pomoSync || !user) return;
   const { data, error } = await sb.from('pomo_activo').select('state,ts').eq('user_id', user.id).maybeSingle();
-  if (error) { if (/pomo_activo|does not exist|schema cache/i.test(error.message)) pomoSync = false; return; }
-  if (data) adoptPomo(data.state, +data.ts);
+  if (error) return;
+  if (data && +data.ts > pomoTs) adoptPomo(data.state, +data.ts);
+  else if (pomo && (!data || +data.ts < pomoTs || !pomoTs)) {   // pomodoro empezado aquí que la nube aún no conoce: se sube
+    if (!pomo.sid) pomo.sid = newId();
+    if (!pomoTs) pomoTs = Date.now();
+    lsSet('pomo', pomo); lsSet('pomoTs', pomoTs); pushPomo();
+  }
 }
 function subPomo() {
   if (pomoChan) { sb.removeChannel(pomoChan); pomoChan = null; }
@@ -3346,6 +3351,7 @@ function subPomo() {
     .on('postgres_changes', { event:'INSERT', schema:'public', table:'pomodoros' }, p => { if (p.new && !pomos.some(x => x.id === p.new.id)) { pomos.push(p.new); pomoDraw(); if (view === 'estadisticas') render(); } })
     .subscribe();
 }
+setInterval(() => { if (user && !document.hidden) pullPomo(); }, 20000);
 addEventListener('storage', e => { if (e.key === 'pomoTs') adoptPomo(lsGet('pomo', null), +lsGet('pomoTs', 0)); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden && user) pullPomo(); });
 
