@@ -349,6 +349,70 @@
   .extitem .bar { width:4px; border-radius:4px; background:var(--pc); justify-self:center; height:100%; min-height:20px; }
   .extitem .ti { font-size:15px; }
   .extitem .meta { font-size:12px; color:var(--mute); margin-top:3px; }
+  /* ---------- Resumen (vista Lista) con el estilo original ---------- */
+  :root { --mint:#a8d5b0; --on-mint:#141414; --ovslab:#1e2024; --on-ovslab:#ffffff; --ovslab-acc:#ff9577; --ovlate:#a83512; }
+  :root[data-theme="dark"] { --mint:#2e5537; --on-mint:#e6f4e8; --ovslab:#ececea; --on-ovslab:#141414; --ovslab-acc:#a83512; --ovlate:#ff8e6e; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --mint:#2e5537; --on-mint:#e6f4e8; --ovslab:#ececea; --on-ovslab:#141414; --ovslab-acc:#a83512; --ovlate:#ff8e6e; } }
+  @media (min-width:901px) { body.v-lista .side .sumrow, body.v-lista .side .prog { display:none; } }
+  .ov { display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:56px; padding-top:10px; }
+  .ovbig { position:relative; display:inline-block; isolation:isolate; font-size:clamp(120px,15vw,230px); line-height:.82; font-weight:800; letter-spacing:-.06em; font-variant-numeric:tabular-nums; }
+  .ovbig i { position:absolute; right:-6px; bottom:-14px; width:42%; aspect-ratio:1; max-width:120px; background:var(--acc); z-index:-1; }
+  .ovlbl { font-size:34px; font-weight:700; line-height:1.08; letter-spacing:-.02em; margin-top:34px; }
+  .ovtags { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+  .mint { font:500 13px var(--f-mono); text-transform:uppercase; letter-spacing:.04em; background:var(--mint); color:var(--on-mint); padding:4px 9px; border:0; border-radius:0; display:inline-block; }
+  button.mint:hover { filter:brightness(.95); }
+  .mint.zero { opacity:.8; }
+  .ovbox { margin-top:56px; border:2px solid var(--ink); border-radius:18px; padding:20px 30px 26px; background:var(--panel); }
+  .ovbox h3 { margin:0 0 14px; font:500 13px var(--f-mono); text-transform:uppercase; letter-spacing:.06em; color:var(--ink2); }
+  .ovdrop { border:2px dashed var(--line2); border-radius:14px; padding:32px 12px; text-align:center; cursor:pointer; font-size:18px; }
+  .ovdrop small { display:block; font:500 11px var(--f-mono); text-transform:uppercase; color:var(--mute); margin-top:6px; letter-spacing:.04em; }
+  .ovdrop:hover, .ovdrop.over { border-color:var(--acc); background:var(--acc-soft); }
+  .ovloose { margin-top:12px; font-size:13px; color:var(--ink2); }
+  .ovpills { display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+  .ovpill { font:500 13px var(--f-mono); text-transform:uppercase; letter-spacing:.05em; border:1.5px solid var(--ink); border-radius:99px; padding:10px 18px; background:transparent; }
+  .ovpill:hover { background:var(--panel); border-color:var(--ink); }
+  .ovpill[aria-pressed="true"] { background:var(--ink); color:var(--bg); }
+  .ovnow { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:52px; padding-bottom:16px; border-bottom:3px solid var(--ink); }
+  .ovst { margin-left:auto; display:flex; gap:2px; flex-wrap:wrap; }
+  .ovst button { font:500 11px var(--f-mono); text-transform:uppercase; letter-spacing:.05em; border:0; background:none; padding:4px 7px; border-radius:6px; color:var(--mute); }
+  .ovst button:hover { color:var(--ink); background:var(--panel); }
+  .ovst button[aria-pressed="true"] { color:var(--ink); text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:2px; }
+  .ovrow { display:grid; grid-template-columns:150px minmax(0,1fr) auto; gap:20px; align-items:start; padding:26px 0; border-bottom:1px solid var(--ink); position:relative; }
+  .ovrow.over { outline:2px dashed var(--acc); outline-offset:-2px; background:var(--acc-soft); }
+  .ovd { font:500 15px/1.45 var(--f-mono); text-transform:uppercase; letter-spacing:.04em; padding-top:6px; }
+  .ovrow.late .ovd { color:var(--ovlate); }
+  .ovt { font-size:clamp(24px,2.5vw,38px); font-weight:800; line-height:1.08; letter-spacing:-.025em; cursor:pointer; text-wrap:balance; word-break:break-word; }
+  .ovt:hover { text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:5px; }
+  .ovrow.nodate .ovt { color:var(--mute); }
+  .ovrow.done .ovt { text-decoration:line-through; color:var(--mute); }
+  .ovfiles { display:flex; flex-wrap:wrap; align-items:center; gap:2px 6px; margin-top:8px; font-size:16px; color:var(--ink2); }
+  .ovf { background:none; border:0; padding:0; font-size:inherit; color:inherit; border-radius:0; }
+  .ovf:hover { text-decoration:underline; }
+  .ovdot { color:var(--mute); }
+  .ovp { font:500 13px var(--f-mono); text-transform:uppercase; letter-spacing:.05em; border:1.5px solid currentColor; border-radius:99px; padding:4px 11px; white-space:nowrap; margin-top:4px; }
+  .ovs { display:block; }
+  .ovacts { display:none; gap:6px; margin-top:10px; }
+  .ovrow:hover .ovacts, .ovrow:focus-within .ovacts { display:flex; }
+  .ovacts button { font:500 11px var(--f-mono); text-transform:uppercase; letter-spacing:.04em; padding:4px 10px; border-radius:99px; border:1px solid currentColor; background:transparent; color:inherit; }
+  .ovrow.doing { background:var(--ovslab); color:var(--on-ovslab); margin:0 -18px; padding:26px 18px; border-radius:14px; border-bottom-color:transparent; }
+  .ovrow.doing .ovd { color:var(--ovslab-acc); }
+  .ovrow.doing .ovfiles { color:color-mix(in srgb, var(--on-ovslab) 80%, transparent); }
+  .ov .empty { padding:40px 0; text-align:left; }
+  @media (max-width:1100px) { .ov { grid-template-columns:1fr; gap:28px; } .ovbox { margin-top:28px; } .ovnow { margin-top:24px; } }
+  @media (max-width:900px) {
+    .ovl { display:none; }
+    .ovpills { justify-content:flex-start; flex-wrap:nowrap; overflow-x:auto; margin:0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding:0 max(16px, env(safe-area-inset-left, 0px)) 4px; scrollbar-width:none; }
+    .ovpill { flex:none; padding:7px 14px; font-size:12px; }
+    .ovnow { margin-top:14px; padding-bottom:10px; } .ovst { margin-left:0; width:100%; }
+    .ov { padding-top:0; gap:0; }
+    .ovrow { grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; padding:18px 0; }
+    .ovd { grid-column:1 / -1; grid-row:1; font-size:12px; padding:0; display:flex; gap:8px; } .ovs { display:inline; }
+    .ovm { grid-row:2; } .ovp { grid-row:2; font-size:11px; padding:3px 9px; margin-top:2px; }
+    .ovt { font-size:22px; } .ovfiles { font-size:14px; }
+    .ovacts { display:flex; } .ovacts button:not(:first-child) { display:none; }
+    .ovrow.doing { margin:0 -12px; padding:18px 12px; }
+  }
+
   /* ---------- Menú Más (móvil) ---------- */
   .navmore { display:none; }
   .sheet-ov { position:fixed; inset:0; z-index:40; }
@@ -1319,6 +1383,7 @@ function renderSide() {
 function render() {
   if (!user) return;
   renderSide();
+  document.body.classList.toggle('v-lista', view === 'lista');
   ensureWx();
   $('fab').hidden = view === 'logros';
   if (!loaded) { $('content').innerHTML = '<div class="empty">Cargando tus tareas…</div>'; return; }
@@ -1331,23 +1396,55 @@ function renderList() {
   const all = visible(), late = all.filter(isLate), open = all.filter(t => t.state !== 'done'), wb = weekInfo().b, t0 = today();
   const vis = all.filter(t => listFilter === 'all' ? true : listFilter === 'done' ? t.state === 'done' : listFilter === 'late' ? isLate(t)
     : listFilter === 'today' ? t.state !== 'done' && t.due === t0 : listFilter === 'week' ? t.state !== 'done' && t.due && t.due >= t0 && t.due <= wb : t.state !== 'done');
-  const byDoneDesc = (a,b) => (b.done_at||0) - (a.done_at||0);
-  const groups = listFilter === 'done' ? [['', vis.sort(byDoneDesc)]] : [
-    ['Vencidas', vis.filter(isLate).sort(byDue), 'warn'],
-    ['Con fecha', vis.filter(t => t.state !== 'done' && !isLate(t) && t.due).sort(byDue)],
-    ['Sin fecha', vis.filter(t => t.state !== 'done' && !t.due).sort((a,b) => (b.state === 'doing') - (a.state === 'doing') || a.created - b.created)],
-    ['Completadas', vis.filter(t => t.state === 'done').sort(byDoneDesc)],
-  ];
-  const nonEmpty = groups.filter(g => g[1].length);
-  const chips = [['open',`Abiertas (${open.length})`,''],['late',`Vencidas (${late.length})`,'warn'],['today','Hoy',''],['week','Esta semana',''],['done','Completadas',''],['all','Todas','']];
+  const order = t => t.state === 'done' ? 3 : t.due ? 0 : 2;
+  vis.sort((a, b) => order(a) - order(b) || (order(a) === 3 ? (b.done_at || 0) - (a.done_at || 0) : byDue(a, b)));
+  const weekOpen = open.filter(t => !t.due || t.due <= wb).filter(t => t.due), withFiles = open.filter(t => t.files?.length);
+  const now = new Date();
+  const status = [['open','Abiertas'],['late',`Vencidas`],['today','Hoy'],['week','Semana'],['done','Hechas'],['all','Todas']];
   let emptyMsg;
   if (!tasks.length) emptyMsg = '<b>Aún no tienes tareas.</b>Pulsa «+ Nueva tarea» o la tecla N para crear la primera.';
   else if ($('q').value || projFilter) emptyMsg = 'Ninguna tarea coincide con la búsqueda o el filtro.';
   else emptyMsg = { late:'No tienes tareas vencidas.', done:'Todavía no has completado ninguna tarea.', today:'Nada para hoy.', week:'Nada más para esta semana.' }[listFilter] || 'No tienes tareas abiertas. Buen trabajo.';
-  $('content').innerHTML = `
-    <div class="head sec"><h2 class="sec">Lista</h2></div>
-    <div class="chips">${chips.map(([k,n,c]) => `<button class="chip ${c}" data-act="lf" data-v="${k}" aria-pressed="${listFilter===k}">${n}</button>`).join('')}<span class="chipsel">${projSelect()}</span></div>
-    <div class="list">${vis.length ? nonEmpty.map(([n, items, c]) => (nonEmpty.length > 1 && n ? `<div class="grp ${c||''}">${n} · ${items.length}</div>` : '') + items.map(row).join('')).join('') : `<div class="card empty">${emptyMsg}</div>`}</div>`;
+  $('content').innerHTML = `<div class="ov">
+    <aside class="ovl">
+      <div class="ovbig"><span>${String(weekOpen.length).padStart(2, '0')}</span><i></i></div>
+      <div class="ovlbl">tareas abiertas<br>esta semana</div>
+      <div class="ovtags"><button class="mint ${late.length ? '' : 'zero'}" data-act="lf" data-v="late">${late.length} vencida${late.length === 1 ? '' : 's'}</button><span class="mint">${withFiles.length} con archivos</span></div>
+      <div class="ovbox"><h3>Adjuntar archivos</h3>
+        <div class="ovdrop" id="ovDrop" tabindex="0" role="button" aria-label="Adjuntar archivos sueltos">Suelta aquí Excel, docs o PDF<small>o haz clic para elegir</small></div>
+        <input id="ovFile" type="file" multiple hidden>
+        ${general.length ? `<button class="linkish ovloose" onclick="location.hash='archivos'">${general.length} archivo${general.length === 1 ? '' : 's'} suelto${general.length === 1 ? '' : 's'} en Archivos →</button>` : ''}</div>
+    </aside>
+    <section class="ovr">
+      <div class="ovpills">${['', ...PROJECTS.map(g => 'g:' + g.g)].map(v => `<button class="ovpill" data-act="ovproj" data-v="${esc(v)}" aria-pressed="${projFilter === v || (v === '' && !projFilter)}">${v ? esc(v.slice(2)) : 'Todos'}</button>`).join('')}</div>
+      <div class="ovnow"><span class="mint">Ahora · ${now.getDate()} ${MSHORT[now.getMonth()]} ${now.getFullYear()}</span>
+        <span class="ovst">${status.map(([k, n]) => `<button data-act="lf" data-v="${k}" aria-pressed="${listFilter === k}">${n}</button>`).join('')}</span></div>
+      <div class="ovlist">${vis.length ? vis.map(ovRow).join('') : `<div class="empty">${emptyMsg}</div>`}</div>
+    </section></div>`;
+  const drop = $('ovDrop');
+  drop.onclick = () => $('ovFile').click();
+  drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('ovFile').click(); } };
+  $('ovFile').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; if (fs.length) addGeneral(fs); };
+  ['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); drop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove('over')));
+  drop.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); if (e.dataTransfer.files.length) addGeneral([...e.dataTransfer.files]); });
+}
+function ovRow(t) {
+  const late = isLate(t);
+  let date;
+  if (t.state === 'done') date = `${t.done_at ? fmt(ymd(new Date(t.done_at))) : ''}<span class="ovs">Hecha</span>`;
+  else if (t.due) date = `${fmt(t.due)}${late ? '<span class="ovs">Vencida</span>' : t.state === 'doing' ? '<span class="ovs">En curso</span>' : ''}`;
+  else date = t.state === 'doing' ? 'En curso' : '–';
+  const files = (t.files || []).map((f, i) => `<button class="ovf" data-act="dl" data-id="${t.id}" data-i="${i}">📎 ${esc(f.name)}</button>`).join('<span class="ovdot">·</span>');
+  const g = groupOf(t.proj) || t.proj;
+  return `<div class="ovrow ${late ? 'late' : ''} ${t.state} ${!t.due && t.state === 'todo' ? 'nodate' : ''}" data-drop="${t.id}">
+    <div class="ovd">${date}</div>
+    <div class="ovm"><div class="ovt" data-act="edit" data-id="${t.id}">${esc(t.title)}</div>
+      ${files ? `<div class="ovfiles">${files}</div>` : ''}
+      <div class="ovacts"><button data-act="toggle" data-id="${t.id}">${t.state === 'done' ? '↺ Reabrir' : '✓ Hecha'}</button>${t.state !== 'done' ? `<button data-act="state" data-id="${t.id}" data-s="${t.state === 'doing' ? 'todo' : 'doing'}">${t.state === 'doing' ? 'Pausar' : 'Empezar'}</button>` : ''}<button data-act="edit" data-id="${t.id}">Editar</button></div>
+    </div>
+    ${g ? `<span class="ovp" title="${esc(projLabel(t.proj))}">${esc(g)}</span>` : '<span></span>'}
+  </div>`;
 }
 function row(t) {
   const late = isLate(t);
@@ -1635,6 +1732,7 @@ document.addEventListener('click', async e => {
   const a = el.dataset.act, id = el.dataset.id, t = id && tasks.find(x => x.id === id);
   switch (a) {
     case 'lf': listFilter = el.dataset.v; render(); break;
+    case 'ovproj': projFilter = el.dataset.v; render(); break;
     case 'goLate': listFilter = 'late'; go('lista'); break;
     case 'goToday': listFilter = 'today'; go('lista'); break;
     case 'goWeek': listFilter = 'week'; go('lista'); break;
