@@ -3169,6 +3169,12 @@ const PV_VIDEO = ['mp4','mov','webm','m4v'], PV_AUDIO = ['mp3','m4a','wav','ogg'
 const scriptCache = {};
 const loadScript = src => scriptCache[src] ||= new Promise((ok, ko) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => { delete scriptCache[src]; ko(new Error('No se pudo cargar el visor.')); }; document.head.appendChild(s); });
 let pvList = [], pvIdx = 0, pvUrl = '', pvBlob = null;
+// Texto en UTF-8 o, si no lo es, en la codificación antigua de Windows (Excel y el editor de VBA la usan)
+async function readText(blob) {
+  const buf = await blob.arrayBuffer();
+  try { return new TextDecoder('utf-8', { fatal:true }).decode(buf).replace(/^\uFEFF/, ''); }
+  catch { return new TextDecoder('windows-1252').decode(buf); }
+}
 async function pvBlobOf(it) {
   const { data, error } = await sb.storage.from(it.bucket || BUCKET).download(it.f.path); if (error) throw error; return data;
 }
@@ -3207,12 +3213,12 @@ async function drawPreview() {
     } else if (PV_AUDIO.includes(e)) {
       pvUrl = URL.createObjectURL(blob); body.classList.add('img'); body.innerHTML = `<audio src="${pvUrl}" controls></audio>`;
     } else if (PV_TEXT.includes(e) || /^text\//.test(blob.type) && !PV_SHEET.includes(e)) {
-      const txt = await blob.text(); body.classList.add('code');
+      const txt = await readText(blob); body.classList.add('code');
       const lines = txt.split(/\r?\n/);
       body.innerHTML = `<pre class="${type === 'bas' ? 'vb' : ''}">${lines.map((l, i) => `<span class="ln">${i + 1}</span>${type === 'bas' ? vbHi(l) : esc(l)}`).join('\n')}</pre>`;
     } else if (PV_SHEET.includes(e)) {
       await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
-      const wb = e === 'csv' || e === 'tsv' ? XLSX.read(await blob.text(), { type:'string', FS:e === 'tsv' ? '\t' : undefined }) : XLSX.read(await blob.arrayBuffer());
+      const wb = e === 'csv' || e === 'tsv' ? XLSX.read(await readText(blob), { type:'string', FS:e === 'tsv' ? '\t' : undefined }) : XLSX.read(await blob.arrayBuffer());
       if (my !== pvIdx) return;
       body.classList.add('xls');
       const show = n => {
