@@ -1047,6 +1047,15 @@
   .pomo button { width:34px; height:34px; flex:none; display:grid; place-items:center; padding:0; border-radius:50%; background:#232428; border-color:#34353a; color:#f0efec; font-size:12px; }
   .pomo button:hover { background:#f0efec; color:#141414; border-color:#f0efec; }
   .pomo.paused .pt b { opacity:.55; }
+  .pomo button.skip { width:auto; border-radius:99px; padding:0 12px; font:600 12px var(--f-body); background:var(--good); border-color:var(--good); color:#0f1a12; }
+  .pomo button.skip[hidden] { display:none; }
+  .pomo.break .pt { min-width:74px; }
+  @media (max-width:900px) { .pomo.break .pt small { font-size:0; } .pomo.break .pt small::before { content:"Descanso"; font-size:11.5px; } }
+  .pomo button.skip:hover { background:#f0efec; border-color:#f0efec; }
+  .horat .hins { font-size:15px; margin:4px 0 2px; } .horat .hins b { font-weight:600; }
+  .horat .parts { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 2px; }
+  .horat .parts span { font:500 11.5px var(--f-mono); color:var(--ink2); background:var(--panel); border:1px solid var(--line); border-radius:99px; padding:3px 10px; }
+  .horat .parts span.top { color:var(--acc-ink); border-color:color-mix(in srgb, var(--acc) 45%, transparent); background:color-mix(in srgb, var(--acc) 10%, transparent); }
   .pomo.focus:not(.paused) .pr { animation:pomoBreath 4s ease-in-out infinite; }
   @keyframes pomoBreath { 50% { filter:drop-shadow(0 0 6px color-mix(in srgb, var(--acc) 70%, transparent)); } }
   @media (max-width:900px) {
@@ -1054,7 +1063,7 @@
     body.pomo-on .content { padding-bottom:150px; }
   }
   @media (prefers-reduced-motion: reduce) { .pomo, .cmdk-box, .pv, .pv-body img { animation:none !important; } }
-  .stats > .pomot { grid-column:1 / -1; }
+  .stats > .pomot, .stats > .horat { grid-column:1 / -1; }
   .pomot .pomokpi { display:flex; flex-wrap:wrap; gap:10px 34px; align-items:flex-end; margin:6px 0 4px; }
   .pomot .pomokpi div { display:grid; }
   .pomot .pomokpi b { font-size:30px; font-weight:700; letter-spacing:-.03em; line-height:1.05; }
@@ -1366,7 +1375,7 @@
 <div class="pomo" id="pomo" hidden>
   <svg class="pr" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15.5" class="bg"/><circle cx="18" cy="18" r="15.5" class="fg" id="pomoArc"/></svg>
   <span class="pt"><b id="pomoTime">60:00</b><small id="pomoLbl">Foco</small></span>
-  <button type="button" id="pomoPause" aria-label="Pausar">❚❚</button><button type="button" id="pomoStop" aria-label="Parar">✕</button>
+  <button type="button" id="pomoSkip" class="skip" title="Saltar el descanso y empezar otra hora de foco" hidden>Saltar</button><button type="button" id="pomoPause" aria-label="Pausar">❚❚</button><button type="button" id="pomoStop" aria-label="Parar">✕</button>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -2206,6 +2215,7 @@ function renderStats() {
         <details class="data"><summary>Ver datos</summary><table><tr><th>Día</th><th>Tareas</th><th>Hechas</th></tr>${load.map((l, i) => `<tr><td>${DOWL[i]} ${parse(l.k).getDate()}</td><td>${l.n}</td><td>${l.done}</td></tr>`).join('')}</table></details>
       </section>
       ${pomoTile(R, start)}
+      ${hoursTile(start)}
     </div>`;
 }
 const niceMax = m => m <= 4 ? 4 : m <= 6 ? 6 : m <= 8 ? 8 : m <= 10 ? 10 : Math.ceil(m / 10) * 10;
@@ -3366,7 +3376,7 @@ function pomoStart(taskId) {
   try { actx ||= new (window.AudioContext || window.webkitAudioContext)(); actx.resume?.(); } catch {}
   pomoSet({ sid:newId(), phase:'focus', start:Date.now(), end:Date.now() + POMO_FOCUS * 6e4, task:t?.id || null, title:t?.title || '' });
   if (t && t.state === 'todo') setState(t, 'doing');
-  toast(`Pomodoro empezado: 60 minutos de foco${t ? ` en «${t.title}»` : ''}. Lo verás también en tus otros dispositivos.`);
+  toast(`▶ 1 h de foco${t ? `: ${t.title}` : ''}`);
 }
 async function pomoStop(ask) {
   if (!pomo) return;
@@ -3410,6 +3420,7 @@ function pomoDraw() {
   if (!pomo) { w.hidden = true; document.title = BASE_TITLE; document.body.classList.remove('pomo-on'); return; }
   w.hidden = false; document.body.classList.add('pomo-on');
   w.className = 'pomo ' + pomo.phase + (pomo.left ? ' paused' : '');
+  $('pomoSkip').hidden = pomo.phase !== 'break';
   if (pomo.phase === 'ready') {
     $('pomoTime').textContent = pomoToday() + ' hoy'; $('pomoLbl').textContent = pomo.title ? `¿Otro? · ${pomo.title}` : '¿Otro pomodoro?';
     $('pomoPause').textContent = '▶'; $('pomoPause').setAttribute('aria-label', 'Empezar otro pomodoro');
@@ -3426,7 +3437,50 @@ function pomoDraw() {
 }
 $('pomoPause').onclick = () => { if (pomo?.phase === 'ready') pomoStart(pomo.task); else pomoPause(); };
 $('pomoStop').onclick = () => pomoStop(true);
+const pomoSkip = () => { if (pomo?.phase === 'break') pomoStart(pomo.task); };
+$('pomoSkip').onclick = pomoSkip;
 document.addEventListener('visibilitychange', () => { if (!document.hidden) pomoCheck(); });
+// ¿A qué horas estudias? Reparte cada bloque de foco minuto a minuto entre las horas del día
+function hoursTile(start) {
+  const mins = new Array(24).fill(0);
+  for (const p of pomos) {
+    if (p.kind !== 'focus') continue;
+    let t = Date.parse(p.started_at); if (t < start.getTime()) continue;
+    for (let k = 0; k < p.minutes; k++, t += 6e4) mins[new Date(t).getHours()]++;
+  }
+  const total = mins.reduce((a, b) => a + b, 0);
+  const H1 = h => `${String(h % 24).padStart(2, '0')}:00`;
+  const hrs = m => (m / 60).toFixed(1).replace('.', ',').replace(',0', '') + ' h';
+  if (!total) return `<section class="card tile wide horat"><h3>¿A qué horas estudias?</h3>
+      <div class="note">Cuando completes algún pomodoro verás aquí tus horas fuertes del día.</div></section>`;
+  // mejor franja de 2 horas seguidas
+  let bi = 0; for (let i = 0; i < 24; i++) if (mins[i] + mins[(i + 1) % 24] > mins[bi] + mins[(bi + 1) % 24]) bi = i;
+  const top = mins.indexOf(Math.max(...mins));
+  const parts = [['Mañana', 6, 14], ['Tarde', 14, 21], ['Noche', 21, 30]].map(([n, a, b]) => { let m = 0; for (let h = a; h < b; h++) m += mins[h % 24]; return [n, m]; });
+  const best = parts.reduce((x, y) => y[1] > x[1] ? y : x);
+  // eje: de la primera a la última hora con estudio, con margen, mínimo de 8:00 a 22:00
+  const used = mins.map((m, h) => m ? h : null).filter(h => h !== null);
+  const a = Math.max(0, Math.min(8, used[0] - 1)), z = Math.min(23, Math.max(21, used[used.length - 1] + 1));
+  const W = innerWidth > 900 ? 1100 : 680, Hh = innerWidth > 900 ? 200 : 160, L = 30, T = 12, B = 24, w = W - L - 6, h = Hh - T - B, n = z - a + 1, bw = w / n, max = Math.max(...mins);
+  const ytop = Math.max(1, Math.ceil(max / 60)) * 60;
+  const bars = mins.slice(a, z + 1).map((m, i) => {
+    const hh = a + i, bh = m / ytop * h, hot = hh === bi || hh === (bi + 1) % 24;
+    return `<rect x="${(L + i * bw + bw * .14).toFixed(1)}" y="${(T + h - bh).toFixed(1)}" width="${(bw * .72).toFixed(1)}" height="${Math.max(m ? 2 : 0, bh).toFixed(1)}" rx="3" class="${hot && m ? 'hoy' : ''}"/>`
+      + `<rect x="${(L + i * bw).toFixed(1)}" y="${T}" width="${bw.toFixed(1)}" height="${h}" fill="transparent" data-tip="${H1(hh)}–${H1(hh + 1)}: ${m ? hrs(m) + ' de foco' : 'nada'} · ${Math.round(m / total * 100)}%"/>`;
+  }).join('');
+  const labs = []; for (let hh = a; hh <= z; hh++) if (hh % 2 === 0) labs.push(`<text x="${(L + (hh - a) * bw + bw / 2).toFixed(1)}" y="${Hh - 6}" text-anchor="middle">${hh}h</text>`);
+  return `<section class="card tile wide horat">
+      <h3>¿A qué horas estudias?</h3>
+      <p class="hins">Tu mejor franja es <b>de ${H1(bi)} a ${H1(bi + 2)}</b>: ahí haces el ${Math.round((mins[bi] + mins[(bi + 1) % 24]) / total * 100)}% de tu foco. La hora con más estudio, <b>${H1(top)}</b>.</p>
+      <div class="parts">${parts.map(([nm, m]) => `<span class="${nm === best[0] ? 'top' : ''}">${nm} · ${Math.round(m / total * 100)}%</span>`).join('')}</div>
+      <svg class="chart pomoc" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Minutos de foco según la hora del día">
+        ${[0, ytop / 2, ytop].map(v => `<line class="grid-l" x1="${L}" x2="${W - 6}" y1="${T + h - v / ytop * h}" y2="${T + h - v / ytop * h}"/><text x="${L - 6}" y="${T + h - v / ytop * h + 4}" text-anchor="end">${hrs(v).replace(' h', 'h')}</text>`).join('')}
+        ${bars}${labs.join('')}
+      </svg>
+      <div class="note">Horas de foco en el periodo según la hora del día (cuenta también los pomodoros que paraste antes de la hora). Mañana: 6–14 h · Tarde: 14–21 h · Noche: 21–6 h.</div>
+      <details class="data"><summary>Ver datos</summary><table><tr><th>Hora</th><th>Horas de foco</th><th>%</th></tr>${mins.map((m, hh) => m ? `<tr><td>${H1(hh)}–${H1(hh + 1)}</td><td>${hrs(m)}</td><td>${Math.round(m / total * 100)}%</td></tr>` : '').join('')}</table></details>
+    </section>`;
+}
 function pomoTile(R, start) {
   const step = R > 31 ? 7 : 1, b = [];
   for (let d = new Date(start); d <= new Date(); d = addDays(d, step)) b.push({ d:new Date(d), n:0, m:0 });
@@ -3434,7 +3488,7 @@ function pomoTile(R, start) {
   for (const p of full) { const t = Date.parse(p.started_at); if (t < start.getTime()) continue; const i = Math.min(b.length - 1, Math.floor((t - start.getTime()) / (864e5 * step))); if (i >= 0) { b[i].m += p.minutes; if (p.minutes >= POMO_FOCUS) b[i].n++; } }
   const tot = b.reduce((s, x) => s + x.n, 0), mins = b.reduce((s, x) => s + x.m, 0), best = Math.max(0, ...b.map(x => x.n));
   let streak = 0; for (let d = parse(today()); ; d = addDays(d, -1)) { const k = ymd(d); if (full.some(p => p.minutes >= POMO_FOCUS && dayKey(p.started_at) === k)) streak++; else if (k !== today()) break; if (streak > 400) break; }
-  const W = 680, H = 150, L = 22, T = 10, Bm = 22, w = W - L - 6, h = H - T - Bm, max = niceMax(Math.max(2, best)), bw = w / b.length;
+  const W = innerWidth > 900 ? 1100 : 680, H = innerWidth > 900 ? 190 : 150, L = 22, T = 10, Bm = 22, w = W - L - 6, h = H - T - Bm, max = niceMax(Math.max(2, best)), bw = w / b.length;
   const bars = b.map((x, i) => { const bh = x.n / max * h; return `<rect x="${(L + i * bw + bw * .18).toFixed(1)}" y="${(T + h - bh).toFixed(1)}" width="${(bw * .64).toFixed(1)}" height="${Math.max(x.n ? 2 : 0, bh).toFixed(1)}" rx="${Math.min(4, bw * .2).toFixed(1)}" class="${ymd(x.d) === today() ? 'hoy' : ''}"/><rect x="${(L + i * bw).toFixed(1)}" y="${T}" width="${bw.toFixed(1)}" height="${h}" fill="transparent" data-tip="${step === 7 ? 'Semana del ' : ''}${fmt(ymd(x.d))}: ${x.n} pomodoro${x.n === 1 ? '' : 's'}${x.m ? ` · ${(x.m / 60).toFixed(1).replace('.', ',')} h de foco` : ''}"/>`; }).join('');
   const labs = [0, Math.floor((b.length - 1) / 2), b.length - 1].filter((v, i, a) => a.indexOf(v) === i);
   return `<section class="card tile wide pomot">
@@ -3571,6 +3625,7 @@ function drawCmdk() {
   const acts = [
     ...NAVS.map(([v, n, i]) => ({ sec:'Ir a', ico:ico(i), label:n, kw:'ir ' + n, run:() => { closeCmdk(); go(v); } })),
     { sec:'Acciones', ico:'<span class="kplus">+</span>', label:'Nueva tarea con formulario', kw:'nueva tarea crear anadir', run:() => { closeCmdk(); $('add').click(); } },
+    ...(pomo?.phase === 'break' ? [{ sec:'Acciones', ico:'<span class="kpomo"></span>', label:'Saltar el descanso y seguir con el foco', kw:'pomodoro saltar descanso seguir', run:() => { closeCmdk(); pomoSkip(); } }] : []),
     pomo && pomo.phase !== 'ready' ? { sec:'Acciones', ico:'<span class="kpomo"></span>', label:'Parar el pomodoro', kw:'pomodoro parar foco', run:() => { closeCmdk(); pomoStop(true); } }
       : { sec:'Acciones', ico:'<span class="kpomo"></span>', label:'Empezar pomodoro (1 h)', kw:'pomodoro foco empezar concentrar', run:() => { closeCmdk(); pomoStart(null); } },
     { sec:'Acciones', ico:ico('i-trophy'), label:'Nuevo logro', kw:'nuevo logro', run:() => { closeCmdk(); go('logros'); openAch(null); } },
