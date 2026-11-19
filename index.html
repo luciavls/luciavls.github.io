@@ -428,6 +428,34 @@
   .fhead .primary { border-radius:99px; background:var(--ink); border-color:var(--ink); color:var(--bg); }
   .fchips { display:flex; gap:6px; flex-wrap:wrap; margin-top:14px; }
   .fchips .chip { padding:6px 12px; font-size:13px; }
+  /* ---------- Portapapeles (pestaña Archivos) ---------- */
+  .clips2 { margin:18px 0 6px; }
+  .chead { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
+  .chead .fsec { margin:0; }
+  .chint { color:var(--mute); font-size:13px; margin-right:auto; }
+  .chint kbd, .cempty kbd { font:500 11px var(--f-mono); color:var(--ink2); border:1px solid var(--line2); border-bottom-width:2px; border-radius:6px; padding:1px 6px; background:var(--card); }
+  .cpaste { border-radius:99px; padding:6px 14px; }
+  @media (hover:hover) { .cpaste { display:none; } }
+  .cgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:12px; margin-top:12px; }
+  .ccard { position:relative; display:flex; flex-direction:column; gap:10px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 14px 10px; cursor:pointer; min-width:0;
+           transition:transform .2s var(--ease), box-shadow .2s, border-color .2s; }
+  .ccard:hover { transform:translateY(-2px); border-color:var(--line2); box-shadow:var(--shadow); }
+  .ccard .ctext { font:13px/1.5 var(--f-mono); color:var(--ink); white-space:pre-wrap; word-break:break-word; max-height:6em; overflow:hidden; cursor:inherit;
+           -webkit-mask-image:linear-gradient(#000 65%, transparent); mask-image:linear-gradient(#000 65%, transparent); }
+  .ccard.open { grid-column:1 / -1; } .ccard.open .ctext { max-height:none; -webkit-mask-image:none; mask-image:none; }
+  .ccard .cwhen { color:var(--mute); font-size:11.5px; margin-top:auto; }
+  .ccard .cmeta { display:flex; align-items:center; gap:4px; margin:-6px -6px 0; }
+  .ccard .cmeta .cb { white-space:nowrap; }
+  .cb { background:transparent; border:0; padding:3px 6px; font-size:12px; color:var(--mute); border-radius:8px; }
+  .cb:hover { color:var(--ink); background:var(--panel); }
+  .ccopy { margin-left:auto; white-space:nowrap; font:600 11px var(--f-mono); text-transform:uppercase; letter-spacing:.06em; color:var(--acc-ink); padding:3px 4px; }
+  .ccard.copied { border-color:var(--good); } .ccard.copied .ccopy { color:var(--good); }
+  .ccard.new { animation:cNew .9s var(--ease); }
+  @keyframes cNew { 0% { transform:translateY(-6px) scale(.98); box-shadow:0 0 0 3px color-mix(in srgb, var(--acc) 45%, transparent); } }
+  @media (hover:hover) { .ccard .cmeta .cb[data-act="cdel"] { opacity:0; transition:opacity .15s; } .ccard:hover .cmeta .cb[data-act="cdel"] { opacity:1; } }
+  .cempty { margin-top:12px; border:1.5px dashed var(--line2); border-radius:16px; padding:22px; text-align:center; color:var(--mute); font-size:14px; }
+  .cfoot { display:flex; margin-top:8px; }
+  @media (max-width:700px) { .cgrid { grid-template-columns:1fr; gap:8px; } .ccard { padding:12px 12px 8px; gap:8px; } .ccard .ctext { font-size:12.5px; max-height:4.6em; } .chint { flex-basis:100%; order:3; font-size:12px; } .chead { gap:8px 12px; } }
   .clipstrip { display:flex; align-items:center; gap:12px; margin-top:16px; background:#141414; color:#f2f1ee; border-radius:16px; padding:10px 12px 10px 16px; }
   .clipstrip b { font-weight:600; flex:none; }
   .clipstrip .cs { flex:1; min-width:0; color:#a7a8ad; font:400 13px var(--f-mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -1739,7 +1767,7 @@ async function saveClip(text) {
   const { data, error } = await sb.from('clips').insert({ content:text, device:DEVICE }).select().single();
   if (error) { clipsErr = /clips|does not exist|schema cache/i.test(error.message) ? 'Falta preparar la base de datos: ejecuta el script SQL nuevo en Supabase.' : 'No se pudo guardar: ' + errText(error); drawClips(); return false; }
   if (!clips.some(c => c.id === data.id)) clips.unshift(data);
-  clipsErr = ''; toast('Guardado en el portapapeles. Ya está en tus otros dispositivos.');
+  clipsErr = ''; toast('Pegado ✓ · ya está en tus otros dispositivos');
   return true;
 }
 async function copyText(text) {
@@ -1754,8 +1782,9 @@ async function copyText(text) {
 async function copyClip(id) {
   const c = clips.find(x => x.id === id); if (!c) return;
   if (await copyText(c.content)) {
-    toast('Copiado. Ya puedes pegarlo donde quieras.');
-    const b = document.querySelector(`[data-act="ccopy"][data-id="${id}"]`); if (b) { b.textContent = 'Copiado ✓'; setTimeout(() => { if (b.isConnected) b.textContent = 'Copiar'; }, 1600); }
+    toast('Copiado ✓');
+    const card = document.querySelector(`.ccard[data-id="${id}"]`), lab = card?.querySelector('.ccopy');
+    if (card) { card.classList.add('copied'); if (lab) lab.textContent = 'Copiado ✓'; setTimeout(() => { if (card.isConnected) { card.classList.remove('copied'); if (lab) lab.textContent = 'Copiar'; } }, 1600); }
   } else { clipOpen.add(id); drawClips(); toast('No se pudo copiar solo: mantén pulsado el texto y elige «Copiar».'); }
 }
 async function deleteClip(id) {
@@ -1772,25 +1801,59 @@ async function clearClips() {
 async function pasteFromClipboard() {
   try {
     const t = await navigator.clipboard.readText();
-    if (!t) { toast('No tienes texto copiado.'); return; }
-    pasteText = pasteText ? pasteText.replace(/\s*$/, '\n') + t : t;
-    const ta = $('pText'); if (ta) { ta.value = pasteText; ta.focus(); }
-  } catch { toast('Este navegador no deja leer el portapapeles: mantén pulsado el cuadro y elige «Pegar».'); $('pText')?.focus(); }
+    if (!t || !t.trim()) { toast('No tienes texto copiado.'); return; }
+    quickClip(t);
+  } catch { toast(IS_MAC_OR_TOUCH() ? 'El navegador no ha dejado leer lo copiado. Prueba otra vez y pulsa «Pegar» en el aviso que sale.' : 'El navegador no deja leer lo copiado: pulsa Ctrl+V en esta pestaña.'); }
 }
-function drawClips() {
-  if (view === 'archivos' && $('clipStrip') && !$('clipList')) { render(); return; }
-  const el = $('clipList'); if (!el) return;
+const IS_MAC_OR_TOUCH = () => !matchMedia('(hover:hover)').matches;
+let clipAll = false, clipNew = '';
+const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+function clipsHTML() {
   const q = $('q').value.trim().toLowerCase();
   const list = clips.filter(c => !q || c.content.toLowerCase().includes(q));
-  el.innerHTML = (clipsErr ? `<div class="msg">${esc(clipsErr)}</div>` : '')
-    + (list.map(c => `<div class="clip ${clipOpen.has(c.id) ? 'open' : ''}">
-        <div class="ctext" data-act="cexpand" data-id="${c.id}" title="Tocar para ver entero">${esc(c.content)}</div>
-        <div class="cmeta"><small>${esc(ago(c.created_at))}${c.device ? ' · ' + esc(c.device) : ''}</small>
-          <button type="button" data-act="cdel" data-id="${c.id}" class="ghost" aria-label="Borrar este texto">Borrar</button>
-          <button type="button" class="primary" data-act="ccopy" data-id="${c.id}">Copiar</button></div>
-      </div>`).join('') || (clipsErr ? '' : `<p class="sub" style="margin:10px 0 0">${q ? 'Ningún texto coincide con la búsqueda.' : 'Aún no hay nada. Pega un texto arriba y pulsa «Guardar»: aparecerá aquí y en tus otros dispositivos.'}</p>`))
-    + (clips.length > 1 ? `<div style="text-align:right;margin-top:8px"><button type="button" class="ghost" data-act="cclear" style="font-size:12px;color:var(--mute)">Vaciar portapapeles</button></div>` : '');
+  const shown = clipAll ? list : list.slice(0, 4);
+  const card = c => `<article class="ccard ${clipOpen.has(c.id) ? 'open' : ''} ${c.id === clipNew ? 'new' : ''}" data-act="ccopy" data-id="${c.id}" title="Pulsa para copiar">
+      <div class="ctext">${esc(c.content)}</div>
+      <small class="cwhen">${esc(ago(c.created_at))}${c.device ? ' · ' + esc(c.device) : ''}</small>
+      <div class="cmeta">
+        ${c.content.length > 180 || c.content.split('\n').length > 4 ? `<button type="button" class="cb" data-act="cexpand" data-id="${c.id}">${clipOpen.has(c.id) ? 'Menos' : 'Ver entero'}</button>` : ''}
+        <button type="button" class="cb" data-act="cdel" data-id="${c.id}" aria-label="Borrar este texto">Borrar</button>
+        <span class="ccopy">Copiar</span></div>
+    </article>`;
+  return `<div class="chead"><h2 class="fsec">Portapapeles<small>${clips.length || ''}</small></h2>
+      <span class="chint">${matchMedia('(hover:hover)').matches ? `Pulsa <kbd>${IS_MAC ? '⌘' : 'Ctrl'}</kbd> <kbd>V</kbd> en esta pestaña y se guarda al momento` : 'Lo que guardes aquí aparece en tus otros dispositivos'}</span>
+      <button type="button" class="cpaste" data-act="preadclip">📋 Pegar</button></div>
+    ${clipsErr ? `<div class="msg">${esc(clipsErr)}</div>` : ''}
+    ${shown.length ? `<div class="cgrid">${shown.map(card).join('')}</div>`
+      : clipsErr ? '' : `<div class="cempty">${q ? 'Ningún texto coincide con la búsqueda.' : `Aún está vacío. Copia un texto en cualquier sitio y ${matchMedia('(hover:hover)').matches ? `pulsa <kbd>${IS_MAC ? '⌘' : 'Ctrl'}</kbd> <kbd>V</kbd> aquí` : 'toca «Pegar»'}.`}</div>`}
+    ${list.length > 4 || clips.length > 1 ? `<div class="cfoot">${list.length > 4 ? `<button type="button" class="cb" data-act="callclips">${clipAll ? 'Ver menos' : `Ver todo (${list.length})`}</button>` : ''}<button type="button" class="cb" data-act="cclear" style="margin-left:auto">Vaciar</button></div>` : ''}`;
 }
+function drawClips() { const el = $('clipsSec'); if (el && view === 'archivos') el.innerHTML = clipsHTML(); }
+async function quickClip(text) {
+  text = String(text || '').replace(/\s+$/, '');
+  if (!text.trim()) return;
+  if (clips[0] && clips[0].content === text) { toast('Eso ya estaba guardado.'); return; }
+  if (await saveClip(text)) { clipNew = clips[0]?.id || ''; drawClips(); setTimeout(() => { clipNew = ''; }, 1200); }
+}
+// Ctrl+V / ⌘V en la pestaña Archivos: texto → portapapeles; imágenes y archivos → archivos sueltos
+document.addEventListener('paste', e => {
+  if (!user || view !== 'archivos' || document.querySelector('dialog[open]') || !$('cmdk').hidden || !$('pv').hidden) return;
+  const t = e.target, tag = t?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || t?.isContentEditable) return;
+  const cd = e.clipboardData; if (!cd) return;
+  const text = cd.getData('text/plain'), files = [...cd.files];
+  e.preventDefault();
+  if (text && text.trim()) { quickClip(text); return; }
+  if (files.length) {
+    const named = files.map((f, i) => {
+      if (f.name && !/^image\.\w+$/i.test(f.name) && f.name !== 'blob') return f;
+      const ext = (f.type.split('/')[1] || 'bin').replace('jpeg', 'jpg').replace(/\+.*/, '');
+      return new File([f], `${f.type.startsWith('image/') ? 'Imagen' : 'Archivo'} ${stamp()}${files.length > 1 ? ' (' + (i + 1) + ')' : ''}.${ext}`, { type:f.type });
+    });
+    toast(`Subiendo ${named.length === 1 ? named[0].name : named.length + ' archivos'}…`, 60000);
+    addGeneral(named);
+  }
+});
 async function assignLoose(id, taskId) {
   const f = general.find(x => x.id === id), t = tasks.find(x => x.id === taskId);
   if (!f || !t) return;
@@ -2115,9 +2178,7 @@ function renderFiles() {
       <div class="fvt" role="group" aria-label="Vista"><button data-act="fview" data-v="grid" aria-pressed="${fView === 'grid'}" title="Cuadrícula">▦</button><button data-act="fview" data-v="list" aria-pressed="${fView === 'list'}" title="Lista">☰</button></div>
       <button class="primary fup" data-act="pickLoose" aria-label="Subir archivos">↑<span> Subir archivos</span></button><input id="gfile" type="file" multiple hidden></div>
     <div class="fchips">${chips.map(([k, n, c]) => `<button class="chip" data-act="ffilter" data-v="${k}" aria-pressed="${fFilter === k}">${esc(n)}${k ? ` (${c})` : ''}</button>`).join('')}</div>
-    <div class="clipstrip" id="clipStrip">📋 <b>Portapapeles</b><span class="cs" data-act="clippanel">${c0 ? `${esc(c0.content.replace(/\s+/g, ' ').slice(0, 140))} · ${esc(ago(c0.created_at))}${c0.device ? ' · ' + esc(c0.device) : ''}` : 'Vacío. Pega aquí textos para tenerlos en todos tus dispositivos.'}</span>
-      ${c0 ? `<button data-act="ccopy" data-id="${c0.id}">Copiar</button>` : ''}<button class="csall" data-act="clippanel">${clipPanel ? 'Cerrar' : clips.length > 1 ? `Ver todo (${clips.length})` : 'Abrir'}</button></div>
-    ${clipPanel ? pasteBoxHTML(open) : ''}
+    <section class="clips2" id="clipsSec">${clipsHTML()}</section>
     ${block('Sin clasificar', loose)}${block('En tus tareas', inT)}
     ${!vis.length ? `<div class="fempty">${count ? 'Ningún archivo coincide con el filtro o la búsqueda.' : '<b>Aún no tienes archivos.</b>Arrástralos aquí o pulsa «↑ Subir archivos».'}</div>` : ''}
     <div class="fdrop" aria-hidden="true">Suelta para subir a «Sin clasificar»</div>
@@ -2129,7 +2190,6 @@ function renderFiles() {
   fv.addEventListener('dragover', e => { if (e.dataTransfer.types.includes('Files') && !e.target.closest('#pasteBox')) { e.preventDefault(); fv.classList.add('over'); } });
   fv.addEventListener('dragleave', e => { if (!fv.contains(e.relatedTarget)) fv.classList.remove('over'); });
   fv.addEventListener('drop', e => { fv.classList.remove('over'); if (e.target.closest('#pasteBox')) return; if (e.dataTransfer.files.length) { e.preventDefault(); e.stopPropagation(); addGeneral([...e.dataTransfer.files]); } });
-  if (clipPanel) wirePasteBox();
 }
 function pasteBoxHTML(open) {
   return `<section class="card box" id="pasteBox" style="margin:12px 0 4px">
@@ -2336,6 +2396,7 @@ document.addEventListener('click', async e => {
     case 'cdel': deleteClip(id); break;
     case 'cclear': clearClips(); break;
     case 'cexpand': if (clipOpen.has(id)) clipOpen.delete(id); else clipOpen.add(id); drawClips(); break;
+    case 'callclips': clipAll = !clipAll; drawClips(); break;
     case 'extcolor': setExtColor(id, el.dataset.color); break;
     case 'dark': toggleDark(); break;
     case 'logout': closePops(); await sb.auth.signOut(); break;
