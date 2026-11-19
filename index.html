@@ -2115,7 +2115,9 @@ const FTYPES = {
   txt:  { n:'Texto', c:'#8e9097', ex:['txt','md'] },
 };
 const ftypeOf = name => { const e = extOf(name); return Object.keys(FTYPES).find(k => FTYPES[k].ex.includes(e)) || 'other'; };
-const fcolor = name => (FTYPES[ftypeOf(name)] || {}).c || '#8e9097';
+// Colores propios de algunas extensiones: macros en azul oscuro, Excel con macros en verde turquesa
+const EXT_COLOR = { bas:'#1f3c9a', cls:'#1f3c9a', frm:'#1f3c9a', vba:'#1f3c9a', vbs:'#1f3c9a', xlsm:'#0e9e8e', xlsb:'#0e9e8e' };
+const fcolor = name => EXT_COLOR[extOf(name)] || (FTYPES[ftypeOf(name)] || {}).c || '#8e9097';
 let fView = (() => { try { return localStorage.getItem('fView') || 'grid'; } catch { return 'grid'; } })();
 let fFilter = '', fSort = 'recent', clipPanel = false;
 const thumbs = {};
@@ -2782,7 +2784,7 @@ $('extClose').onclick = () => $('extDlg').close();
 // ======================= Logros =======================
 const ACH_COLORS = [['Naranja','#ee6a45'],['Rojo','#e5534b'],['Rosa','#e86aa6'],['Fucsia','#d14bd0'],['Morado','#a46be6'],['Índigo','#6f6af0'],
   ['Azul','#3d8be8'],['Celeste','#36b3e0'],['Turquesa','#2fc1a9'],['Verde','#3fb563'],['Lima','#a4c93a'],['Amarillo','#e2ad2a'],['Dorado','#c8963e'],['Gris','#8e9097']];
-const FT = { pdf:'#e5534b', doc:'#3d8be8', docx:'#3d8be8', xls:'#3fb563', xlsx:'#3fb563', csv:'#3fb563', ppt:'#ee6a45', pptx:'#ee6a45', zip:'#a46be6', rar:'#a46be6', jpg:'#e2ad2a', jpeg:'#e2ad2a', png:'#e2ad2a' };
+const FT = { ...EXT_COLOR, pdf:'#e5534b', doc:'#3d8be8', docx:'#3d8be8', xls:'#3fb563', xlsx:'#3fb563', csv:'#3fb563', ppt:'#ee6a45', pptx:'#ee6a45', zip:'#a46be6', rar:'#a46be6', jpg:'#e2ad2a', jpeg:'#e2ad2a', png:'#e2ad2a' };
 const ftag = n => { const e = extOf(n) || 'file'; return `<span class="ftag" style="--c:${FT[e] || '#8e9097'}">${esc(e.toUpperCase().slice(0, 4))}</span>`; };
 const initials = t => (String(t).match(/[A-Za-zÁÉÍÓÚÑáéíóúñ0-9]+/g) || []).filter(w => w.length > 2 || /^[A-Z0-9]+$/.test(w)).map(w => /^[A-Z0-9]{2,}$/.test(w) ? w : w[0].toUpperCase()).join('').slice(0, 5) || '★';
 const coverText = a => (a.cover_text || '').trim() || initials(a.title);
